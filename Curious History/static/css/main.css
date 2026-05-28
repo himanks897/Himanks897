@@ -420,13 +420,13 @@ html.high-contrast {
 }
 
 html {
-  font-size: 17px;           /* up from 16px — scales all rem units */
+  font-size: 18px;           /* bumped again for better readability */
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
-html.font-sm { font-size: 15px; }
-html.font-lg { font-size: 20px; }
+html.font-sm { font-size: 16px; }
+html.font-lg { font-size: 21px; }
 
 body {
   font-family: var(--font-ui);
@@ -941,40 +941,40 @@ html.dyslexic p {
   position: relative;
   overflow: hidden;
   transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.18s ease, border-color 0.18s ease;
-  /* Liquid Glass — semi-transparent so background shows through */
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.90);
+  /* Completely White Liquid Glass — opaque white with strong glass sheen */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.07),
-    0 1px 4px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+    0 4px 24px rgba(0, 0, 0, 0.09),
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.40);
   color: var(--color-text-secondary);
 }
-/* Specular highlight — top-half shine that makes it look wet/glass */
+/* Specular highlight — the "wet glass" shine across the top half */
 .btn::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 52%;
+  height: 55%;
   border-radius: inherit;
   background: linear-gradient(180deg,
-    rgba(255,255,255,0.55) 0%,
-    rgba(255,255,255,0.12) 60%,
+    rgba(255,255,255,0.70) 0%,
+    rgba(255,255,255,0.20) 55%,
     rgba(255,255,255,0.00) 100%);
   pointer-events: none;
   z-index: 0;
 }
 .btn:hover, .btn:focus {
-  background: rgba(255, 255, 255, 0.80);
-  border-color: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(255, 255, 255, 1.0);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.10),
-    0 2px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.98),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35);
+    0 10px 40px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.50);
   transform: translateY(-2px);
 }
 .btn:active {
@@ -1074,18 +1074,18 @@ html.dyslexic p {
   font-size: 0.88rem;
   font-style: italic;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(16px) saturate(170%);
-  -webkit-backdrop-filter: blur(16px) saturate(170%);
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-decoration: none;
   min-height: 34px;
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease;
   box-shadow:
-    0 2px 10px rgba(0,0,0,0.06),
-    inset 0 1px 0 rgba(255,255,255,0.95);
+    0 2px 12px rgba(0,0,0,0.07),
+    inset 0 1px 0 rgba(255,255,255,1.0);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -1275,6 +1275,119 @@ html.colorblind .btn-gold {
     transparent, transparent 3px,
     rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 6px
   ) !important;
+}
+
+/* ── Guest Search Limit Popup ─────────────────────────────────────────────── */
+.guest-limit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(44, 26, 14, 0.50);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.30s ease, visibility 0.30s ease;
+  padding: 20px;
+}
+.guest-limit-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.guest-limit-modal {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1.5px solid rgba(255, 255, 255, 0.98);
+  border-radius: var(--radius-xl);
+  padding: 44px 36px 36px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 32px 80px rgba(44, 26, 14, 0.28),
+    0 8px 24px rgba(0,0,0,0.12),
+    inset 0 1px 0 rgba(255,255,255,1.0);
+  transform: scale(0.92) translateY(10px);
+  transition: transform 0.30s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.guest-limit-overlay.show .guest-limit-modal {
+  transform: scale(1) translateY(0);
+}
+/* Top specular shine */
+.guest-limit-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+.guest-limit-icon {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(139,69,19,0.20));
+}
+.guest-limit-title {
+  font-family: var(--font-body);
+  font-size: 2rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-accent);
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+.guest-limit-msg {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.guest-limit-sub {
+  font-size: 0.92rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.guest-limit-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.guest-limit-cta {
+  width: 100%;
+  max-width: 240px;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.guest-limit-dismiss {
+  background: rgba(255,255,255,0.72);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  min-height: 40px;
+  padding: 8px 20px;
+}
+.guest-limit-dismiss:hover {
+  color: var(--color-text-secondary);
+}
+@media (max-width: 480px) {
+  .guest-limit-modal { padding: 36px 24px 28px; }
+  .guest-limit-title { font-size: 1.7rem; }
+  .guest-limit-msg   { font-size: 1rem; }
 }
 
 /* ── Milestone shimmer ────────────────────────────────────────────────────── */

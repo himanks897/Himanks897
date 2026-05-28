@@ -74,6 +74,18 @@
     </button>
   </form>
 
+  <script>
+  /* Guest search limit check — runs before form submits */
+  document.getElementById('topic-form').addEventListener('submit', function(e) {
+    if (typeof window.checkGuestSearchAllowed === 'function'
+        && !window.checkGuestSearchAllowed()) {
+      e.preventDefault();   /* block navigation — popup is already shown */
+    } else {
+      window.pageLoader && window.pageLoader.show('Searching history…');
+    }
+  });
+  </script>
+
   <!-- AI Suggestions -->
   <div class="suggestions-wrap" id="suggestions-wrap">
     <div id="suggestions-loading" style="display:none;">

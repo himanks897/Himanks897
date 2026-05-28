@@ -131,6 +131,11 @@
 
 <script>
 document.getElementById('surprise-me-btn').addEventListener('click', async function() {
+  /* Check guest limit before consuming a search */
+  if (typeof window.checkGuestSearchAllowed === 'function'
+      && !window.checkGuestSearchAllowed()) {
+    return; /* popup already shown by checkGuestSearchAllowed */
+  }
   this.disabled = true;
   try {
     const r = await fetch('/api/surprise');

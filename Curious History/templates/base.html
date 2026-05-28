@@ -209,6 +209,20 @@
 </aside>
 {% endblock %}
 
+<!-- Guest Search Limit Popup -->
+<div id="guest-limit-overlay" class="guest-limit-overlay" role="dialog" aria-modal="true" aria-labelledby="guest-limit-title" aria-hidden="true">
+  <div class="guest-limit-modal">
+    <div class="guest-limit-icon" aria-hidden="true">🕰️</div>
+    <h2 id="guest-limit-title" class="guest-limit-title">Uh Oh!</h2>
+    <p class="guest-limit-msg">You've Hit your Free Limit<br>for the time being</p>
+    <p class="guest-limit-sub">Sign in to unlock unlimited searches across all of history.</p>
+    <div class="guest-limit-btns">
+      <a href="{{ url_for('login') }}" class="btn btn-primary guest-limit-cta">Get a Plan</a>
+      <button class="btn guest-limit-dismiss" id="guest-limit-close" aria-label="Dismiss and close">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
 <!-- Highlight & Save Tooltip -->
 <div
   class="highlight-tooltip"

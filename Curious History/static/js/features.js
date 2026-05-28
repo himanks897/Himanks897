@@ -7,7 +7,90 @@
 document.addEventListener('DOMContentLoaded', function() {
   checkMilestones();
   initSaveEventBtn();
+  initGuestLimit();
 });
+
+// ── Guest Search Limit — 3 searches per month for guest users ─────────────
+// Stored in localStorage so it persists across tabs/sessions without a server.
+// Key: ch_guest_limit  →  { count: N, month: "YYYY-MM" }
+
+var GUEST_MONTHLY_LIMIT = 3;
+
+function _getGuestLimitStore() {
+  try {
+    return JSON.parse(localStorage.getItem('ch_guest_limit') || '{"count":0,"month":""}');
+  } catch(e) { return { count: 0, month: '' }; }
+}
+
+function _saveGuestLimitStore(store) {
+  try { localStorage.setItem('ch_guest_limit', JSON.stringify(store)); } catch(e) {}
+}
+
+function _currentMonth() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+/* Returns true if the search is allowed; false if the limit is hit. */
+window.checkGuestSearchAllowed = function() {
+  /* If the user is signed in (Google), no limit applies */
+  var avatarImg = document.querySelector('#user-menu-btn img');
+  if (avatarImg) return true;   /* signed-in users have a profile photo in the nav */
+
+  var store  = _getGuestLimitStore();
+  var month  = _currentMonth();
+
+  if (store.month !== month) {
+    /* New month — reset counter */
+    store = { count: 0, month: month };
+  }
+
+  if (store.count >= GUEST_MONTHLY_LIMIT) {
+    showGuestLimitPopup();
+    return false;
+  }
+
+  /* Increment and allow */
+  store.count += 1;
+  _saveGuestLimitStore(store);
+  return true;
+};
+
+function showGuestLimitPopup() {
+  var overlay = document.getElementById('guest-limit-overlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  /* Focus the CTA for keyboard/screen-reader users */
+  var cta = overlay.querySelector('.guest-limit-cta');
+  if (cta) setTimeout(function() { cta.focus(); }, 320);
+}
+
+function hideGuestLimitPopup() {
+  var overlay = document.getElementById('guest-limit-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function initGuestLimit() {
+  /* Close button inside the popup */
+  var closeBtn = document.getElementById('guest-limit-close');
+  if (closeBtn) closeBtn.addEventListener('click', hideGuestLimitPopup);
+
+  /* Click the dark overlay background to dismiss */
+  var overlay = document.getElementById('guest-limit-overlay');
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) hideGuestLimitPopup();
+    });
+  }
+
+  /* Escape key to close */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideGuestLimitPopup();
+  });
+}
 
 // ── Milestone Celebrations (Feature #20) ──────────────────────────────────
 function checkMilestones() {
