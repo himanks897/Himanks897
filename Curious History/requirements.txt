@@ -1,26 +1,27 @@
-# Core web framework
+# ── Web framework ─────────────────────────────────────────────────────────────
 Flask==3.0.0
 Flask-Cors==4.0.0
 Werkzeug==3.0.1
 gunicorn==21.2.0
 python-dotenv==1.0.0
 
-# HTTP + data
+# ── HTTP + caching ─────────────────────────────────────────────────────────────
 requests==2.31.0
 cachetools==5.3.2
 
-# Google APIs
+# ── Google APIs ────────────────────────────────────────────────────────────────
 google-auth>=2.28.0
-google-generativeai==0.7.2
+google-genai>=1.0.0          # provides `from google import genai` used in gemini_synthesis.py
 
-# Supabase
+# ── Database / backend ─────────────────────────────────────────────────────────
 supabase==2.3.4
 
-# Image handling
+# ── Image handling ─────────────────────────────────────────────────────────────
 Pillow==10.2.0
 
-# Data processing (used by fetchers / pipeline)
-beautifulsoup4==4.12.3
-lxml==5.2.2
-pandas==2.2.2
-openpyxl==3.1.4
+# ── Fetcher / pipeline scripts (NOT needed by the Flask web app on Vercel) ────
+# Uncomment locally when running main.py / run_*.py data pipeline scripts:
+# beautifulsoup4==4.12.3
+# lxml==5.2.2
+# pandas==2.2.2
+# openpyxl==3.1.4
