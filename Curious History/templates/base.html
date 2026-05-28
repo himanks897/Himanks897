@@ -359,43 +359,33 @@
     }
   }
 
-  /* ── Selector: every interactive element site-wide ── */
+  /* ── Selector: ONLY truly clickable action buttons ──
+     Excludes: text inputs, search boxes, info cards, decorative elements,
+     labels, wrappers. Haptic + sound only fires on real button taps. */
   var SEL = [
-    'button',
-    '[role="button"]',
+    /* Native buttons */
+    'button:not([disabled])',
+    /* Role buttons */
+    '[role="button"]:not([aria-disabled="true"])',
+    /* Link-buttons (navigation CTAs) */
     'a.btn', 'a[class*="btn-"]',
-    '.chip', '.chip-accent',
+    'a.era-card', 'a.recent-item', 'a.world-option',
+    'a.strip-card', 'a.gallery-card',
+    /* Interactive chips (navigable, not just labels) */
+    'button.chip', 'button.chip-accent',
+    /* Specific action button classes */
     '.action-btn',
     '.country-btn',
-    '.era-card',
-    '.world-option',
-    '.suggestion-chip',
     '.reaction-btn',
-    '.time-nav-btn',
-    '.accordion-header',
-    '.quiz-option',
-    '.nav-icon-btn',
-    '.page-back-btn',
-    '.page-skip-link',
-    '.landing-nav-cta',
-    '.lpa-btn',
-    '.strip-card',
-    '.gallery-card',
-    '.lb-close', '.lb-nav', '.lb-zoom-btn',
-    '.a11y-btn',
-    '.dropdown-item',
-    '.read-aloud-btn',
     '.share-btn',
-    '.recent-item',
-    '.landing-icon-card',
-    '.landing-usp-card',
-    '.landing-audience-card',
+    '.time-nav-btn',
+    '.read-aloud-btn',
+    '.save-btn',
     '.simplify-btn',
     '.panel-close',
-    '.suggestion-chip',
-    '.country-note',
-    '.save-btn',
-    '.glossary-header'
+    '.a11y-btn',
+    '.nav-icon-btn',
+    '.lb-close', '.lb-nav', '.lb-zoom-btn'
   ].join(', ');
 
   /* ── touchstart fires first on mobile — triggers haptic immediately ── */
