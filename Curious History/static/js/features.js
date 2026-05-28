@@ -10,42 +10,44 @@ document.addEventListener('DOMContentLoaded', function() {
   initGuestLimit();
 });
 
-// ── Guest Search Limit — 3 searches per month for guest users ─────────────
-// Stored in localStorage so it persists across tabs/sessions without a server.
-// Key: ch_guest_limit  →  { count: N, month: "YYYY-MM" }
+// ── Guest Search Limit — 3 searches per day for guest users ──────────────
+// Stored in localStorage. Resets automatically each calendar day.
+// Key: ch_guest_limit  →  { count: N, day: "YYYY-MM-DD" }
 
-var GUEST_MONTHLY_LIMIT = 3;
+var GUEST_DAILY_LIMIT = 3;
 
 function _getGuestLimitStore() {
   try {
-    return JSON.parse(localStorage.getItem('ch_guest_limit') || '{"count":0,"month":""}');
-  } catch(e) { return { count: 0, month: '' }; }
+    return JSON.parse(localStorage.getItem('ch_guest_limit') || '{"count":0,"day":""}');
+  } catch(e) { return { count: 0, day: '' }; }
 }
 
 function _saveGuestLimitStore(store) {
   try { localStorage.setItem('ch_guest_limit', JSON.stringify(store)); } catch(e) {}
 }
 
-function _currentMonth() {
+function _currentDay() {
   var d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  return d.getFullYear() + '-'
+    + String(d.getMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getDate()).padStart(2, '0');
 }
 
-/* Returns true if the search is allowed; false if the limit is hit. */
+/* Returns true if the search is allowed; false if the daily limit is hit. */
 window.checkGuestSearchAllowed = function() {
-  /* If the user is signed in (Google), no limit applies */
+  /* Signed-in users (Google profile photo present in nav) have no limit */
   var avatarImg = document.querySelector('#user-menu-btn img');
-  if (avatarImg) return true;   /* signed-in users have a profile photo in the nav */
+  if (avatarImg) return true;
 
-  var store  = _getGuestLimitStore();
-  var month  = _currentMonth();
+  var store = _getGuestLimitStore();
+  var today = _currentDay();
 
-  if (store.month !== month) {
-    /* New month — reset counter */
-    store = { count: 0, month: month };
+  if (store.day !== today) {
+    /* New day — reset counter */
+    store = { count: 0, day: today };
   }
 
-  if (store.count >= GUEST_MONTHLY_LIMIT) {
+  if (store.count >= GUEST_DAILY_LIMIT) {
     showGuestLimitPopup();
     return false;
   }

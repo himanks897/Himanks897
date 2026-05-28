@@ -420,13 +420,13 @@ html.high-contrast {
 }
 
 html {
-  font-size: 18px;           /* bumped again for better readability */
+  font-size: 16px;           /* restored to original — landing page has its own overrides */
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
-html.font-sm { font-size: 16px; }
-html.font-lg { font-size: 21px; }
+html.font-sm { font-size: 14px; }
+html.font-lg { font-size: 20px; }
 
 body {
   font-family: var(--font-ui);
@@ -606,9 +606,9 @@ html.dyslexic p {
   height: 40px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.90);
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
@@ -940,20 +940,20 @@ html.dyslexic p {
   user-select: none;
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.18s ease, border-color 0.18s ease;
-  /* Completely White Liquid Glass — opaque white with strong glass sheen */
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.18s ease;
+  /* Transparent White Liquid Glass — frosted, see-through, modern 2026 */
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.90);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.09),
-    0 1px 4px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 1.0),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.40);
+    0 4px 24px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.20);
   color: var(--color-text-secondary);
 }
-/* Specular highlight — the "wet glass" shine across the top half */
+/* Strong specular highlight — this is what makes it look like real glass */
 .btn::before {
   content: '';
   position: absolute;
@@ -961,20 +961,20 @@ html.dyslexic p {
   height: 55%;
   border-radius: inherit;
   background: linear-gradient(180deg,
-    rgba(255,255,255,0.70) 0%,
-    rgba(255,255,255,0.20) 55%,
+    rgba(255,255,255,0.72) 0%,
+    rgba(255,255,255,0.22) 50%,
     rgba(255,255,255,0.00) 100%);
   pointer-events: none;
   z-index: 0;
 }
 .btn:hover, .btn:focus {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.60);
   border-color: rgba(255, 255, 255, 1.0);
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 1.0),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.50);
+    inset 0 1.5px 0 rgba(255, 255, 255, 1.0),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.30);
   transform: translateY(-2px);
 }
 .btn:active {
@@ -1074,18 +1074,18 @@ html.dyslexic p {
   font-size: 0.88rem;
   font-style: italic;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.90);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-decoration: none;
   min-height: 34px;
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease;
   box-shadow:
-    0 2px 12px rgba(0,0,0,0.07),
-    inset 0 1px 0 rgba(255,255,255,1.0);
+    0 2px 10px rgba(0,0,0,0.07),
+    inset 0 1.5px 0 rgba(255,255,255,0.95);
   white-space: nowrap;
   position: relative;
   overflow: hidden;

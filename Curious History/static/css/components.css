@@ -106,7 +106,7 @@
 
 .today-card {
   grid-column: 1 / -1;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid rgba(200, 175, 130, 0.40);
@@ -153,7 +153,7 @@
 }
 
 .word-card {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid rgba(200, 175, 130, 0.40);
@@ -215,7 +215,7 @@
   padding: 28px 20px;
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(18px) saturate(200%);
   -webkit-backdrop-filter: blur(18px) saturate(200%);
   cursor: pointer;
@@ -237,7 +237,7 @@
   pointer-events: none;
 }
 .era-card:hover, .era-card:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 8px 32px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-2px);
@@ -293,7 +293,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.88);
@@ -306,7 +306,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.92);
 }
 .recent-item:hover, .recent-item:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 4px 16px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -439,7 +439,7 @@
 
 /* ── Country Page Header ─────────────────────────────────────────────────── */
 .country-page-header {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -530,7 +530,7 @@
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(18px) saturate(200%);
   -webkit-backdrop-filter: blur(18px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.88);
@@ -552,7 +552,7 @@
   pointer-events: none;
 }
 .world-option:hover, .world-option:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 6px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -606,7 +606,7 @@
   gap: 8px;
   width: 100%;
   padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.88);
@@ -623,7 +623,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.92);
 }
 .accordion-header:hover {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 3px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
 }
@@ -682,7 +682,7 @@
   padding: 6px 14px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(12px) saturate(200%);
   -webkit-backdrop-filter: blur(12px) saturate(200%);
   color: var(--color-text-secondary);
@@ -696,7 +696,7 @@
   overflow: hidden;
 }
 .country-btn:hover, .country-btn:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 3px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -868,7 +868,7 @@
   gap: 8px;
   margin-bottom: 14px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -957,7 +957,7 @@
 }
 
 .who-alive-strip {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -995,7 +995,7 @@
   gap: 8px;
   margin-bottom: 28px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -1018,7 +1018,7 @@
   font-weight: 500;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   color: var(--color-text-secondary);
@@ -1040,7 +1040,7 @@
   pointer-events: none;
 }
 .action-btn:hover, .action-btn:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   color: var(--color-accent-dark);
   border-color: rgba(255, 255, 255, 0.98);
   box-shadow: 0 4px 18px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.96);
@@ -1370,7 +1370,7 @@
   padding: 6px 14px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(12px) saturate(200%);
   -webkit-backdrop-filter: blur(12px) saturate(200%);
   cursor: pointer;
@@ -1382,7 +1382,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.92);
 }
 .reaction-btn:hover, .reaction-btn:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 3px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -1491,7 +1491,7 @@
   align-items: center;
   margin: 28px 0;
   padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -1509,7 +1509,7 @@
   padding: 8px 16px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   cursor: pointer;
@@ -1518,7 +1518,7 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.92);
 }
 .time-nav-btn:hover, .time-nav-btn:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 4px 18px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -1927,7 +1927,7 @@
   padding: 6px 14px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(12px) saturate(200%);
   -webkit-backdrop-filter: blur(12px) saturate(200%);
   color: var(--color-text-secondary);
@@ -1941,7 +1941,7 @@
   overflow: hidden;
 }
 .share-btn:hover, .share-btn:focus {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.60);
   box-shadow: 0 3px 14px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.96);
   border-color: rgba(255, 255, 255, 0.98);
   transform: translateY(-1px);
@@ -2816,7 +2816,7 @@
 /* ── Article Image Strip ─────────────────────────────────────────────────── */
 .article-image-strip {
   margin: 0 0 24px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -2972,6 +2972,8 @@
   background: var(--color-bg);
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
+  /* Landing page uses a larger base font for better readability */
+  font-size: 18px;
 }
 
 /* ── Times New Roman + italic on everything in the landing page ──────────── */
@@ -2979,6 +2981,26 @@
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
 }
+
+/* ── Landing page text scale overrides (larger than rest of site) ─────────── */
+.landing-hero-tagline    { font-size: 1.25rem; }
+.landing-hero-sub        { font-size: 1.12rem; }
+.landing-section-title   { font-size: clamp(1.6rem, 3.2vw, 2.2rem); }
+.landing-section-intro   { font-size: 1.12rem; }
+.landing-about-text p    { font-size: 1.08rem; }
+.landing-about-text ul li { font-size: 0.96rem; }
+.landing-audience-card h3 { font-size: 1.1rem; }
+.landing-audience-card p  { font-size: 0.98rem; }
+.landing-audience-card ul li { font-size: 0.92rem; }
+.landing-usp-card h3     { font-size: 1.08rem; }
+.landing-usp-card p      { font-size: 0.96rem; }
+.landing-stat-num        { font-size: clamp(1.4rem, 3vw, 1.75rem); }
+.landing-stat-label      { font-size: 0.76rem; }
+.landing-cta-title       { font-size: clamp(1.4rem, 3vw, 1.9rem); }
+.landing-cta-sub         { font-size: 0.96rem; }
+.landing-preview-article { font-size: 0.96rem; }
+.landing-footer-inner > p { font-size: 0.88rem; }
+.lpf-try-text            { font-size: 1.1rem; }
 
 /* ── Buttons, badges, pills stay upright (non-italic) ───────────────────── */
 .landing-page .btn,
@@ -3291,7 +3313,7 @@
   align-items: center;
   gap: 6px;
   padding: 14px 8px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -3320,7 +3342,7 @@
   gap: 18px;
 }
 .landing-audience-card {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -3367,7 +3389,7 @@
   gap: 14px;
 }
 .landing-usp-card {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
@@ -3430,7 +3452,7 @@
 
 /* ── PEARL HARBOR PREVIEW BANNER ─────────────────────────────────────────── */
 .landing-preview-banner {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
@@ -3874,7 +3896,7 @@
   padding: 6px 13px;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(255, 255, 255, 0.88);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(12px) saturate(200%);
   -webkit-backdrop-filter: blur(12px) saturate(200%);
   font-family: var(--font-ui);
