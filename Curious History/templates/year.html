@@ -17,11 +17,11 @@
 
   <div class="year-select-page">
     {% if era == 'bce' %}
-      <h1 class="year-page-title">Choose a year in the <em>BCE era</em></h1>
-      <p class="year-page-sub"><em>Explore ancient civilisations — from the Bronze Age to the fall of the Roman Republic</em></p>
+      <h1 class="year-page-title">Choose a year — <em>Ancient World</em></h1>
+      <p class="year-page-sub">Explore ancient Egypt, Mesopotamia, Greece and Rome (3000 BCE – 1 BCE)</p>
     {% else %}
-      <h1 class="year-page-title">Choose a year in the <em>CE era</em></h1>
-      <p class="year-page-sub"><em>Explore recorded history — from the rise of Rome to the present day (2026)</em></p>
+      <h1 class="year-page-title">Choose a year — <em>Recorded History</em></h1>
+      <p class="year-page-sub">Explore medieval, renaissance and modern history (1 CE – 2026)</p>
     {% endif %}
 
     <div class="card">
@@ -38,18 +38,18 @@
           class="year-slider"
           id="year-slider"
           min="1"
-          max="5000"
-          value="2500"
+          max="3000"
+          value="1500"
           step="1"
           aria-label="Select year BCE"
-          aria-valuenow="2500"
+          aria-valuenow="1500"
           aria-valuemin="1"
-          aria-valuemax="5000"
-          aria-valuetext="2500 BCE"
+          aria-valuemax="3000"
+          aria-valuetext="1500 BCE"
           role="slider"
         >
         <div class="slider-range">
-          <span>5000 BCE</span>
+          <span>3000 BCE</span>
           <span>1 BCE</span>
         </div>
         {% else %}
@@ -82,9 +82,9 @@
           type="number"
           id="year-input"
           class="year-input"
-          value="{% if era == 'bce' %}2500{% else %}1900{% endif %}"
+          value="{% if era == 'bce' %}1500{% else %}1900{% endif %}"
           min="1"
-          max="{% if era == 'bce' %}5000{% else %}2026{% endif %}"
+          max="{% if era == 'bce' %}3000{% else %}2026{% endif %}"
           aria-label="Enter year manually"
           aria-describedby="year-input-hint"
         >
@@ -94,11 +94,11 @@
       <!-- Quick-select Era Buttons -->
       <div class="era-quick-btns" role="group" aria-label="Quick-select historical era">
         {% if era == 'bce' %}
-        <button class="chip" onclick="setYear(3100)" aria-label="Jump to Ancient Egypt era (3100 BCE to 332 BCE)">Ancient Egypt</button>
-        <button class="chip" onclick="setYear(2600)" aria-label="Jump to Mesopotamia era (2600 BCE)">Mesopotamia</button>
-        <button class="chip" onclick="setYear(480)" aria-label="Jump to Greek Classical era (480 BCE)">Greek Classical</button>
-        <button class="chip" onclick="setYear(264)" aria-label="Jump to Roman Republic era (264 BCE)">Roman Republic</button>
-        <button class="chip" onclick="setYear(1200)" aria-label="Jump to Bronze Age (1200 BCE)">Bronze Age</button>
+        <button class="chip" onclick="setYear(3000)" aria-label="Ancient Egypt (3000 BCE)">Ancient Egypt</button>
+        <button class="chip" onclick="setYear(2600)" aria-label="Mesopotamia (2600 BCE)">Mesopotamia</button>
+        <button class="chip" onclick="setYear(500)" aria-label="Classical Greece (500 BCE)">Classical Greece</button>
+        <button class="chip" onclick="setYear(264)" aria-label="Roman Republic (264 BCE)">Roman Republic</button>
+        <button class="chip" onclick="setYear(44)" aria-label="Julius Caesar era (44 BCE)">Julius Caesar</button>
         {% else %}
         <button class="chip" onclick="setYear(1000)" aria-label="Jump to Medieval era (1000 CE)">Medieval</button>
         <button class="chip" onclick="setYear(1450)" aria-label="Jump to Renaissance era (1450 CE)">Renaissance</button>
@@ -134,15 +134,14 @@ const yearDisplay = document.getElementById('year-display');
 const continueBtn = document.getElementById('year-continue-btn');
 
 function setYear(y) {
-  const displayY = isBce ? (5001 - y) : y;
   if (isBce) {
-    slider.value = 5001 - y;
+    slider.value = 3001 - y;
     yearInput.value = y;
   } else {
     slider.value = y;
     yearInput.value = y;
   }
-  updateDisplay(isBce ? y : y);
+  updateDisplay(y);
 }
 
 function updateDisplay(year) {
@@ -157,14 +156,14 @@ function updateDisplay(year) {
 
 // Init gradient
 function updateSliderGradient() {
-  const max = isBce ? 5000 : 2026;
+  const max = isBce ? 3000 : 2026;
   const pct = (slider.value / max) * 100;
   slider.style.background = `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) ${pct}%, var(--color-border) ${pct}%)`;
 }
 
 slider.addEventListener('input', function() {
   const v = parseInt(this.value);
-  const displayYear = isBce ? (5001 - v) : v;
+  const displayYear = isBce ? (3001 - v) : v;
   yearInput.value = displayYear;
   updateDisplay(displayYear);
   updateSliderGradient();
@@ -172,15 +171,15 @@ slider.addEventListener('input', function() {
 
 yearInput.addEventListener('input', function() {
   let v = parseInt(this.value) || 1;
-  const max = isBce ? 5000 : 2026;
+  const max = isBce ? 3000 : 2026;
   v = Math.max(1, Math.min(max, v));
-  slider.value = isBce ? (5001 - v) : v;
+  slider.value = isBce ? (3001 - v) : v;
   updateDisplay(v);
   updateSliderGradient();
 });
 
 // Init
-const initYear = isBce ? 2500 : 1900;
+const initYear = isBce ? 1500 : 1900;
 updateDisplay(initYear);
 updateSliderGradient();
 

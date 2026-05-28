@@ -1961,34 +1961,60 @@
    MOBILE & RESPONSIVE — COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Global font size bumps — raise tiny labels to readable minimum ──────── */
+.meta-chip, .confidence-badge { font-size: 0.88rem; }
+.today-label { font-size: 0.88rem; }
+.word-era    { font-size: 0.88rem; }
+.word-def    { font-size: 1rem; }
+.today-text  { font-size: 1rem; }
+.word-term   { font-size: 1.35rem; }
+.era-card-title { font-size: 1.1rem; }
+.era-card-desc  { font-size: 0.9rem; }
+.era-card-range { font-size: 0.88rem; }
+.recent-item    { font-size: 0.95rem; }
+.section-heading { font-size: 1.1rem; }
+.article-content { font-size: 1.05rem; line-height: 1.85; }
+.article-content h2 { font-size: 1.4rem; }
+.article-content h3 { font-size: 1.2rem; }
+.action-btn  { font-size: 0.9rem; }
+.reaction-btn, .share-btn { font-size: 0.9rem; }
+.time-nav-btn { font-size: 0.95rem; }
+.read-aloud-btn { font-size: 0.9rem; }
+.glossary-term { font-size: 0.95rem; }
+.glossary-def  { font-size: 0.9rem; }
+.sources-footer { font-size: 0.88rem; }
+.quiz-option { font-size: 0.95rem; }
+.suggestion-chip { font-size: 1rem; }
+.topic-input { font-size: 1.05rem; }
+.country-btn { font-size: 0.9rem; }
+.accordion-header { font-size: 0.95rem; }
+.world-option-name { font-size: 1rem; }
+.world-option-desc { font-size: 0.88rem; }
+.results-title { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+.year-page-title { font-size: clamp(1.5rem, 4vw, 2rem); }
+.year-page-sub { font-size: 1rem; }
+.slider-display { font-size: clamp(2.2rem, 6vw, 3rem); }
+
 /* ── Tablet (≤ 900px) ──────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   /* Results: stack into single column */
-  .results-layout {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
+  .results-layout { grid-template-columns: 1fr; gap: 24px; }
   .media-column {
     position: static;
     border-left: none;
     padding-left: 0;
-    border-top: 1px solid #000;
-    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 24px;
   }
-  .image-gallery-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .image-gallery-grid .gallery-img:first-child {
-    grid-column: 1 / -1;
-  }
-  /* Results header spacing */
+  .image-gallery-grid { grid-template-columns: repeat(3, 1fr); }
+  .image-gallery-grid .gallery-img:first-child { grid-column: 1 / -1; }
   .results-header { margin-bottom: 20px; }
+  .detail-content-panel, .action-result-panel { padding: 20px; }
 
-  /* Panels — full width */
-  .detail-content-panel,
-  .action-result-panel {
-    padding: 16px;
-  }
+  /* Bigger cards on tablet */
+  .today-card { padding: 22px; }
+  .word-card  { padding: 20px; }
+  .era-card   { padding: 26px 18px; }
 }
 
 /* ── Mobile (≤ 640px) ──────────────────────────────────────────────────── */
@@ -1998,185 +2024,151 @@
   .welcome-page { padding: 28px 16px 80px; }
   .welcome-content { max-width: 100%; }
   .welcome-logo { font-size: 2.2rem; }
-  .welcome-tagline { font-size: 1rem; margin-bottom: 32px; }
+  .welcome-tagline { font-size: 1.05rem; margin-bottom: 32px; }
   .welcome-btns .btn { max-width: 100%; }
 
   /* ─ Home dashboard ─ */
   .home-grid { grid-template-columns: 1fr; gap: 14px; }
-  .era-cards { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .era-card { padding: 20px 14px; }
-  .era-card-icon { font-size: 2rem; }
-  .era-card-title { font-size: 0.95rem; }
+  .era-cards { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .era-card { padding: 22px 16px; }
+  .era-card-title { font-size: 1.05rem; }
+  .era-card-desc { font-size: 0.88rem; }
   .today-card { padding: 18px; }
-  .today-text { font-size: 0.9rem; }
-  .word-card { padding: 16px; }
-  .word-term { font-size: 1.1rem; }
-  .home-hero h2 { font-size: 1.3rem; }
+  .today-text { font-size: 1rem; }
+  .word-card { padding: 18px; }
+  .word-term { font-size: 1.2rem; }
+  .home-hero h2 { font-size: 1.35rem; }
+  .home-hero p { font-size: 0.95rem; }
 
   /* ─ Year selection ─ */
   .year-select-page { max-width: 100%; }
-  .year-page-title { font-size: 1.5rem; }
-  .slider-display { font-size: 2.2rem; }
   .year-manual { flex-wrap: wrap; gap: 8px; }
-  .year-input { width: 140px; height: 52px; font-size: 1.25rem; }
+  .year-input { width: 140px; height: 54px; font-size: 1.3rem; }
 
   /* ─ Country selection ─ */
   .country-region-grid { grid-template-columns: 1fr; }
   .country-page-header { padding: 18px 16px 16px; }
-  .country-page-title { font-size: 1.3rem; }
-  .country-btn {
-    min-height: 40px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-  }
-  .accordion-header { min-height: 48px; font-size: 0.95rem; }
-  .accordion-body { gap: 8px; padding: 10px; }
-  .world-option { padding: 14px 16px; }
-  .world-option-icon { font-size: 1.7rem; }
+  .country-page-title { font-size: 1.35rem; }
+  .country-btn { min-height: 44px; padding: 10px 16px; font-size: 0.92rem; }
+  .accordion-header { min-height: 50px; font-size: 1rem; }
+  .accordion-body { gap: 8px; padding: 12px; }
+  .world-option { padding: 16px; }
+  .world-option-name { font-size: 1rem; }
 
   /* ─ Topic input ─ */
-  .topic-input { height: 56px; font-size: 0.95rem; }
-  .context-banner { font-size: 0.85rem; padding: 10px 14px; }
-  .suggestions-chips { gap: 6px; }
+  .topic-input { height: 60px; font-size: 1rem; }
+  .context-banner { font-size: 0.9rem; padding: 12px 14px; }
+  .suggestions-chips { gap: 8px; }
+  .suggestion-chip { font-size: 0.95rem; padding: 10px 16px; }
 
   /* ─ Results header ─ */
-  .results-title { font-size: 1.5rem; }
-  .results-meta {
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .meta-chip { font-size: 0.72rem; padding: 3px 9px; }
-  .confidence-badge { font-size: 0.72rem; padding: 3px 9px; }
-  .share-btn { font-size: 0.72rem; padding: 3px 9px; }
+  .results-meta { gap: 8px; margin-bottom: 12px; }
+  .meta-chip { font-size: 0.85rem; padding: 5px 12px; }
+  .confidence-badge { font-size: 0.85rem; padding: 5px 12px; }
+  .share-btn { font-size: 0.85rem; padding: 5px 12px; }
 
-  /* Importance bar labels — smaller on mobile */
-  .importance-level-labels span { font-size: 0.6rem; }
+  /* Importance bar labels */
+  .importance-level-labels span { font-size: 0.72rem; }
 
   /* Who alive strip — scrollable */
   .who-alive-strip {
     flex-wrap: nowrap;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    gap: 10px;
-    padding: 10px 12px;
+    gap: 12px;
+    padding: 12px 14px;
     scrollbar-width: none;
   }
   .who-alive-strip::-webkit-scrollbar { display: none; }
-  .who-alive-person { white-space: nowrap; font-size: 0.8rem; flex-shrink: 0; }
+  .who-alive-person { white-space: nowrap; font-size: 0.9rem; flex-shrink: 0; }
 
   /* ─ Action buttons — 2-col grid on mobile ─ */
   .action-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 7px;
-    padding: 10px 0;
+    gap: 8px;
+    padding: 12px;
   }
   .action-btn {
     justify-content: center;
     text-align: center;
-    font-size: 0.8rem;
-    padding: 9px 8px;
-    min-height: 46px;
+    font-size: 0.88rem;
+    padding: 10px 8px;
+    min-height: 48px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
   }
-  /* Dropdown wrapper inside grid */
-  .action-buttons .dropdown {
-    display: contents; /* slot child directly into the grid */
-  }
-  .action-buttons .dropdown .action-btn {
-    display: flex;
-    width: 100%;
-  }
+  .action-buttons .dropdown { display: contents; }
+  .action-buttons .dropdown .action-btn { display: flex; width: 100%; }
 
   /* ─ Article content ─ */
-  .article-content { font-size: 0.95rem; line-height: 1.75; }
-  .article-content h2 { font-size: 1.15rem; margin: 20px 0 10px; }
-  .article-content h3 { font-size: 1rem; }
-  .article-content p { text-align: left; } /* justified text causes odd rivers on mobile */
+  .article-content { font-size: 1rem; line-height: 1.82; }
+  .article-content h2 { font-size: 1.25rem; margin: 20px 0 10px; }
+  .article-content h3 { font-size: 1.1rem; }
+  .article-content p { text-align: left; }
 
-  /* Article inline images — full width, no float */
+  /* Article inline images — full width on mobile */
   .article-image {
-    float: none;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 0 18px 0;
-    clear: both;
+    float: none; width: 100%; max-width: 100%;
+    margin: 0 0 18px 0; clear: both;
   }
   .article-image img { height: auto; max-height: 220px; object-fit: cover; }
 
-  /* ─ Detail / action panels ─ */
-  .panel-header {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .panel-header > div {
-    flex-shrink: 0;
-  }
-  .panel-title { font-size: 0.9rem; }
+  /* ─ Panels ─ */
+  .panel-header { flex-wrap: wrap; gap: 8px; }
+  .panel-header > div { flex-shrink: 0; }
+  .panel-title { font-size: 0.95rem; }
 
   /* ─ Reactions ─ */
-  .reactions-row { gap: 6px; }
-  .reaction-btn {
-    padding: 5px 10px;
-    font-size: 0.78rem;
-    min-height: 38px;
-  }
+  .reactions-row { gap: 8px; }
+  .reaction-btn { padding: 7px 12px; font-size: 0.9rem; min-height: 42px; }
 
   /* ─ Image gallery ─ */
-  .image-gallery-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-  .gallery-img img { height: 110px; }
-  .gallery-img:first-child img { height: 140px; }
-  .gallery-caption { font-size: 0.68rem; }
+  .image-gallery-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .gallery-img img { height: 120px; }
+  .gallery-img:first-child img { height: 150px; }
+  .gallery-caption { font-size: 0.8rem; }
 
   /* ─ Glossary ─ */
-  .glossary-grid { grid-template-columns: 1fr; gap: 6px; }
-  .glossary-item { padding: 8px 10px; }
+  .glossary-grid { grid-template-columns: 1fr; gap: 8px; }
+  .glossary-item { padding: 10px 12px; }
+  .glossary-term { font-size: 1rem; }
+  .glossary-def  { font-size: 0.92rem; }
 
   /* ─ Time navigation ─ */
-  .time-nav { flex-direction: column; gap: 8px; }
-  .time-nav-btn { width: 100%; text-align: center; justify-content: center; }
+  .time-nav { flex-direction: column; gap: 10px; }
+  .time-nav-btn { width: 100%; text-align: center; justify-content: center; font-size: 1rem; }
 
   /* ─ Read aloud bar ─ */
-  .read-aloud-bar { padding: 8px 12px; gap: 8px; }
-  .read-aloud-btn { font-size: 0.82rem; min-height: 36px; padding: 6px 14px; }
+  .read-aloud-bar { padding: 10px 14px; gap: 10px; }
+  .read-aloud-btn { font-size: 0.92rem; min-height: 42px; padding: 8px 16px; }
 
-  /* ─ Summary / Quiz pages ─ */
-  .summary-header,
-  .quiz-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
+  /* ─ Summary / Quiz ─ */
+  .summary-header, .quiz-header { flex-direction: column; align-items: flex-start; gap: 10px; }
   .word-count-chips { flex-wrap: wrap; gap: 6px; }
-  .quiz-options { gap: 8px; }
-  .quiz-option { padding: 10px 14px; font-size: 0.875rem; }
+  .quiz-options { gap: 10px; }
+  .quiz-option { padding: 12px 16px; font-size: 0.95rem; }
 
   /* ─ Sources footer ─ */
-  .sources-footer { font-size: 0.78rem; }
+  .sources-footer { font-size: 0.9rem; }
 }
 
 /* ── Small phone (≤ 480px) ─────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  /* Action buttons — keep 2-col grid, tighter padding */
-  .action-buttons {
-    grid-template-columns: 1fr 1fr;
-    padding: 10px;
-    gap: 6px;
-  }
+  .action-buttons { grid-template-columns: 1fr 1fr; padding: 10px; gap: 6px; }
   .action-buttons .dropdown { display: contents; }
 
-  /* Era cards — single column */
-  .era-cards { grid-template-columns: 1fr; }
+  /* Era cards — single column on very small screens */
+  .era-cards { grid-template-columns: 1fr; gap: 12px; }
 
-  /* Welcome — single column, tighter */
-  .welcome-logo { font-size: 1.9rem; }
+  /* Welcome */
+  .welcome-logo { font-size: 2rem; }
   .welcome-ornament { font-size: 1.5rem; margin-bottom: 24px; }
 
   /* Results title */
-  .results-title { font-size: 1.3rem; }
+  .results-title { font-size: 1.35rem; }
 
   /* Map card */
   .map-card img { max-height: 180px; object-fit: cover; }
