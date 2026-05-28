@@ -14,7 +14,8 @@ google-auth>=2.28.0
 google-genai>=1.0.0          # provides `from google import genai` used in gemini_synthesis.py
 
 # ── Database / backend ─────────────────────────────────────────────────────────
-supabase==2.3.4
+# supabase==2.3.4  ← broken on Python 3.11/3.12 (realtime dependency conflict)
+supabase>=2.7.4
 
 # ── Image handling ─────────────────────────────────────────────────────────────
 Pillow==10.2.0
