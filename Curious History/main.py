@@ -2,20 +2,18 @@
 main.py — Curious History data pipeline orchestrator.
 
 Usage:
-    python main.py --reset   # wipe DB, rebuild from scratch
-    python main.py           # add new records without wiping existing data
+    python main.py              # add new records without wiping existing data
+    python main.py --reset      # wipe DB, rebuild from scratch (takes ~30 min)
+    python main.py --new-only   # run only the 10 new global sources
 
-Database: curious_history.json  (human-readable JSON — open in VS Code)
-Sources:  8 free public APIs, no API key required (see db.py → SOURCES)
+Database : curious_history.json
+Sources  : 28+ free public APIs (original 8 + 10 new global sources via
+           new_sources_pathway)
 
-Content-type breakdown after a full --reset run:
-  full_text     → 1000–1200 records  (IA, Perseus, Cabinet Papers,
-                                      Wikipedia ~200, Wikidata ~70,
-                                      Wikimedia ~150)
-  dataset       →     7     records  (Our World in Data CSVs)
-  metadata_only →    23     records  (Qatar Digital Library)
-  ─────────────────────────────────────────────
-  Total target  → 1030–1230 records
+New global sources cover:
+  Japan (NDL), India (IA DLI), Africa (IA), Middle East (Europeana ME,
+  OpenITI), South/SE Asia (SOAS, HathiTrust), Latin America (LOC,
+  Memoria Chilena), plus expanded Qatar Digital Library queries.
 """
 
 import sys
@@ -23,7 +21,8 @@ import importlib
 import db
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
-reset_mode = "--reset" in sys.argv
+reset_mode    = "--reset"    in sys.argv
+new_only_mode = "--new-only" in sys.argv
 
 # ── Database initialisation ───────────────────────────────────────────────────
 if reset_mode:
@@ -111,3 +110,25 @@ print("=" * 62)
 
 db.save(conn)
 print(f"  Database saved → curious_history.json")
+
+# ── Also run the new global sources (unless --new-only already ran them) ──────
+if not new_only_mode:
+    print("\n\n" + "=" * 62)
+    print("RUNNING NEW GLOBAL SOURCES (Asia, Africa, Middle East, Latin America)")
+    print("=" * 62)
+    try:
+        from fetchers.new_sources.new_sources_pathway import run_all as run_new_sources
+        new_results = run_new_sources(conn)
+        print("\n" + "─" * 62)
+        print("  NEW GLOBAL SOURCES SUMMARY:")
+        for name, count in new_results.items():
+            status = "✓" if count > 0 else "✗"
+            print(f"  {status}  {name:<42} {count:>5} records")
+        print(f"  TOTAL RECORDS IN DATABASE: {db.get_total_count(conn)}")
+        print("─" * 62)
+        db.save(conn)
+        print("  Database saved with new global sources.")
+    except Exception as e:
+        print(f"[WARN] New sources pathway failed: {e}")
+        import traceback
+        traceback.print_exc()

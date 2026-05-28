@@ -1,6 +1,6 @@
 """
-new_sources_db_setup.py — Registers all 8 new global-history sources
-into the JSON pipeline database.
+new_sources_db_setup.py — Registers all 18 global-history sources
+into the JSON pipeline database (8 original + 10 new global sources).
 
 Safe to call multiple times (name-based deduplication).
 """
@@ -52,6 +52,61 @@ NEW_SOURCES = [
         "name":         "DPLA",
         "base_url":     "https://api.dp.la/v2",
         "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    # ── 10 new global sources ──────────────────────────────────────────────────
+    {
+        "name":         "National Diet Library Japan",
+        "base_url":     "https://iss.ndl.go.jp/api/opensearch",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "HathiTrust Digital Library",
+        "base_url":     "https://catalog.hathitrust.org",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "Internet Archive — India",
+        "base_url":     "https://archive.org/advancedsearch.php",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "Internet Archive — Africa",
+        "base_url":     "https://archive.org/advancedsearch.php",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "SOAS University London",
+        "base_url":     "https://eprints.soas.ac.uk/cgi/oai2",
+        "api_type":     "OAI-PMH",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "OpenITI — Islamic Texts",
+        "base_url":     "https://archive.org/advancedsearch.php",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "Europeana Middle East & Global",
+        "base_url":     "https://api.europeana.eu/record/v2",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "Library of Congress",
+        "base_url":     "https://www.loc.gov/search/",
+        "api_type":     "REST",
+        "content_type": "full_text",
+    },
+    {
+        "name":         "Memoria Chilena",
+        "base_url":     "http://www.memoriachilena.gob.cl/oai/request",
+        "api_type":     "OAI-PMH",
         "content_type": "full_text",
     },
 ]

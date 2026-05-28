@@ -215,6 +215,16 @@ def _source_label(url: str, region: str = "") -> str:
         return "Library of Congress"
     if "theqi.com" in url or "qdl.qa" in url:
         return "Qatar Digital Library"
+    if "ndl.go.jp" in url:
+        return "National Diet Library Japan"
+    if "hathitrust.org" in url:
+        return "HathiTrust Digital Library"
+    if "eprints.soas.ac.uk" in url or "digital.soas.ac.uk" in url:
+        return "SOAS University London"
+    if "memoriachilena.gob.cl" in url:
+        return "Memoria Chilena"
+    if "openiti.org" in url:
+        return "OpenITI"
     return "Historical Archive"
 
 

@@ -27,13 +27,30 @@ SOURCE_NAME = "Qatar Digital Library"
 
 HEADERS = {"User-Agent": "CuriousHistory/1.0 (himanks897@gmail.com)"}
 
-# Targeted search queries for Gulf History / Colonial Records / British India
+# Expanded queries — Gulf, South Asia, Ottoman, Middle East, Africa colonial
 ARCHIVE_QUERIES = [
+    # Gulf / Arabia
     "Colonial Records Gulf Arabia British India",
     "Persian Gulf British Mandate historical documents",
+    "Gulf Arab states history diplomatic records",
+    "Arabia peninsula history Ottoman British",
+    "Kuwait Bahrain Qatar history British",
+    # India Office Records (British Library)
     "India Office Records colonial history",
     "British India political records administration",
-    "Gulf Arab states history diplomatic records",
+    "Bengal Punjab colonial administration records",
+    # Ottoman / Middle East
+    "Ottoman Empire administrative records history",
+    "Palestine Mandate British history documents",
+    "Iraq Mesopotamia British Mandate records",
+    "Syria Lebanon French Mandate history",
+    "Egypt British occupation history documents",
+    # East Africa
+    "East Africa colonial records British Kenya",
+    "Zanzibar history Sultan British",
+    # South Asia extended
+    "Afghanistan British India frontier records",
+    "Ceylon Sri Lanka colonial history documents",
 ]
 
 
