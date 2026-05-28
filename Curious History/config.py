@@ -38,8 +38,13 @@ class Config:
     # DigitalNZ — free key: digitalnz.org/developers
     DIGITAL_NZ_API_KEY = os.getenv("DIGITAL_NZ_API_KEY", "")
 
-    # Cache directory
-    CACHE_DIR = os.path.join(os.path.dirname(__file__), ".cache")
+    # Cache directory — use /tmp on Vercel (read-only filesystem), local .cache elsewhere
+    _project_root = os.path.dirname(__file__)
+    CACHE_DIR = (
+        "/tmp/.curious_cache"
+        if not os.access(_project_root, os.W_OK)
+        else os.path.join(_project_root, ".cache")
+    )
 
     # Guest search limit
     GUEST_SEARCH_LIMIT = 10

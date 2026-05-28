@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Sign In — Curious History{% endblock %}
 
+{% block extra_head %}
+<!-- Google Identity Services — loaded async so it never blocks page render -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endblock %}
+
 {% block nav %}
 <nav class="landing-nav" role="navigation" aria-label="Sign-in navigation">
   <div class="landing-nav-inner">
@@ -28,9 +33,34 @@
 
     <p class="login-sub">Choose how you'd like to continue:</p>
 
-    <div class="login-btns">
-      <!-- Google Sign In -->
-      <a href="{{ url_for('home') }}" class="login-btn login-btn-google" role="button">
+    <!-- ── Success panel (hidden until Google login succeeds) ── -->
+    <div id="login-success-panel" style="display:none; text-align:center; padding:8px 0 16px;">
+      <img id="login-user-pic" src="" alt="Profile photo"
+           style="width:72px;height:72px;border-radius:50%;border:3px solid var(--color-accent);
+                  object-fit:cover;margin-bottom:12px;display:block;margin:0 auto 12px;">
+      <p id="login-user-name"
+         style="font-family:var(--font-body);font-size:1.1rem;font-weight:700;
+                font-style:italic;color:var(--color-accent);margin-bottom:4px;"></p>
+      <p id="login-user-email"
+         style="font-size:0.82rem;font-style:italic;color:var(--color-text-muted);
+                margin-bottom:20px;"></p>
+      <a href="{{ url_for('home') }}" class="btn btn-primary" style="width:100%;justify-content:center;">
+        Enter Curious History →
+      </a>
+      <button id="login-signout-btn"
+              style="margin-top:12px;background:none;border:none;font-size:0.8rem;
+                     font-style:italic;color:var(--color-text-muted);cursor:pointer;
+                     text-decoration:underline;">
+        Not you? Sign out
+      </button>
+    </div>
+
+    <!-- ── Login buttons (hidden after successful Google login) ── -->
+    <div class="login-btns" id="login-btns-wrap">
+
+      <!-- Google Sign In — custom button triggers GIS popup -->
+      <button id="google-signin-btn" class="login-btn login-btn-google" type="button"
+              aria-label="Sign in with Google">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -38,7 +68,12 @@
           <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
         </svg>
         Continue with Google
-      </a>
+      </button>
+
+      <!-- Error message — shown if login fails -->
+      <p id="login-error-msg"
+         style="display:none;font-size:0.82rem;font-style:italic;color:var(--color-error);
+                text-align:center;margin:4px 0;"></p>
 
       <div class="login-or"><span>or</span></div>
 
@@ -52,11 +87,123 @@
       </a>
     </div>
 
-    <p class="login-note">
+    <p class="login-note" id="login-note-default">
       <em>Guest access is free and unlimited for browsing.<br>
       Sign in with Google to save articles and track history.</em>
     </p>
 
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+
+  var CLIENT_ID = '795621911465-a1122fukv8b3j96f2oq5bje7u9gnpooe.apps.googleusercontent.com';
+
+  /* ── UI helpers ─────────────────────────────────────────────────────────── */
+  function showError(msg) {
+    var el = document.getElementById('login-error-msg');
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+  }
+
+  function showSuccess(user) {
+    document.getElementById('login-user-pic').src           = user.picture || '';
+    document.getElementById('login-user-name').textContent  = user.name    || '';
+    document.getElementById('login-user-email').textContent = user.email   || '';
+    document.getElementById('login-btns-wrap').style.display     = 'none';
+    document.getElementById('login-note-default').style.display  = 'none';
+    document.getElementById('login-success-panel').style.display = 'block';
+  }
+
+  /* ── Step 2: send access token to Flask — verified server-side ──────────── */
+  function sendToFlask(accessToken) {
+    fetch('/api/google-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: accessToken }),
+    })
+    .then(function (res) {
+      if (!res.ok) {
+        return res.json().then(function (d) {
+          throw new Error(d.error || 'Server error ' + res.status);
+        });
+      }
+      return res.json();
+    })
+    .then(function (user) { showSuccess(user); })
+    .catch(function (err) {
+      if (!err.message || err.message.toLowerCase().includes('fetch')) {
+        showError('Cannot reach the server — make sure Flask is running on port 5001.');
+      } else {
+        showError('Sign-in failed: ' + err.message);
+      }
+    });
+  }
+
+  /* ── Initialise GIS OAuth2 Token Client (works on mobile + desktop) ─────── */
+  /* Uses a real popup window instead of One Tap overlay, so it works on HTTP  */
+  var tokenClient = null;
+
+  function initGIS() {
+    if (!window.google || !window.google.accounts) {
+      setTimeout(initGIS, 150);
+      return;
+    }
+
+    /* Token client: opens Google's account-chooser in a popup window */
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope:     'openid email profile',
+      callback:  function (response) {
+        if (response.error) {
+          /* User cancelled or an error occurred */
+          if (response.error !== 'popup_closed_by_user'
+              && response.error !== 'access_denied') {
+            showError('Google sign-in error: ' + response.error);
+          }
+          return;
+        }
+        showError('');
+        /* Send the access token to Flask for server-side verification */
+        sendToFlask(response.access_token);
+      },
+    });
+
+    /* Wire our custom button */
+    var btn = document.getElementById('google-signin-btn');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        showError('');
+        /* prompt:'select_account' always shows the account chooser */
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initGIS();
+
+    /* ── "Not you? Sign out" clears session and restores login panel ── */
+    var signOutBtn = document.getElementById('login-signout-btn');
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', function () {
+        if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+          /* Revoke the Google token client-side */
+          google.accounts.oauth2.revoke('', function () {});
+        }
+        fetch('/api/logout', { method: 'POST' }).finally(function () {
+          document.getElementById('login-success-panel').style.display  = 'none';
+          document.getElementById('login-btns-wrap').style.display       = '';
+          document.getElementById('login-note-default').style.display    = '';
+          showError('');
+        });
+      });
+    }
+  });
+})();
+</script>
 {% endblock %}

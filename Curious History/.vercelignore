@@ -1,0 +1,18 @@
+# Never needed at runtime on Vercel
+.cache/
+.git/
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+
+# Dev-only scripts
+run.py
+run_*.py
+
+# Binary database (JSON version used instead)
+curious_history.db
+
+# Secrets
+.env
+bl_oai_token.txt

@@ -12,10 +12,18 @@ venv/
 dist/
 build/
 
-# Cache
+# Cache — runtime only, never commit
+.cache/
 api/cache_data/
 *.cache
 *.json.cache
+
+# Secrets / dev-only files
+bl_oai_token.txt
+curious_history.db
+
+# Dev tunnel script
+run_*.py
 
 # macOS
 .DS_Store

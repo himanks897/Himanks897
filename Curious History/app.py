@@ -14,6 +14,10 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from flask_cors import CORS
 from dotenv import load_dotenv
 
+# Google Sign-In verification
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 load_dotenv()
 
 from config import Config
@@ -39,6 +43,15 @@ import db as _pdb          # pipeline database (in-memory JSON cache)
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
+
+# Google OAuth Client ID (public — safe to embed in frontend too)
+GOOGLE_CLIENT_ID = "795621911465-a1122fukv8b3j96f2oq5bje7u9gnpooe.apps.googleusercontent.com"
+
+
+@app.context_processor
+def inject_user():
+    """Makes current_user available in every Jinja2 template automatically."""
+    return {"current_user": session.get("user")}
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -1483,6 +1496,87 @@ def api_search():
         return jsonify({"results": []})
     results = wikipedia.search_wikipedia(q, limit=6)
     return jsonify({"results": results})
+
+
+# ─── Google Auth ──────────────────────────────────────────────────────────────
+
+@app.route("/api/google-login", methods=["POST"])
+def api_google_login():
+    """
+    Accepts either:
+      { "access_token": "..." }  — from OAuth Token Client (desktop + mobile)
+      { "credential":   "..." }  — from One Tap ID token (kept for compat)
+
+    Verifies with Google and stores the user in the Flask session.
+    Returns: { name, email, picture } on success, or { error } on failure.
+    """
+    import requests as _requests
+    data = request.get_json(silent=True) or {}
+
+    # ── Path A: OAuth2 access token (Token Client — works on mobile) ──────────
+    access_token = (data.get("access_token") or "").strip()
+    if access_token:
+        # Ask Google's userinfo endpoint to validate the token and return user data
+        resp = _requests.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=8,
+        )
+        if resp.status_code != 200:
+            return jsonify({"error": "Google token rejected"}), 401
+
+        info = resp.json()
+        # Reject tokens not issued for our client (aud field)
+        if info.get("aud") and info["aud"] != GOOGLE_CLIENT_ID:
+            return jsonify({"error": "Token audience mismatch"}), 401
+
+        user = {
+            "sub":     info.get("sub", ""),
+            "name":    info.get("name", ""),
+            "email":   info.get("email", ""),
+            "picture": info.get("picture", ""),
+        }
+
+    # ── Path B: ID token credential (One Tap — desktop fallback) ─────────────
+    else:
+        credential = (data.get("credential") or "").strip()
+        if not credential:
+            return jsonify({"error": "No token provided"}), 400
+
+        try:
+            id_info = id_token.verify_oauth2_token(
+                credential,
+                google_requests.Request(),
+                GOOGLE_CLIENT_ID,
+                clock_skew_in_seconds=10,
+            )
+        except ValueError as exc:
+            return jsonify({"error": f"Token verification failed: {exc}"}), 401
+
+        user = {
+            "sub":     id_info.get("sub", ""),
+            "name":    id_info.get("name", ""),
+            "email":   id_info.get("email", ""),
+            "picture": id_info.get("picture", ""),
+        }
+
+    # ── Store in session ──────────────────────────────────────────────────────
+    session["user"]    = user
+    session["user_id"] = user["sub"]   # used by reactions / save endpoints
+    session.permanent  = True
+
+    return jsonify({
+        "name":    user["name"],
+        "email":   user["email"],
+        "picture": user["picture"],
+    })
+
+
+@app.route("/api/logout", methods=["POST"])
+def api_logout():
+    """Clears the session and signs the user out."""
+    session.clear()
+    return jsonify({"ok": True})
 
 
 # ─── Run ──────────────────────────────────────────────────────────────────────
