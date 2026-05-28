@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Quiz — {{ topic }} — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <!-- Back Button -->
+  <a
+    href="{{ url_for('results', topic=topic, year=year, country=country, era=era) }}"
+    class="btn btn-ghost btn-sm"
+    style="margin-bottom:20px;display:inline-flex;"
+    aria-label="Back to {{ topic }} article"
+  >← Back to Article</a>
+
+  <div class="quiz-page">
+
+    <!-- Quiz Header -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:0.78rem;font-style:italic;color:var(--color-accent);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">
+        {{ '📋 MCQ Quiz' if quiz_type == 'mcq' else '✍️ Fill in the Blanks Quiz' }}
+      </div>
+      <h1 class="quiz-title"><em>{{ topic }}</em></h1>
+      <p class="quiz-subtitle">
+        <em>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }} · {{ country }}</em>
+      </p>
+    </div>
+
+    <!-- Loading state -->
+    <div id="quiz-loading" class="loading-state">
+      <div class="spinner"></div>
+      <p><em>Gemini is generating your quiz…</em></p>
+    </div>
+
+    <!-- Quiz Content -->
+    <div id="quiz-content" style="display:none;"></div>
+
+    <!-- Submit & Score -->
+    <div id="quiz-actions" style="display:none;margin-top:24px;text-align:center;">
+      <button class="btn btn-primary btn-lg" id="submit-quiz-btn">
+        Check Answers →
+      </button>
+    </div>
+
+    <!-- Score Display -->
+    <div id="quiz-score" class="quiz-score" style="display:none;">
+      <div class="score-value" id="score-value">0/5</div>
+      <div class="score-label"><em>Your Score</em></div>
+      <div id="score-feedback" style="margin-top:12px;font-style:italic;color:var(--color-text-secondary);"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;">
+        <button class="btn btn-secondary" id="retake-btn">🔄 Retake Quiz</button>
+        <a href="{{ url_for('results', topic=topic, year=year, country=country, era=era) }}" class="btn btn-primary">← Back to Article</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const quizType = {{ quiz_type | tojson }};
+const topic = {{ topic | tojson }};
+const year = {{ year | tojson }};
+const country = {{ country | tojson }};
+const era = {{ era | tojson }};
+
+let quizData = null;
+let userAnswers = {};
+
+async function loadQuiz() {
+  document.getElementById('quiz-loading').style.display = 'block';
+  document.getElementById('quiz-content').style.display = 'none';
+  document.getElementById('quiz-actions').style.display = 'none';
+  document.getElementById('quiz-score').style.display = 'none';
+  userAnswers = {};
+
+  try {
+    const r = await fetch('/api/quiz', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ topic, year, country, era, type: quizType })
+    });
+    const data = await r.json();
+    quizData = data;
+    document.getElementById('quiz-loading').style.display = 'none';
+    renderQuiz(data);
+  } catch(e) {
+    document.getElementById('quiz-loading').innerHTML = '<p style="color:var(--color-error);font-style:italic;"><em>Failed to load quiz. Please try again.</em></p>';
+  }
+}
+
+function renderQuiz(data) {
+  const container = document.getElementById('quiz-content');
+  container.innerHTML = '';
+
+  if (!data.questions || data.questions.length === 0) {
+    container.innerHTML = '<p style="font-style:italic;color:var(--color-text-muted);"><em>No quiz generated. Please try again.</em></p>';
+    container.style.display = 'block';
+    return;
+  }
+
+  if (quizType === 'mcq') {
+    renderMCQ(data.questions, container);
+  } else {
+    renderFITB(data.questions, container);
+  }
+
+  container.style.display = 'block';
+  document.getElementById('quiz-actions').style.display = 'block';
+}
+
+function renderMCQ(questions, container) {
+  questions.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question';
+    div.innerHTML = `
+      <div class="quiz-q-num"><em>Question ${idx + 1} of ${questions.length}</em></div>
+      <div class="quiz-q-text">${q.question}</div>
+      <div class="quiz-options" role="radiogroup" aria-label="Options for question ${idx + 1}">
+        ${Object.entries(q.options).map(([letter, text]) => `
+          <label class="quiz-option" data-q="${idx}" data-letter="${letter}" tabindex="0" role="radio" aria-checked="false">
+            <span class="quiz-option-letter">${letter}</span>
+            <span><em>${text}</em></span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Option click handlers
+  container.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+      const qIdx = this.dataset.q;
+      const letter = this.dataset.letter;
+      // Deselect others in same question
+      container.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(o => {
+        o.classList.remove('selected');
+        o.setAttribute('aria-checked', 'false');
+      });
+      this.classList.add('selected');
+      this.setAttribute('aria-checked', 'true');
+      userAnswers[qIdx] = letter;
+    });
+    // Keyboard support
+    opt.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+    });
+  });
+}
+
+function renderFITB(questions, container) {
+  questions.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-question';
+
+    const inputId = `fitb-input-${idx}`;
+    div.innerHTML = `
+      <div class="quiz-q-num"><em>Question ${idx + 1} of ${questions.length}</em></div>
+      <div class="fitb-sentence">${q.sentence.replace('__________', `<input type="text" id="${inputId}" class="fitb-input" aria-label="Fill in the blank for question ${idx + 1}" autocomplete="off">`)}</div>
+      <div class="fitb-hint"><em>Hint: ${q.hint}</em></div>
+    `;
+    container.appendChild(div);
+
+    document.addEventListener('DOMContentLoaded', () => {}, false);
+
+    // Store reference
+    setTimeout(() => {
+      const inp = document.getElementById(inputId);
+      if (inp) {
+        inp.addEventListener('input', function() {
+          userAnswers[idx] = this.value.trim();
+        });
+      }
+    }, 100);
+  });
+}
+
+// Submit
+document.getElementById('submit-quiz-btn').addEventListener('click', function() {
+  if (!quizData || !quizData.questions) return;
+  let score = 0;
+  const total = quizData.questions.length;
+
+  if (quizType === 'mcq') {
+    quizData.questions.forEach((q, idx) => {
+      const allOpts = document.querySelectorAll(`.quiz-option[data-q="${idx}"]`);
+      allOpts.forEach(opt => {
+        if (opt.dataset.letter === q.correct) {
+          opt.classList.add('correct');
+        } else if (opt.classList.contains('selected')) {
+          opt.classList.add('wrong');
+        }
+      });
+      if (userAnswers[idx] === q.correct) score++;
+    });
+  } else {
+    quizData.questions.forEach((q, idx) => {
+      const inp = document.getElementById(`fitb-input-${idx}`);
+      if (inp) {
+        const userVal = (inp.value || '').trim().toLowerCase();
+        const correctVal = (q.blank_word || '').trim().toLowerCase();
+        if (userVal === correctVal || userVal.includes(correctVal) || correctVal.includes(userVal)) {
+          score++;
+          inp.style.borderBottomColor = 'var(--color-success)';
+        } else {
+          inp.style.borderBottomColor = 'var(--color-error)';
+          inp.value = `${inp.value} (Answer: ${q.blank_word})`;
+        }
+      }
+    });
+  }
+
+  document.getElementById('quiz-actions').style.display = 'none';
+  const scoreDiv = document.getElementById('quiz-score');
+  const pct = Math.round((score / total) * 100);
+  document.getElementById('score-value').textContent = `${score}/${total}`;
+  const feedbacks = [
+    [0, 39, 'Keep exploring — every mistake is a lesson! 📚'],
+    [40, 69, 'Good effort! Read the article again to fill the gaps. 📖'],
+    [70, 89, 'Well done! You know your history. 🎉'],
+    [90, 100, 'Outstanding! You\'re a true history scholar! 🏆'],
+  ];
+  for (const [min, max, msg] of feedbacks) {
+    if (pct >= min && pct <= max) {
+      document.getElementById('score-feedback').innerHTML = `<em>${msg}</em>`;
+      break;
+    }
+  }
+  scoreDiv.style.display = 'block';
+});
+
+// Retake
+document.getElementById('retake-btn').addEventListener('click', loadQuiz);
+
+// Init
+loadQuiz();
+</script>
+{% endblock %}

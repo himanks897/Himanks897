@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ word_count }}-Word Summary — {{ topic }} — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <!-- Back Button -->
+  <a
+    href="{{ url_for('results', topic=topic, year=year, country=country, era=era) }}"
+    class="btn btn-ghost btn-sm"
+    style="margin-bottom:20px;display:inline-flex;"
+    aria-label="Back to {{ topic }} article"
+  >← Back to Article</a>
+
+  <div class="summary-page">
+
+    <!-- Summary Header -->
+    <div class="summary-header">
+      <div>
+        <div style="font-size:0.78rem;font-style:italic;color:var(--color-accent);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">
+          📝 {{ word_count }}-Word Summary
+        </div>
+        <h1 class="summary-title"><em>{{ topic }}</em></h1>
+        <p style="font-style:italic;color:var(--color-text-secondary);font-size:0.9rem;">
+          <em>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }} · {{ country }}</em>
+        </p>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="summary-loading" class="loading-state">
+      <div class="spinner"></div>
+      <p><em>Gemini is generating your {{ word_count }}-word summary…</em></p>
+    </div>
+
+    <!-- Content -->
+    <div id="summary-body" class="summary-content" style="display:none;"></div>
+    <div id="summary-word-count" class="summary-word-count" style="display:none;"></div>
+
+    <!-- Switch summary length -->
+    <div id="summary-switch" style="display:none;margin-top:24px;border-top:1px solid var(--color-border);padding-top:16px;">
+      <p style="font-size:0.85rem;font-style:italic;color:var(--color-text-muted);margin-bottom:10px;"><em>Switch summary length:</em></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% for wc in [200, 500, 1000] %}
+        <a
+          href="{{ url_for('summary_page', topic=topic, year=year, country=country, era=era, words=wc) }}"
+          class="chip {% if wc == word_count|int %}chip-accent{% endif %}"
+          aria-label="{{ wc }}-word summary"
+          {% if wc == word_count|int %}aria-current="true"{% endif %}
+        >{{ wc }} Words</a>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const topic = {{ topic | tojson }};
+const year = {{ year | tojson }};
+const country = {{ country | tojson }};
+const era = {{ era | tojson }};
+const wordCount = {{ word_count | int }};
+
+async function loadSummary() {
+  try {
+    const r = await fetch('/api/summary', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ topic, year, country, era, words: wordCount })
+    });
+    const data = await r.json();
+
+    document.getElementById('summary-loading').style.display = 'none';
+    const body = document.getElementById('summary-body');
+
+    // Strip WORD_COUNT line if present
+    let html = (data.html || '').replace(/WORD_COUNT:\s*\d+/gi, '').trim();
+    body.innerHTML = html;
+    body.style.display = 'block';
+
+    // Extract word count from response
+    const wcMatch = (data.html || '').match(/WORD_COUNT:\s*(\d+)/i);
+    if (wcMatch) {
+      const wc = document.getElementById('summary-word-count');
+      wc.innerHTML = `<em>Approximate word count: ${wcMatch[1]} words</em>`;
+      wc.style.display = 'block';
+    }
+
+    document.getElementById('summary-switch').style.display = 'block';
+  } catch(e) {
+    document.getElementById('summary-loading').innerHTML =
+      '<p style="color:var(--color-error);font-style:italic;"><em>Failed to generate summary. Please try again.</em></p>';
+  }
+}
+
+loadSummary();
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+Flask==3.0.0
+Flask-Cors==4.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+google-generativeai==0.7.2
+supabase==2.3.4
+Pillow==10.2.0
+cachetools==5.3.2
+gunicorn==21.2.0
+Werkzeug==3.0.1
+
+# Historical database scrapers
+beautifulsoup4==4.12.3
+lxml==5.2.2
+pandas==2.2.2
+openpyxl==3.1.4
+# playwright — install separately: pip install playwright && playwright install chromium
+# playwright==1.44.0

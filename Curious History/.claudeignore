@@ -1,0 +1,13 @@
+# Ignore cached API responses — can be large and are regenerated automatically
+api/cache_data/
+
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore virtual environment
+venv/
+.venv/
+
+# Ignore secrets
+.env

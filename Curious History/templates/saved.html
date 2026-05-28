@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Saved Items — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  <!-- Page Nav: Back -->
+  <div class="page-nav-bar">
+    <a href="{{ url_for('home') }}" class="page-back-btn" aria-label="Back to Home">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4L5 10l7 6"/>
+      </svg>
+      Back
+    </a>
+  </div>
+
+  <h1 style="font-family:var(--font-body);font-size:1.7rem;font-style:italic;margin-bottom:8px;">
+    📚 Your Saved Collection
+  </h1>
+  <p style="font-style:italic;color:var(--color-text-secondary);margin-bottom:24px;">
+    <em>All the history you've saved for later</em>
+  </p>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--color-border);padding-bottom:0;" role="tablist">
+    <button class="btn btn-ghost btn-sm" id="tab-events" role="tab" aria-selected="true" aria-controls="panel-events" style="border-bottom:2px solid var(--color-accent);border-radius:var(--radius-sm) var(--radius-sm) 0 0;">
+      📖 Saved Events
+    </button>
+    <button class="btn btn-ghost btn-sm" id="tab-quotes" role="tab" aria-selected="false" aria-controls="panel-quotes">
+      💬 Saved Quotes
+    </button>
+  </div>
+
+  <!-- Events Panel -->
+  <div id="panel-events" role="tabpanel" aria-labelledby="tab-events">
+    <!-- Filters -->
+    <div class="saved-filters" role="group" aria-label="Filter saved events">
+      <button class="chip chip-accent" data-filter="all" onclick="filterSaved('all')">All</button>
+      <button class="chip" data-filter="bce" onclick="filterSaved('bce')">BCE</button>
+      <button class="chip" data-filter="ce" onclick="filterSaved('ce')">CE</button>
+    </div>
+
+    <div id="saved-events-list" class="saved-grid">
+      <!-- Loaded by JS from localStorage / API -->
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p><em>Loading your saved events…</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotes Panel -->
+  <div id="panel-quotes" role="tabpanel" aria-labelledby="tab-quotes" style="display:none;">
+    <div id="saved-quotes-list" class="saved-grid">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p><em>Loading your saved quotes…</em></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Tab switching
+document.getElementById('tab-events').addEventListener('click', function() {
+  document.getElementById('panel-events').style.display = 'block';
+  document.getElementById('panel-quotes').style.display = 'none';
+  this.setAttribute('aria-selected', 'true');
+  this.style.borderBottom = '2px solid var(--color-accent)';
+  document.getElementById('tab-quotes').setAttribute('aria-selected', 'false');
+  document.getElementById('tab-quotes').style.borderBottom = '';
+});
+
+document.getElementById('tab-quotes').addEventListener('click', function() {
+  document.getElementById('panel-quotes').style.display = 'block';
+  document.getElementById('panel-events').style.display = 'none';
+  this.setAttribute('aria-selected', 'true');
+  this.style.borderBottom = '2px solid var(--color-accent)';
+  document.getElementById('tab-events').setAttribute('aria-selected', 'false');
+  document.getElementById('tab-events').style.borderBottom = '';
+  loadQuotes();
+});
+
+// Load saved events from localStorage
+function loadSavedEvents(filter = 'all') {
+  const container = document.getElementById('saved-events-list');
+  let events = [];
+  try {
+    events = JSON.parse(localStorage.getItem('ch_saved_events') || '[]');
+  } catch(e) { events = []; }
+
+  if (filter !== 'all') {
+    events = events.filter(e => e.era === filter);
+  }
+
+  if (events.length === 0) {
+    container.innerHTML = '<div class="loading-state"><p><em>No saved events yet. Explore history and save events from the results page!</em></p></div>';
+    return;
+  }
+
+  container.innerHTML = events.map(ev => `
+    <div class="saved-card">
+      <div class="saved-card-img" aria-hidden="true">📜</div>
+      <div class="saved-card-body">
+        <div class="saved-card-title">
+          <a href="/results?topic=${encodeURIComponent(ev.topic)}&year=${ev.year}&country=${encodeURIComponent(ev.country)}&era=${ev.era || 'ce'}" style="color:inherit;text-decoration:none;">
+            <em>${ev.topic}</em>
+          </a>
+        </div>
+        <div class="saved-card-meta"><em>${ev.year} · ${ev.country}</em></div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <a href="/results?topic=${encodeURIComponent(ev.topic)}&year=${ev.year}&country=${encodeURIComponent(ev.country)}&era=${ev.era || 'ce'}" class="btn btn-ghost btn-sm">Open</a>
+          <button class="btn btn-ghost btn-sm" style="color:var(--color-error);" onclick="removeEvent('${ev.topic}', '${ev.year}')">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeEvent(topic, year) {
+  let events = JSON.parse(localStorage.getItem('ch_saved_events') || '[]');
+  events = events.filter(e => !(e.topic === topic && String(e.year) === String(year)));
+  localStorage.setItem('ch_saved_events', JSON.stringify(events));
+  loadSavedEvents();
+}
+
+function filterSaved(filter) {
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('chip-accent'));
+  document.querySelector(`[data-filter="${filter}"]`).classList.add('chip-accent');
+  loadSavedEvents(filter);
+}
+
+function loadQuotes() {
+  const container = document.getElementById('saved-quotes-list');
+  let quotes = [];
+  try {
+    quotes = JSON.parse(localStorage.getItem('ch_saved_quotes') || '[]');
+  } catch(e) { quotes = []; }
+
+  if (quotes.length === 0) {
+    container.innerHTML = '<div class="loading-state"><p><em>No saved quotes yet. Highlight text on any results page to save quotes.</em></p></div>';
+    return;
+  }
+
+  container.innerHTML = quotes.map((q, i) => `
+    <div class="saved-card">
+      <div class="saved-card-body">
+        <blockquote style="font-family:var(--font-body);font-style:italic;color:var(--color-text-secondary);border-left:3px solid var(--color-gold);padding-left:12px;margin-bottom:10px;font-size:0.95rem;">
+          "${q.text}"
+        </blockquote>
+        <div class="saved-card-meta"><em>From: ${q.source_topic}${q.source_year ? ' (' + q.source_year + ')' : ''}</em></div>
+        <button class="btn btn-ghost btn-sm" style="color:var(--color-error);margin-top:8px;" onclick="removeQuote(${i})">Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeQuote(index) {
+  let quotes = JSON.parse(localStorage.getItem('ch_saved_quotes') || '[]');
+  quotes.splice(index, 1);
+  localStorage.setItem('ch_saved_quotes', JSON.stringify(quotes));
+  loadQuotes();
+}
+
+// Init
+loadSavedEvents();
+</script>
+{% endblock %}

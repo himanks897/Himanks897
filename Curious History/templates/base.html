@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Curious History — Every year. Every country. Every story.">
+  <title>{% block title %}Curious History{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/favicon.svg') }}">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility.css') }}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" class="page-loader" aria-hidden="true">
+  <div class="loader-inner">
+    <div class="loader-logo">Curious <span>History</span></div>
+    <div class="loader-spinner">
+      <div class="loader-ring"></div>
+      <div class="loader-ring loader-ring-2"></div>
+    </div>
+    <p class="loader-tagline">Every year. Every country. Every story.</p>
+  </div>
+</div>
+
+<!-- Skip Link (Accessibility Feature #3) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- Session Timeout Banner (Accessibility Feature #15) -->
+<div class="session-banner" id="session-banner" role="alert" aria-live="polite">
+  <em>Your session will end in 5 minutes. Click anywhere to stay signed in.</em>
+</div>
+
+{% block nav %}
+<!-- Navigation Bar -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="navbar-inner">
+    <!-- Logo -->
+    <a href="{{ url_for('home') }}" class="nav-logo" aria-label="Curious History — go to home">
+      Curious <span>History</span>
+    </a>
+
+    <!-- Global Live Search -->
+    <div class="nav-search-wrap" role="search">
+      <label for="nav-search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Search history</label>
+      <span class="nav-search-icon" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:block;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM17.5 17.5l-3.328-3.329"/>
+        </svg>
+      </span>
+      <input
+        type="search"
+        id="nav-search"
+        class="nav-search"
+        placeholder="Search any historical event, person, or era…"
+        autocomplete="off"
+        aria-label="Search all historical content"
+        aria-controls="nav-search-results"
+        aria-autocomplete="list"
+      >
+      <div id="nav-search-results" class="nav-search-results" role="listbox" aria-label="Search suggestions"></div>
+    </div>
+
+    <!-- Right icons -->
+    <div class="nav-right">
+      <!-- Accessibility gear button -->
+      <div class="nav-a11y-wrap">
+        <button
+          class="nav-icon-btn"
+          id="a11y-toggle-btn"
+          aria-label="Open accessibility settings"
+          aria-expanded="false"
+          aria-controls="a11y-panel"
+          title="Accessibility Settings"
+        >⚙</button>
+        <span class="nav-a11y-label">Accessibility settings</span>
+      </div>
+
+      <!-- User/Guest menu -->
+      <div class="dropdown">
+        <button
+          class="nav-icon-btn"
+          id="user-menu-btn"
+          aria-label="User menu"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >👤</button>
+        <div class="dropdown-menu" id="user-menu" role="menu" aria-labelledby="user-menu-btn">
+          <a href="{{ url_for('saved') }}" class="dropdown-item" role="menuitem">📚 Saved Items</a>
+          <button class="dropdown-item" id="clear-history-btn" role="menuitem">🕐 Search History</button>
+          <button class="dropdown-item" id="surprise-btn" role="menuitem">🎲 Surprise Me…</button>
+          <hr style="border:none;border-top:1px solid var(--color-border);margin:4px 0;">
+          <button class="dropdown-item" role="menuitem">🚪 Log Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Accessibility Panel (Accessibility Feature — all 15 toggles) -->
+<aside
+  class="a11y-panel"
+  id="a11y-panel"
+  role="complementary"
+  aria-label="Accessibility settings panel"
+>
+  <div class="a11y-panel-header">
+    <span class="a11y-panel-title">⚙ Accessibility Settings</span>
+    <button class="a11y-close" id="a11y-close-btn" aria-label="Close accessibility panel">✕</button>
+  </div>
+
+  <!-- Font Size -->
+  <div class="a11y-section">
+    <span class="a11y-label" id="font-size-label">Font Size</span>
+    <div class="a11y-btn-group" role="group" aria-labelledby="font-size-label">
+      <button class="a11y-btn" id="font-sm-btn" aria-pressed="false" aria-label="Small font size">S</button>
+      <button class="a11y-btn active" id="font-md-btn" aria-pressed="true" aria-label="Medium font size (default)">M</button>
+      <button class="a11y-btn" id="font-lg-btn" aria-pressed="false" aria-label="Large font size">L</button>
+    </div>
+  </div>
+
+  <!-- Theme -->
+  <div class="a11y-section">
+    <span class="a11y-label" id="theme-label">Theme</span>
+    <div class="a11y-btn-group" role="group" aria-labelledby="theme-label">
+      <button class="a11y-btn active" id="theme-light-btn" aria-pressed="true" aria-label="Light theme">Light</button>
+      <button class="a11y-btn" id="theme-dark-btn" aria-pressed="false" aria-label="Dark theme">Dark</button>
+      <button class="a11y-btn" id="theme-warm-btn" aria-pressed="false" aria-label="Warm sepia theme">Warm</button>
+    </div>
+  </div>
+
+  <!-- Toggles -->
+  <div class="a11y-section">
+    <div class="a11y-toggle-row">
+      <label class="a11y-toggle-label" for="toggle-contrast">High Contrast</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-contrast" role="switch" aria-label="Toggle high contrast mode">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="a11y-toggle-row">
+      <label class="a11y-toggle-label" for="toggle-dyslexic">Dyslexia-Friendly Font</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-dyslexic" role="switch" aria-label="Toggle dyslexia-friendly font">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="a11y-toggle-row">
+      <label class="a11y-toggle-label" for="toggle-motion">Reduced Motion</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-motion" role="switch" aria-label="Toggle reduced motion">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="a11y-toggle-row">
+      <label class="a11y-toggle-label" for="toggle-readaloud">Read Aloud</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-readaloud" role="switch" aria-label="Enable text-to-speech read aloud">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="a11y-toggle-row">
+      <label class="a11y-toggle-label" for="toggle-colorblind">Colour Blind Mode</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-colorblind" role="switch" aria-label="Toggle colour blind mode">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+</aside>
+{% endblock %}
+
+<!-- Highlight & Save Tooltip -->
+<div
+  class="highlight-tooltip"
+  id="highlight-tooltip"
+  role="tooltip"
+  aria-label="Save selected text as a quote"
+>💾 Save Quote</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Main Content -->
+<main id="main-content" tabindex="-1">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+{% block footer %}
+<footer>
+  <em>Curious History — Built for curious minds. Every year. Every country. Every story.</em>
+  &nbsp;·&nbsp;
+  <a href="{{ url_for('welcome') }}">Home</a>
+  &nbsp;·&nbsp;
+  <a href="{{ url_for('saved') }}">Saved</a>
+</footer>
+{% endblock %}
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+<script src="{{ url_for('static', filename='js/features.js') }}"></script>
+<script src="{{ url_for('static', filename='js/lightbox.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+
+<!-- ── Haptic Feedback + Click Sound ───────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Single shared AudioContext ── */
+  var _ctx = null;
+  function getCtx() {
+    if (!_ctx) {
+      try {
+        _ctx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) { return null; }
+    }
+    if (_ctx.state === 'suspended') { try { _ctx.resume(); } catch(e){} }
+    return _ctx;
+  }
+
+  /* ── Light-switch click sound — 120%+ LOUD ──
+     Master gain at 1.8 (180%) fed through a DynamicsCompressor to prevent
+     clipping while maintaining full perceived loudness. */
+  function playClick() {
+    var ctx = getCtx();
+    if (!ctx) return;
+    try {
+      var now = ctx.currentTime;
+
+      /* DynamicsCompressor — prevents clipping at high gain */
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -8;
+      comp.knee.value      = 10;
+      comp.ratio.value     = 6;
+      comp.attack.value    = 0.001;
+      comp.release.value   = 0.15;
+      comp.connect(ctx.destination);
+
+      /* Master gain — 1.8 = 180% — boosted above 100% via compressor */
+      var master = ctx.createGain();
+      master.gain.setValueAtTime(1.8, now);
+      master.connect(comp);
+
+      /* Layer 1: sharp high-frequency tick (noise burst ~22 ms) — 0.75 gain */
+      var tickLen = Math.floor(ctx.sampleRate * 0.022);
+      var buf = ctx.createBuffer(1, tickLen, ctx.sampleRate);
+      var d   = buf.getChannelData(0);
+      for (var i = 0; i < tickLen; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / tickLen, 1.3) * 0.75;
+      }
+      var src = ctx.createBufferSource();
+      src.buffer = buf;
+      var hpf = ctx.createBiquadFilter();
+      hpf.type = 'highpass';
+      hpf.frequency.value = 2200;
+      hpf.Q.value = 0.6;
+      src.connect(hpf);
+      hpf.connect(master);
+      src.start(now);
+
+      /* Layer 2: low mechanical thud — strong impact (0.55 gain) */
+      var osc = ctx.createOscillator();
+      var g   = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.032);
+      g.gain.setValueAtTime(0.55, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.048);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(now);
+      osc.stop(now + 0.058);
+
+      /* Layer 3: secondary snap transient (adds body) — 0.28 gain */
+      var osc2 = ctx.createOscillator();
+      var g2   = ctx.createGain();
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(320, now);
+      osc2.frequency.exponentialRampToValueAtTime(80, now + 0.020);
+      g2.gain.setValueAtTime(0.28, now);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.028);
+      osc2.connect(g2);
+      g2.connect(master);
+      osc2.start(now);
+      osc2.stop(now + 0.034);
+
+      /* Layer 4: low-frequency body rumble (sub-thump) — 0.22 gain */
+      var osc3 = ctx.createOscillator();
+      var g3   = ctx.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(60, now);
+      osc3.frequency.exponentialRampToValueAtTime(28, now + 0.030);
+      g3.gain.setValueAtTime(0.22, now);
+      g3.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
+      osc3.connect(g3);
+      g3.connect(master);
+      osc3.start(now);
+      osc3.stop(now + 0.045);
+
+    } catch (e) {}
+  }
+
+  /* ── Haptic vibration — MAXIMUM strength pattern ──
+     Triple-pulse: 100ms on / 12ms off / 100ms on.
+     Debounced at 80ms to prevent double-fire when both touchstart + click fire.
+     iOS Safari does NOT support navigator.vibrate — no browser workaround. */
+  var _lastHapticTime = 0;
+  function haptic() {
+    if (!navigator.vibrate) return;
+    var now = Date.now();
+    if (now - _lastHapticTime < 80) return; /* debounce — ignore if fired <80ms ago */
+    _lastHapticTime = now;
+    try {
+      navigator.vibrate([100, 12, 100]);
+    } catch(e) {
+      try { navigator.vibrate(150); } catch(e2) {}
+    }
+  }
+
+  /* ── Selector: every interactive element site-wide ── */
+  var SEL = [
+    'button',
+    '[role="button"]',
+    'a.btn', 'a[class*="btn-"]',
+    '.chip', '.chip-accent',
+    '.action-btn',
+    '.country-btn',
+    '.era-card',
+    '.world-option',
+    '.suggestion-chip',
+    '.reaction-btn',
+    '.time-nav-btn',
+    '.accordion-header',
+    '.quiz-option',
+    '.nav-icon-btn',
+    '.page-back-btn',
+    '.page-skip-link',
+    '.landing-nav-cta',
+    '.lpa-btn',
+    '.strip-card',
+    '.gallery-card',
+    '.lb-close', '.lb-nav', '.lb-zoom-btn',
+    '.a11y-btn',
+    '.dropdown-item',
+    '.read-aloud-btn',
+    '.share-btn',
+    '.recent-item',
+    '.landing-icon-card',
+    '.landing-usp-card',
+    '.landing-audience-card',
+    '.simplify-btn',
+    '.panel-close',
+    '.suggestion-chip',
+    '.country-note',
+    '.save-btn',
+    '.glossary-header'
+  ].join(', ');
+
+  /* ── touchstart fires first on mobile — triggers haptic immediately ── */
+  document.addEventListener('touchstart', function (e) {
+    var target = e.target;
+    if (!target) return;
+    var tag = target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (target.closest && target.closest(SEL)) {
+      haptic(); /* debounce prevents double-fire when click also fires */
+    }
+  }, { passive: true });
+
+  document.addEventListener('click', function (e) {
+    var target = e.target;
+    if (!target) return;
+    var tag = target.tagName;
+    /* Skip raw text inputs, textareas, selects */
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (target.closest && target.closest(SEL)) {
+      playClick();
+      haptic(); /* debounce ensures this is a no-op on mobile (touchstart already fired) */
+    }
+  }, { passive: true });
+
+})();
+</script>
+
+</body>
+</html>

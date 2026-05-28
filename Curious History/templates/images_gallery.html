@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ topic }} — Image Gallery — Curious History{% endblock %}
+
+{% block content %}
+<div class="gallery-page">
+
+  <!-- Header -->
+  <div class="gallery-header">
+    <a href="{{ url_for('results', topic=topic, year=year, country=country, era=era) }}"
+       class="gallery-back-btn">← Back to Article</a>
+    <h1 class="gallery-title">Image Gallery</h1>
+    <p class="gallery-subtitle">
+      <em>{{ topic }} &middot; {{ year }} {{ 'BCE' if era == 'bce' else 'CE' }} &middot; {{ country }}</em>
+    </p>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="gallery-loading" class="gallery-loading">
+    <div class="spinner"></div>
+    <p>Loading historical images&hellip;</p>
+  </div>
+
+  <!-- All Images (events + key people combined) -->
+  <section id="section-event" class="gallery-section" style="display:none;">
+    <h2 class="gallery-section-title">Historical Images</h2>
+    <div class="gallery-grid" id="grid-event"></div>
+  </section>
+
+
+
+  <!-- Empty state -->
+  <div id="gallery-empty" class="gallery-empty" style="display:none;">
+    <p><em>No images found for this topic.</em></p>
+  </div>
+
+</div>
+
+<!-- Pass server-side data to JS -->
+<script>
+window.GALLERY_DATA = {
+  topic:   {{ topic   | tojson }},
+  year:    {{ year }},
+  country: {{ country | tojson }},
+  era:     {{ era     | tojson }},
+};
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+
+  function escAttr(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;').replace(/</g,'&lt;');
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function makeCard(img, idx, extraClass) {
+    const figure = document.createElement('figure');
+    figure.className = 'gallery-card' + (extraClass ? ' ' + extraClass : '');
+    figure.dataset.lightboxIndex = idx;
+    figure.setAttribute('tabindex', '0');
+    figure.setAttribute('role', 'button');
+    figure.setAttribute('aria-label', 'View ' + (img.title || 'image') + ' in full screen');
+
+    const label   = (img.title   || img.caption || '').trim();
+    const caption = (img.caption || img.title   || '').trim();
+    const src     = escAttr(img.url || '');
+    const alt     = escAttr(img.alt || label || 'Historical image');
+
+    figure.innerHTML =
+      '<div class="gallery-card-img-wrap">' +
+        '<img src="' + src + '" alt="' + alt + '" loading="lazy" ' +
+             'onerror="this.closest(\'.gallery-card\').style.display=\'none\'">' +
+        '<div class="gallery-card-zoom-hint">&#x1F50D; Click to zoom</div>' +
+      '</div>' +
+      '<figcaption class="gallery-card-caption">' +
+        '<strong>' + escHtml(label.slice(0, 80)) + (label.length > 80 ? '&hellip;' : '') + '</strong>' +
+        (caption && caption !== label
+          ? '<em>' + escHtml(caption.slice(0, 120)) + '</em>'
+          : '') +
+        (img.wiki_url
+          ? '<a href="' + escAttr(img.wiki_url) + '" target="_blank" rel="noopener" ' +
+              'class="gallery-wiki-link" onclick="event.stopPropagation()">Wikipedia &rarr;</a>'
+          : '') +
+      '</figcaption>';
+
+    return figure;
+  }
+
+  async function load() {
+    const D       = window.GALLERY_DATA;
+    const loading = document.getElementById('gallery-loading');
+    const empty   = document.getElementById('gallery-empty');
+
+    try {
+      const r = await fetch(
+        '/api/gallery-images?topic=' + encodeURIComponent(D.topic) +
+        '&year=' + D.year +
+        '&country=' + encodeURIComponent(D.country)
+      );
+      const data = await r.json();
+      loading.style.display = 'none';
+
+      const allImages = [];
+
+      // Merge event images and person images into a single Images section
+      const grid = document.getElementById('grid-event');
+      const allImgSources = [
+        ...(data.topic_images || []).map(function(i){ return Object.assign({}, i, {_cat:'event'}); }),
+        ...(data.person_images || []).map(function(i){ return Object.assign({}, i, {_cat:'person'}); }),
+      ];
+
+      if (allImgSources.length) {
+        allImgSources.forEach(function (img) {
+          const idx = allImages.length;
+          allImages.push(img);
+          const cls = img._cat === 'person' ? 'gallery-card-person' : 'gallery-card-event';
+          grid.appendChild(makeCard(img, idx, cls));
+        });
+        document.getElementById('section-event').style.display = 'block';
+      }
+
+      if (!allImages.length) {
+        empty.style.display = 'block';
+      } else {
+        window.initLightbox && window.initLightbox(allImages);
+      }
+
+    } catch (e) {
+      loading.style.display = 'none';
+      empty.style.display   = 'block';
+    }
+  }
+
+  load();
+}());
+</script>
+{% endblock %}

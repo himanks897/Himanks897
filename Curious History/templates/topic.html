@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Enter Topic — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:700px;margin:0 auto;">
+
+  <!-- Page Nav: Back -->
+  <div class="page-nav-bar">
+    <a href="{{ url_for('country_select', era=era, year=year) }}" class="page-back-btn" aria-label="Back to Country selection">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4L5 10l7 6"/>
+      </svg>
+      Back
+    </a>
+  </div>
+
+  <!-- Context Banner -->
+  <div class="context-banner" role="status" aria-live="polite">
+    <span>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}</span>
+    <span>{{ country }}</span>
+    <span>{{ 'Prehistory' if era == 'bce' else 'Modern History' }}</span>
+  </div>
+
+  <!-- Header -->
+  <h1 style="font-family:var(--font-body);font-size:1.7rem;font-style:italic;margin-bottom:8px;">
+    What historical event or topic are you looking for?
+  </h1>
+  <p style="font-style:italic;color:var(--color-text-secondary);margin-bottom:28px;">
+    <em>Type a keyword, event name, person, or phrase. Be specific for better results.</em>
+  </p>
+
+  <!-- Topic Input Form -->
+  <form id="topic-form" action="{{ url_for('results') }}" method="get" novalidate>
+    <input type="hidden" name="era" value="{{ era }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <input type="hidden" name="country" value="{{ country }}">
+
+    <div class="topic-search-wrap">
+      <label for="topic-input" style="position:absolute;width:1px;height:1px;overflow:hidden;">Enter historical topic</label>
+      <input
+        type="text"
+        id="topic-input"
+        name="topic"
+        class="topic-input"
+        placeholder="e.g. Indo-China War, Salt March, Partition of Bengal…"
+        autocomplete="off"
+        aria-label="Enter historical event or topic keyword"
+        aria-describedby="topic-hint"
+        required
+        autofocus
+      >
+      <button
+        type="button"
+        class="topic-mic-btn"
+        id="mic-btn"
+        aria-label="Use voice input"
+        title="Voice input"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"/>
+        </svg>
+      </button>
+    </div>
+
+    <p id="topic-hint" style="font-size:0.8rem;font-style:italic;color:var(--color-text-muted);margin-top:-16px;margin-bottom:20px;">
+      <em>Try the name of a war, person, movement, treaty, or period</em>
+    </p>
+
+    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+      <svg viewBox="0 0 20 20" fill="currentColor" style="width:16px;height:16px;margin-right:6px;vertical-align:-2px;" aria-hidden="true">
+        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+      </svg>
+      Search History
+    </button>
+  </form>
+
+  <!-- AI Suggestions -->
+  <div class="suggestions-wrap" id="suggestions-wrap">
+    <div id="suggestions-loading" style="display:none;">
+      <div class="spinner" style="width:24px;height:24px;margin:16px auto;"></div>
+    </div>
+    <p class="suggestions-label" id="suggestions-label" style="display:none;">
+      <em>Suggested topics for {{ country }}, {{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}:</em>
+    </p>
+    <div class="suggestions-chips" id="suggestions-chips" role="list" aria-label="Suggested topics"></div>
+  </div>
+
+</div>
+
+<script>
+const era     = '{{ era }}';
+const year    = '{{ year }}';
+const country = '{{ country }}';
+
+// ── Load AI suggestions ──────────────────────────────────────────────────────
+async function loadSuggestions() {
+  document.getElementById('suggestions-loading').style.display = 'block';
+  try {
+    const r    = await fetch(`/api/suggestions?year=${encodeURIComponent(year)}&country=${encodeURIComponent(country)}&era=${era}`);
+    const data = await r.json();
+    const chips = document.getElementById('suggestions-chips');
+    const label = document.getElementById('suggestions-label');
+    document.getElementById('suggestions-loading').style.display = 'none';
+
+    if (data.suggestions && data.suggestions.length > 0) {
+      label.style.display = 'block';
+      chips.innerHTML = '';
+      data.suggestions.forEach(s => {
+        const btn = document.createElement('button');
+        btn.type      = 'button';
+        btn.className = 'suggestion-chip';   // larger dedicated class
+        btn.textContent = s;
+        btn.setAttribute('role', 'listitem');
+        btn.setAttribute('aria-label', `Search for: ${s}`);
+        btn.addEventListener('click', () => {
+          document.getElementById('topic-input').value = s;
+          // Show loader BEFORE submit so it's visible during navigation
+          window.pageLoader && window.pageLoader.show('Searching history…');
+          const form = document.getElementById('topic-form');
+          // requestSubmit() fires the submit event (unlike .submit())
+          if (form.requestSubmit) {
+            form.requestSubmit();
+          } else {
+            form.submit();
+          }
+        });
+        chips.appendChild(btn);
+      });
+    }
+  } catch(e) {
+    document.getElementById('suggestions-loading').style.display = 'none';
+  }
+}
+
+loadSuggestions();
+
+// ── Voice input ──────────────────────────────────────────────────────────────
+const micBtn = document.getElementById('mic-btn');
+let isRecording = false;
+let recognition = null;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onresult = function(e) {
+    document.getElementById('topic-input').value = e.results[0][0].transcript;
+    micBtn.classList.remove('mic-recording');
+    isRecording = false;
+  };
+  recognition.onerror = recognition.onend = function() {
+    micBtn.classList.remove('mic-recording');
+    isRecording = false;
+  };
+
+  micBtn.addEventListener('click', function() {
+    if (isRecording) {
+      recognition.stop();
+      micBtn.classList.remove('mic-recording');
+      isRecording = false;
+    } else {
+      recognition.start();
+      micBtn.classList.add('mic-recording');
+      isRecording = true;
+    }
+  });
+} else {
+  micBtn.style.display = 'none';
+}
+
+// ── Form validation — show loader only when input is valid ───────────────────
+document.getElementById('topic-form').addEventListener('submit', function(e) {
+  const input = document.getElementById('topic-input').value.trim();
+  if (!input) {
+    e.preventDefault();
+    // Also cancel loader if main.js already showed it
+    window.pageLoader && window.pageLoader.hide();
+    document.getElementById('topic-input').classList.add('field-error');
+    document.getElementById('topic-input').setAttribute('aria-invalid', 'true');
+    document.getElementById('topic-input').focus();
+    return;
+  }
+  // Valid — ensure loader is visible
+  window.pageLoader && window.pageLoader.show('Searching history…');
+});
+</script>
+{% endblock %}

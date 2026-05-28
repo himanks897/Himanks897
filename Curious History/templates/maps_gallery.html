@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ topic }} — Historical Maps — Curious History{% endblock %}
+
+{% block content %}
+<div class="gallery-page">
+
+  <!-- Header -->
+  <div class="gallery-header">
+    <a href="{{ url_for('results', topic=topic, year=year, country=country, era=era) }}"
+       class="gallery-back-btn">← Back to Article</a>
+    <h1 class="gallery-title">Historical Maps</h1>
+    <p class="gallery-subtitle">
+      <em>{{ topic }} &middot; {{ year }} {{ 'BCE' if era == 'bce' else 'CE' }} &middot; {{ country }}</em>
+    </p>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="gallery-loading" class="gallery-loading">
+    <div class="spinner"></div>
+    <p>Searching historical map archives&hellip;</p>
+  </div>
+
+  <!-- Maps grid -->
+  <div class="gallery-grid gallery-grid-maps" id="maps-grid" style="display:none;"></div>
+
+  <!-- Empty state -->
+  <div id="gallery-empty" class="gallery-empty" style="display:none;">
+    <p>
+      <em>No historical maps found for this topic.</em><br>
+      <small>Maps are sourced from Wikimedia Commons.</small>
+    </p>
+  </div>
+
+</div>
+
+<!-- Pass server-side data to JS -->
+<script>
+window.GALLERY_DATA = {
+  topic:   {{ topic   | tojson }},
+  year:    {{ year }},
+  country: {{ country | tojson }},
+  era:     {{ era     | tojson }},
+};
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+
+  function escAttr(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;').replace(/</g,'&lt;');
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function load() {
+    const D       = window.GALLERY_DATA;
+    const loading = document.getElementById('gallery-loading');
+    const empty   = document.getElementById('gallery-empty');
+    const grid    = document.getElementById('maps-grid');
+
+    try {
+      const r = await fetch(
+        '/api/maps?topic=' + encodeURIComponent(D.topic) +
+        '&year=' + D.year +
+        '&country=' + encodeURIComponent(D.country)
+      );
+      const data = await r.json();
+      loading.style.display = 'none';
+
+      if (!data.maps || !data.maps.length) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      const allMaps = data.maps.map(function (m, i) {
+        return Object.assign({}, m, { alt: m.alt || m.title || 'Historical map' });
+      });
+
+      allMaps.forEach(function (map, idx) {
+        const figure = document.createElement('figure');
+        figure.className = 'gallery-card gallery-card-map';
+        figure.dataset.lightboxIndex = idx;
+        figure.setAttribute('tabindex', '0');
+        figure.setAttribute('role', 'button');
+        figure.setAttribute('aria-label', 'View map: ' + (map.title || ''));
+
+        figure.innerHTML =
+          '<div class="gallery-card-img-wrap">' +
+            '<img src="' + escAttr(map.url) + '" alt="' + escAttr(map.alt) + '" loading="lazy" ' +
+                 'onerror="this.closest(\'.gallery-card\').style.display=\'none\'">' +
+            '<div class="gallery-card-zoom-hint">&#x1F50D; Click to zoom</div>' +
+          '</div>' +
+          '<figcaption class="gallery-card-caption">' +
+            '<strong>' + escHtml((map.title || '').slice(0, 80)) + '</strong>' +
+            '<em>' + escHtml((map.caption || map.date || '').slice(0, 120)) + '</em>' +
+            '<span class="gallery-source">' + escHtml(map.source || 'Wikimedia Commons') + '</span>' +
+          '</figcaption>';
+
+        grid.appendChild(figure);
+      });
+
+      grid.style.display = 'grid';
+      window.initLightbox && window.initLightbox(allMaps);
+
+    } catch (e) {
+      loading.style.display = 'none';
+      empty.style.display   = 'block';
+    }
+  }
+
+  load();
+}());
+</script>
+{% endblock %}

@@ -1,0 +1,198 @@
+/* accessibility.css — All accessibility-specific styles.
+   Applied via class overrides on the <html> element.
+   Never use outline:none without a replacement focus indicator. */
+
+/* ── Skip Link (always first element in body) ─────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: -999px;
+  padding: 12px 20px;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  z-index: 10000;
+  text-decoration: none;
+  font-style: italic;
+}
+.skip-link:focus {
+  top: 8px;
+  left: 8px;
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* ── Focus Ring — all interactive elements ────────────────────────────── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="option"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-info) !important;
+  outline-offset: 3px !important;
+  border-radius: var(--radius-xs);
+}
+
+/* ── Minimum Touch Targets ────────────────────────────────────────────── */
+button, [role="button"], a, input[type="button"], input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ── High Contrast Mode ───────────────────────────────────────────────── */
+html.high-contrast {
+  --color-bg: #000000;
+  --color-surface: #000000;
+  --color-surface-2: #111111;
+  --color-border: #FFFFFF;
+  --color-border-light: #CCCCCC;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #EEEEEE;
+  --color-text-muted: #CCCCCC;
+  --color-accent: #FFFF00;
+  --color-accent-dark: #FFFF00;
+  --color-accent-light: #333300;
+  --color-gold: #FFFF00;
+  --color-gold-light: #333300;
+  --color-highlight: #FFFF00;
+}
+
+html.high-contrast * {
+  border-color: #FFFFFF !important;
+  text-shadow: none !important;
+}
+html.high-contrast a { color: #FFFF00 !important; }
+html.high-contrast img { filter: contrast(1.3); }
+
+/* ── Dyslexia-Friendly Font ───────────────────────────────────────────── */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/fonts/OpenDyslexic-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html.dyslexic {
+  --font-body: 'OpenDyslexic', 'Comic Sans MS', cursive;
+  --font-ui: 'OpenDyslexic', 'Comic Sans MS', cursive;
+}
+
+html.dyslexic body,
+html.dyslexic p,
+html.dyslexic li,
+html.dyslexic div,
+html.dyslexic span,
+html.dyslexic h1, html.dyslexic h2, html.dyslexic h3, html.dyslexic h4 {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', cursive !important;
+  font-style: normal !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.12em;
+  line-height: 1.9 !important;
+}
+
+/* ── Reduced Motion ───────────────────────────────────────────────────── */
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Colour Blind Mode ────────────────────────────────────────────────── */
+html.colorblind .btn-primary,
+html.colorblind .btn-gold,
+html.colorblind .chip-accent,
+html.colorblind .reaction-btn.selected,
+html.colorblind .importance-level-item.filled,
+html.colorblind .today-year-badge {
+  position: relative;
+  overflow: hidden;
+}
+html.colorblind .btn-primary::after,
+html.colorblind .btn-gold::after,
+html.colorblind .chip-accent::after,
+html.colorblind .reaction-btn.selected::after,
+html.colorblind .importance-level-item.filled::after,
+html.colorblind .today-year-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent, transparent 3px,
+    rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 6px
+  );
+  pointer-events: none;
+}
+
+/* Status badges always use text, not colour alone */
+.status-badge::before { content: attr(data-label) ' '; }
+
+/* ── Font Size Adjustments ────────────────────────────────────────────── */
+html.font-sm {
+  font-size: 14px;
+}
+html.font-sm .article-content {
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+html.font-lg {
+  font-size: 20px;
+}
+html.font-lg .article-content {
+  font-size: 1.1rem;
+  line-height: 1.9;
+}
+
+/* ── Warm / Sepia Mode ────────────────────────────────────────────────── */
+html.warm {
+  --color-bg: #F0E6D0;
+  --color-surface: #F8F0DC;
+  --color-surface-2: #EDE0C8;
+  --color-text-primary: #2C1810;
+  --color-text-secondary: #5C3820;
+}
+html.warm img {
+  filter: sepia(15%);
+}
+
+/* ── Aria-hidden decorative ───────────────────────────────────────────── */
+[aria-hidden="true"] { pointer-events: none; }
+
+/* ── Form label required fields ──────────────────────────────────────── */
+label.required::after {
+  content: ' *';
+  color: var(--color-error);
+  font-style: normal;
+}
+
+/* ── Error state styles ───────────────────────────────────────────────── */
+.field-error {
+  border-color: var(--color-error) !important;
+  box-shadow: 0 0 0 3px rgba(139,26,26,0.15) !important;
+}
+.field-error-msg {
+  color: var(--color-error);
+  font-size: 0.82rem;
+  font-style: italic;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

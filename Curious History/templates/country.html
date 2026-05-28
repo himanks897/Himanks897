@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Select Country — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:900px;">
+
+  <!-- Page Nav: Back + Skip -->
+  <div class="page-nav-bar">
+    <a href="{{ url_for('year_select', era=era) }}" class="page-back-btn" aria-label="Back to Year selection">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4L5 10l7 6"/>
+      </svg>
+      Back
+    </a>
+    <a href="{{ url_for('topic_input', era=era, year=year, country='World') }}" class="page-skip-link" aria-label="Skip — use The Entire World">Skip →</a>
+  </div>
+
+  <!-- Page Header -->
+  <div class="country-page-header">
+    <h1 class="country-page-title">Where in the world?</h1>
+    <p class="country-page-sub">Choose a country or region to explore history in <strong>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}</strong></p>
+
+    <!-- Country Search -->
+    <div class="country-search-wrap">
+      <span class="country-search-icon" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:block;">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM17.5 17.5l-3.328-3.329"/>
+        </svg>
+      </span>
+      <label for="country-search" style="position:absolute;width:1px;height:1px;overflow:hidden;">Search for a country</label>
+      <input
+        type="search"
+        id="country-search"
+        class="country-search"
+        placeholder="Search for a country by name…"
+        autocomplete="off"
+        aria-label="Search for a country by name"
+        aria-controls="country-list"
+      >
+    </div>
+  </div>
+
+  <!-- Country List -->
+  <div id="country-list">
+
+    <!-- The Entire World (pinned) -->
+    <a
+      href="{{ url_for('topic_input', era=era, year=year, country='World') }}"
+      class="world-option"
+      aria-label="The Entire World — for global events"
+    >
+      <span class="world-option-icon" aria-hidden="true">🌏</span>
+      <div class="world-option-text">
+        <div class="world-option-name"><strong>The Entire World</strong></div>
+        <div class="world-option-desc">For global events: World Wars, Cold War, Climate History, pandemics, and more</div>
+      </div>
+      <span class="world-option-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <!-- Region label -->
+    <div class="country-region-label">
+      <svg viewBox="0 0 20 20" fill="currentColor" style="width:13px;height:13px;flex-shrink:0;" aria-hidden="true">
+        <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"/>
+      </svg>
+      Select a Region
+    </div>
+
+    {% set regions = [
+      ('🌍 Africa', ['Algeria','Angola','Benin','Botswana','Burkina Faso','Burundi','Cabo Verde','Cameroon','Central African Republic','Chad','Comoros','Congo','DR Congo','Djibouti','Egypt','Equatorial Guinea','Eritrea','Eswatini','Ethiopia','Gabon','Gambia','Ghana','Guinea','Guinea-Bissau','Ivory Coast','Kenya','Lesotho','Liberia','Libya','Madagascar','Malawi','Mali','Mauritania','Mauritius','Morocco','Mozambique','Namibia','Niger','Nigeria','Rwanda','São Tomé & Príncipe','Senegal','Seychelles','Sierra Leone','Somalia','South Africa','South Sudan','Sudan','Tanzania','Togo','Tunisia','Uganda','Zambia','Zimbabwe']),
+      ('🕌 South Asia', ['Afghanistan','Bangladesh','Bhutan','India','Maldives','Nepal','Pakistan','Sri Lanka']),
+      ('⛩️ East Asia', ['China','Japan','Mongolia','North Korea','South Korea','Taiwan']),
+      ('🌴 Southeast Asia', ['Brunei','Cambodia','Indonesia','Laos','Malaysia','Myanmar','Philippines','Singapore','Thailand','Timor-Leste','Vietnam']),
+      ('🏔️ Central Asia', ['Kazakhstan','Kyrgyzstan','Tajikistan','Turkmenistan','Uzbekistan']),
+      ('🕌 Middle East', ['Bahrain','Cyprus','Iran','Iraq','Israel','Jordan','Kuwait','Lebanon','Oman','Palestine','Qatar','Saudi Arabia','Syria','Turkey','United Arab Emirates','Yemen']),
+      ('🏰 Europe', ['Albania','Andorra','Armenia','Austria','Azerbaijan','Belarus','Belgium','Bosnia and Herzegovina','Bulgaria','Croatia','Czech Republic','Denmark','Estonia','Finland','France','Georgia','Germany','Greece','Hungary','Iceland','Ireland','Italy','Kosovo','Latvia','Liechtenstein','Lithuania','Luxembourg','Malta','Moldova','Monaco','Montenegro','Netherlands','North Macedonia','Norway','Poland','Portugal','Romania','Russia','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Ukraine','United Kingdom','Vatican City']),
+      ('🗽 North America & Caribbean', ['Canada','United States','Mexico','Antigua and Barbuda','Bahamas','Barbados','Cuba','Dominica','Dominican Republic','Grenada','Haiti','Jamaica','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Trinidad and Tobago']),
+      ('🌎 Central America', ['Belize','Costa Rica','El Salvador','Guatemala','Honduras','Nicaragua','Panama']),
+      ('🌿 South America', ['Argentina','Bolivia','Brazil','Chile','Colombia','Ecuador','Guyana','Paraguay','Peru','Suriname','Uruguay','Venezuela']),
+      ('🏝️ Oceania', ['Australia','Fiji','Kiribati','Marshall Islands','Micronesia','Nauru','New Zealand','Palau','Papua New Guinea','Samoa','Solomon Islands','Tonga','Tuvalu','Vanuatu']),
+      ('📜 Historical Regions', ['Ottoman Empire','British Raj','Roman Empire','Ancient Mesopotamia','Ancient Egypt','Austro-Hungarian Empire','Mughal Empire','Soviet Union','Byzantine Empire','Mongol Empire','Holy Roman Empire','Qing Dynasty','Islamic Caliphate','Aztec Empire','Inca Empire','Macedonian Empire','Persian Empire','British India'])
+    ] %}
+
+    <div class="country-region-grid">
+      {% for region_name, countries in regions %}
+      <div class="country-accordion" data-region="{{ region_name.lower() }}">
+        <button
+          class="accordion-header"
+          aria-expanded="false"
+          aria-controls="region-{{ loop.index }}"
+          id="region-btn-{{ loop.index }}"
+        >
+          <span class="accordion-region-name">{{ region_name }}</span>
+          <span class="accordion-count">{{ countries|length }}</span>
+          <span class="accordion-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6l4 4 4-4"/>
+            </svg>
+          </span>
+        </button>
+        <div class="accordion-body" id="region-{{ loop.index }}" role="list" aria-labelledby="region-btn-{{ loop.index }}">
+          {% for country in countries %}
+          <button
+            class="country-btn"
+            role="listitem"
+            data-country="{{ country }}"
+            aria-label="{{ country }}"
+            onclick="selectCountry('{{ country }}')"
+          >{{ country }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Note -->
+  <p class="country-note">
+    <svg viewBox="0 0 20 20" fill="currentColor" style="width:13px;height:13px;flex-shrink:0;color:var(--color-text-muted);" aria-hidden="true">
+      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
+    </svg>
+    Some regions may have limited records for your selected year. We will show the nearest available historical records when exact data is unavailable.
+  </p>
+
+</div>
+
+<script>
+const era = '{{ era }}';
+const year = '{{ year }}';
+
+function selectCountry(country) {
+  document.querySelectorAll('.country-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.setAttribute('aria-selected', 'false');
+  });
+  event.target.classList.add('selected');
+  event.target.setAttribute('aria-selected', 'true');
+  setTimeout(() => {
+    window.location.href = `/topic?era=${era}&year=${encodeURIComponent(year)}&country=${encodeURIComponent(country)}`;
+  }, 150);
+}
+
+document.querySelectorAll('.accordion-header').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const body = document.getElementById(this.getAttribute('aria-controls'));
+    const expanded = this.getAttribute('aria-expanded') === 'true';
+    this.setAttribute('aria-expanded', !expanded);
+    body.classList.toggle('open', !expanded);
+  });
+  btn.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
+  });
+});
+
+document.getElementById('country-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  const accordions = document.querySelectorAll('.country-accordion');
+  if (!q) {
+    accordions.forEach(a => { a.style.display = ''; });
+    document.querySelectorAll('.country-btn').forEach(b => { b.style.display = ''; });
+    return;
+  }
+  accordions.forEach(acc => {
+    const btns = acc.querySelectorAll('.country-btn');
+    let hasMatch = false;
+    btns.forEach(btn => {
+      const matches = btn.dataset.country.toLowerCase().includes(q);
+      btn.style.display = matches ? '' : 'none';
+      if (matches) hasMatch = true;
+    });
+    acc.style.display = hasMatch ? '' : 'none';
+    if (hasMatch) {
+      acc.querySelector('.accordion-body').classList.add('open');
+      acc.querySelector('.accordion-header').setAttribute('aria-expanded', 'true');
+    }
+  });
+});
+</script>
+{% endblock %}
