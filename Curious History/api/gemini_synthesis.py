@@ -23,10 +23,12 @@ def _get_client():
 MODEL = "gemini-2.0-flash"
 
 
-def _call_gemini(prompt: str, cache_key: str = None, ttl: int = 3600) -> str:
+def _call_gemini(prompt: str, cache_key: str = None, ttl: int = 3600,
+                 max_tokens: int = 8192) -> str:
     """
     Calls Gemini API with the given prompt. Returns text response.
     Caches the result if cache_key is provided.
+    max_tokens controls output length — set higher for full articles.
     """
     if cache_key:
         cached = cache.get(cache_key)
@@ -37,6 +39,10 @@ def _call_gemini(prompt: str, cache_key: str = None, ttl: int = 3600) -> str:
         response = client.models.generate_content(
             model=MODEL,
             contents=prompt,
+            config=types.GenerateContentConfig(
+                max_output_tokens=max_tokens,
+                temperature=0.4,
+            ),
         )
         text = response.text if response.text else ""
         if cache_key and text:
@@ -63,8 +69,12 @@ Year: {year} {'BCE' if era == 'bce' else 'CE'}
 Country/Region: {country}
 Era: {era.upper()}
 
-Raw source material:
-{raw_content[:4000]}
+Raw source material (use ALL of it — do not ignore any section):
+{raw_content[:8000]}
+
+CRITICAL: You MUST write a COMPLETE essay. Do NOT stop mid-sentence, mid-paragraph, or mid-section.
+Every section listed below MUST be fully written. The Bibliography MUST be the final section.
+If you cannot complete a section from the source material, use your historical knowledge to complete it.
 
 Write a comprehensive academic essay in HTML following this EXACT structure:
 
@@ -100,14 +110,17 @@ Write a comprehensive academic essay in HTML following this EXACT structure:
 Additional rules:
 - Wrap ALL key historical terms, names, dates, and places in <strong> tags
 - Use <em> for quotes, foreign words, and nuanced claims
-- Minimum 800 words of actual content
+- MINIMUM 1000 words of actual content — cover ALL major aspects of the topic
+- Both Introduction and Conclusion MUST be fully written, not truncated
+- Body must cover: Background/Context, Main Events, Key People, Consequences, Legacy
 - Do NOT include Wikipedia links or raw source URLs in the essay text
 - At the end include: <div class="key-terms-data">term1|term2|term3</div>
 - At the end include: <div class="importance-level">Global</div> (one of: Local, Regional, National, Continental, Global)
+- LAST LINE must be the closing </div> of the Bibliography. Never stop before the Bibliography.
 
 Return ONLY the HTML content — no markdown, no ```html blocks, no text outside the HTML."""
 
-    result = _call_gemini(prompt, cache_key=cache_key, ttl=86400)
+    result = _call_gemini(prompt, cache_key=cache_key, ttl=86400, max_tokens=8192)
 
     # Extract importance level
     importance_match = re.search(r'<div class="importance-level">(.*?)</div>', result)
@@ -150,8 +163,12 @@ Topic: {topic}
 Year: {year} {'BCE' if era == 'bce' else 'CE'}
 Country/Region: {country}
 
-Raw source material:
-{raw_content[:5000]}
+Raw source material (use ALL of it — every section matters):
+{raw_content[:10000]}
+
+CRITICAL: Write a COMPLETELY FINISHED essay. Every section MUST be written in full.
+NEVER stop mid-sentence, mid-paragraph, or leave any section incomplete.
+The Bibliography MUST be the final element. Use your historical knowledge to fill gaps in the source material.
 
 Write an EXTREMELY detailed academic essay in HTML following this EXACT structure:
 
@@ -187,13 +204,15 @@ Write an EXTREMELY detailed academic essay in HTML following this EXACT structur
 
 Additional rules:
 - Wrap ALL key terms in <strong>, use <em> for quotes/emphasis
-- Minimum 1000-1200 words of actual content
+- MINIMUM 1500 words — cover every sub-event, cause, and consequence in depth
+- The detailed content MUST be significantly more elaborate than the standard article
 - No source URLs or raw Wikipedia links in the essay text
 - Write in rigorous academic but accessible prose
+- LAST ELEMENT must be the closing </div> of the Bibliography — never stop before it
 
 Return ONLY HTML content."""
 
-    result = _call_gemini(prompt, cache_key=cache_key, ttl=86400)
+    result = _call_gemini(prompt, cache_key=cache_key, ttl=86400, max_tokens=8192)
     return result
 
 

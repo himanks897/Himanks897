@@ -428,6 +428,26 @@ html {
 html.font-sm { font-size: 14px; }
 html.font-lg { font-size: 20px; }
 
+/* Prevent text overflow at any font size — critical for font-lg on mobile */
+.article-content,
+.article-content p,
+.article-content li,
+.article-content h2,
+.article-content h3,
+.essay-section,
+.card,
+.today-text,
+.word-def,
+.results-title {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+html.font-lg .main-content { padding-left: 14px; padding-right: 14px; }
+html.font-lg .article-content { font-size: 1rem; }
+html.font-lg .navbar-inner,
+html.font-lg .landing-nav-inner { gap: 10px; }
+
 body {
   font-family: var(--font-ui);
   font-style: normal;

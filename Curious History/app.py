@@ -229,6 +229,35 @@ def _source_label(url: str, region: str = "") -> str:
     return "Historical Archive"
 
 
+def _clean_image_label(raw_label: str, topic: str = "") -> str:
+    """
+    Converts raw database image filenames/metadata into readable human labels.
+    Strips resolution prefixes, underscores, file extensions, and technical IDs.
+    Ensures the label is contextually meaningful and not blindly copied metadata.
+    """
+    if not raw_label:
+        return topic or "Historical Image"
+    label = raw_label
+    # Strip resolution prefix like "800px-", "1200px-", "File:", "Image:"
+    label = re.sub(r'^\d+px[-_]', '', label)
+    label = re.sub(r'^(File|Image|Photo|Foto):\s*', '', label, flags=re.IGNORECASE)
+    # Strip common file extensions
+    label = re.sub(r'\.(jpg|jpeg|png|gif|svg|webp|tiff?|bmp)$', '', label, flags=re.IGNORECASE)
+    # Replace underscores and hyphens with spaces
+    label = label.replace('_', ' ').replace('-', ' ')
+    # Strip Wikimedia Commons long ID suffixes (e.g. "q12345678")
+    label = re.sub(r'\s+[qQ]\d{5,}\s*$', '', label)
+    # Strip trailing/leading whitespace and normalise internal spaces
+    label = re.sub(r'\s{2,}', ' ', label).strip()
+    # Capitalise first letter
+    if label:
+        label = label[0].upper() + label[1:]
+    # Reject labels that are just numbers, hashes, or very short
+    if not label or len(label) < 4 or re.fullmatch(r'[\d\s\-_]+', label):
+        return topic or "Historical Image"
+    return label
+
+
 def _fmt_record(r: dict) -> dict:
     """Format one pipeline DB record for template / JSON consumption."""
     url    = r.get("source_url", "")
@@ -597,8 +626,8 @@ def _resolve_search_context(topic: str) -> str:
     return topic
 
 
-# Page-title markers that strongly indicate a sport/entertainment page
-# If the page title contains these AND the topic is not about sports, reject it.
+# Page-title markers that strongly indicate a sport/entertainment/fiction page
+# If the page title contains these AND the topic is not about that domain, reject it.
 _OFFTOPIC_PAGE_SIGNALS = frozenset([
     "world cup", "cricket", "football", "soccer", "olympic", "olympics",
     "championship", "tournament", "premier league", "fifa", "ipl",
@@ -606,6 +635,14 @@ _OFFTOPIC_PAGE_SIGNALS = frozenset([
     "athletics", "formula one", "formula 1", "grand prix", "nba", "nfl",
     "superhero", "marvel", "disney", "bollywood", "hollywood",
 ])
+
+# Parenthetical suffixes on Wikipedia titles that always mean non-historical content
+_DISAMBIGUATION_SUFFIXES = (
+    "(video game)", "(game)", "(film)", "(movie)", "(tv series)",
+    "(television series)", "(novel)", "(book)", "(song)", "(album)",
+    "(band)", "(comics)", "(comic)", "(anime)", "(manga)", "(character)",
+    "(disambiguation)", "(series)", "(franchise)", "(miniseries)",
+)
 
 _SPORT_TOPIC_WORDS = frozenset([
     "cricket", "football", "soccer", "olympic", "sport", "cup",
@@ -631,6 +668,10 @@ def _page_relevant_to_topic(page_title: str, topic: str) -> bool:
         return True
     title_lower = page_title.lower()
     topic_lower = topic.lower()
+
+    # ── Hard reject: Wikipedia disambiguation suffixes always mean non-historical ─
+    if any(suffix in title_lower for suffix in _DISAMBIGUATION_SUFFIXES):
+        return False
 
     # ── Guard: reject clearly off-topic sport/entertainment pages ──────────
     topic_is_sport = any(s in topic_lower for s in _SPORT_TOPIC_WORDS)
@@ -941,26 +982,34 @@ def results():
 
     # Prepend Wikipedia thumbnail if not already present
     if wiki_data.get("image"):
+        wiki_title = _clean_image_label(wiki_data.get("title", ""), topic)
         wiki_img = {
             "url":     wiki_data["image"],
-            "title":   wiki_data.get("title", topic),
-            "caption": wiki_data.get("description", ""),
-            "alt":     wiki_data.get("title", topic),
+            "title":   wiki_title,
+            "caption": wiki_data.get("description", "") or wiki_title,
+            "alt":     wiki_title,
             "source":  "Wikipedia",
             "license": "CC BY-SA",
         }
         if not any(i.get("url") == wiki_data["image"] for i in event_images):
             event_images.insert(0, wiki_img)
 
-    # Merge Wikimedia Commons images (deduplicated)
+    # Clean labels on all event images from the API
+    for img in event_images:
+        img["title"]   = _clean_image_label(img.get("title", ""), topic)
+        img["caption"] = _clean_image_label(img.get("caption", "") or img.get("title", ""), topic)
+        img["alt"]     = img["title"]
+
+    # Merge Wikimedia Commons images (deduplicated) with cleaned labels
     _seen = {i["url"] for i in event_images}
     for img in commons_images:
         if img.get("url") and img["url"] not in _seen:
+            clean_title = _clean_image_label(img.get("title", ""), topic)
             event_images.append({
                 "url":     img["url"],
-                "title":   img.get("title", ""),
-                "caption": img.get("description") or img.get("title", ""),
-                "alt":     img.get("title") or topic,
+                "title":   clean_title,
+                "caption": _clean_image_label(img.get("description") or img.get("title", ""), topic),
+                "alt":     clean_title,
                 "source":  "Wikimedia Commons",
                 "license": img.get("license", ""),
             })
