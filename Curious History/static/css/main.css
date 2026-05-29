@@ -5,10 +5,10 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* White canvas — clean premium paper white; brown is the dominant ink colour */
-  --color-bg:              #F7F3EE;
-  --color-surface:         #FDFCFB;
-  --color-surface-2:       #EDE6DC;
+  /* Pure white canvas — every surface is white; brown ink is the dominant colour */
+  --color-bg:              #FFFFFF;
+  --color-surface:         #FFFFFF;
+  --color-surface-2:       #F5EFE8;
   --color-border:          #7A4818;
   --color-border-light:    #B07A40;
 
@@ -470,12 +470,8 @@ body {
   color: var(--color-text-primary);
   line-height: 1.7;
   min-height: 100vh;
-  /* Brown × White — clean premium white canvas; brown structure stands out crisply */
-  background-image:
-    /* Very faint vignette — softens the edges without yellowing */
-    radial-gradient(ellipse at 50% 50%, transparent 72%, rgba(44, 22, 6, 0.025) 100%),
-    /* Soft warm-white gradient — like premium laid paper */
-    linear-gradient(155deg, #FDFCFA 0%, #F5EEE4 38%, #FAF7F2 68%, #FDFCFA 100%);
+  /* Pure white — no tint, no gradient; brown text and borders carry all the character */
+  background-image: none;
 }
 
 html.dyslexic body,
@@ -529,11 +525,11 @@ html.dyslexic p {
   top: 0;
   z-index: 1000;
   height: var(--nav-height);
-  background: rgba(255, 255, 255, 0.88);
-  border-bottom: 1.5px solid rgba(107, 56, 18, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1.5px solid rgba(107, 56, 18, 0.20);
   backdrop-filter: blur(44px) saturate(200%);
   -webkit-backdrop-filter: blur(44px) saturate(200%);
-  box-shadow: 0 2px 24px rgba(44, 22, 6, 0.08), inset 0 -1px 0 rgba(255,255,255,0.95);
+  box-shadow: 0 2px 20px rgba(44, 22, 6, 0.07), inset 0 -1px 0 rgba(255,255,255,1.0);
 }
 
 .navbar-inner {
@@ -576,23 +572,23 @@ html.dyslexic p {
   width: 100%;
   height: 40px;
   padding: 0 16px 0 40px;
-  background: rgba(255, 255, 255, 0.30);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border: 1.5px solid rgba(107, 56, 18, 0.35);
+  border: 1.5px solid rgba(107, 56, 18, 0.38);
   border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-style: italic;
   font-size: 0.95rem;
   color: var(--color-text-primary);
-  box-shadow: 0 2px 8px rgba(44, 22, 6, 0.06), inset 0 1px 0 rgba(255,255,255,0.80);
+  box-shadow: 0 2px 8px rgba(44, 22, 6, 0.05), inset 0 1px 0 rgba(255,255,255,0.90);
   transition: box-shadow 0.18s ease, border-color 0.18s ease, background 0.15s ease;
 }
 .nav-search:focus {
-  border-color: rgba(107, 56, 18, 0.65);
-  box-shadow: 0 0 0 3px rgba(107, 56, 18, 0.09), 0 2px 12px rgba(44, 22, 6, 0.07), inset 0 1px 0 rgba(255,255,255,0.90);
+  border-color: rgba(107, 56, 18, 0.68);
+  box-shadow: 0 0 0 3px rgba(107, 56, 18, 0.09), 0 2px 12px rgba(44, 22, 6, 0.06), inset 0 1px 0 rgba(255,255,255,0.95);
   outline: none;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.30);
 }
 .nav-search::placeholder { color: var(--color-text-muted); }
 
@@ -650,8 +646,8 @@ html.dyslexic p {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  border: 1.5px solid rgba(107, 56, 18, 0.42);
-  background: rgba(255, 255, 255, 0.22);
+  border: 1.5px solid rgba(107, 56, 18, 0.45);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   color: var(--color-text-secondary);
@@ -662,12 +658,12 @@ html.dyslexic p {
   font-size: 1rem;
   transition: box-shadow 0.18s ease, transform 0.12s ease, background 0.15s ease, border-color 0.18s ease;
   position: relative;
-  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.07), inset 0 1px 0 rgba(255,255,255,0.90);
+  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.06), inset 0 1px 0 rgba(255,255,255,0.90);
 }
 .nav-icon-btn:hover,
 .nav-icon-btn:focus {
-  background: rgba(255, 255, 255, 0.48);
-  border-color: rgba(107, 56, 18, 0.72);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(107, 56, 18, 0.75);
   box-shadow: 0 6px 22px rgba(44, 22, 6, 0.12), inset 0 1px 0 rgba(255,255,255,0.98);
   transform: translateY(-1px);
 }
@@ -681,8 +677,8 @@ html.dyslexic p {
   padding: 7px 16px;
   height: 36px;
   border-radius: var(--radius-full);
-  border: 1.5px solid rgba(107, 56, 18, 0.52);
-  background: rgba(255, 255, 255, 0.22);
+  border: 1.5px solid rgba(107, 56, 18, 0.55);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   font-family: var(--font-ui);
@@ -695,13 +691,13 @@ html.dyslexic p {
   cursor: pointer;
   align-self: center;
   letter-spacing: 0.01em;
-  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.07), inset 0 1px 0 rgba(255,255,255,0.90);
+  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.05), inset 0 1px 0 rgba(255,255,255,0.90);
   transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, border-color 0.18s ease;
 }
 .nav-subscriptions-btn:hover,
 .nav-subscriptions-btn:focus {
-  background: rgba(255, 255, 255, 0.42);
-  border-color: rgba(107, 56, 18, 0.82);
+  background: rgba(255, 255, 255, 0.20);
+  border-color: rgba(107, 56, 18, 0.85);
   box-shadow: 0 6px 22px rgba(44, 22, 6, 0.12), inset 0 1px 0 rgba(255,255,255,0.98);
   transform: translateY(-1px);
 }
@@ -986,9 +982,9 @@ html.dyslexic p {
 }
 .page-skip-link:hover { opacity: 0.7; }
 
-/* ── Cards — white glass with brown border ───────────────────────────────── */
+/* ── Cards — liquid glass with brown border ──────────────────────────────── */
 .card {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   border: 1.5px solid rgba(107, 56, 18, 0.22);
@@ -1012,7 +1008,7 @@ html.dyslexic p {
 }
 
 .card-sm {
-  background: rgba(255, 255, 255, 0.48);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1.5px solid rgba(107, 56, 18, 0.18);
@@ -1044,11 +1040,11 @@ html.dyslexic p {
   position: relative;
   overflow: hidden;
   transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.18s ease, border-color 0.18s ease;
-  /* Pure transparent glass — barely-there background, brown border pops */
-  background: rgba(255, 255, 255, 0.18);
+  /* Maximum liquid glass — almost invisible; brown border is the entire visual cue */
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
-  border: 1.5px solid rgba(107, 56, 18, 0.48);
+  border: 1.5px solid rgba(107, 56, 18, 0.52);
   box-shadow:
     0 4px 28px rgba(44, 22, 6, 0.09),
     0 1px 4px rgba(44, 22, 6, 0.05),
@@ -1071,8 +1067,8 @@ html.dyslexic p {
   z-index: 0;
 }
 .btn:hover, .btn:focus {
-  background: rgba(255, 255, 255, 0.38);
-  border-color: rgba(107, 56, 18, 0.78);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(107, 56, 18, 0.82);
   box-shadow:
     0 10px 40px rgba(44, 22, 6, 0.13),
     0 2px 8px rgba(44, 22, 6, 0.07),
@@ -1085,9 +1081,9 @@ html.dyslexic p {
   box-shadow: 0 2px 8px rgba(44, 22, 6, 0.09), inset 0 1px 0 rgba(255,255,255,0.92);
 }
 
-/* Primary — strongest glass presence, brown accent text */
+/* Primary — liquid glass, brown accent text, stronger brown border */
 .btn-primary {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
   color: var(--color-accent);
@@ -1100,8 +1096,8 @@ html.dyslexic p {
     inset 0 -0.5px 0 rgba(44, 22, 6, 0.05);
 }
 .btn-primary:hover, .btn-primary:focus {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(107, 56, 18, 0.88);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(107, 56, 18, 0.92);
   box-shadow:
     0 10px 40px rgba(44, 22, 6, 0.15),
     0 2px 8px rgba(44, 22, 6, 0.08),
@@ -1110,9 +1106,9 @@ html.dyslexic p {
 }
 .btn-primary:active { transform: scale(0.97); }
 
-/* Secondary — slightly lighter glass */
+/* Secondary — liquid glass */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   color: var(--color-accent);
@@ -1127,9 +1123,9 @@ html.dyslexic p {
 }
 .btn-secondary:active { transform: scale(0.97); }
 
-/* Ghost — most transparent, brown border still clearly visible */
+/* Ghost — near-invisible glass, brown border defines the pill */
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(36px) saturate(160%);
   -webkit-backdrop-filter: blur(36px) saturate(160%);
   color: var(--color-text-secondary);
@@ -1144,9 +1140,9 @@ html.dyslexic p {
 }
 .btn-ghost:active { transform: scale(0.97); }
 
-/* Gold — transparent glass, warm brown-gold text */
+/* Gold — liquid glass, warm brown-gold text */
 .btn-gold {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
   color: var(--color-gold);
@@ -1177,16 +1173,16 @@ html.dyslexic p {
   font-size: 0.92rem;
   font-style: italic;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1.5px solid rgba(107, 56, 18, 0.38);
+  border: 1.5px solid rgba(107, 56, 18, 0.42);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-decoration: none;
   min-height: 36px;
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease, border-color 0.18s ease;
-  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.06), inset 0 1px 0 rgba(255,255,255,0.85);
+  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.05), inset 0 1px 0 rgba(255,255,255,0.90);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -1653,10 +1649,8 @@ footer, .loading-state,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
-  background-image:
-    radial-gradient(ellipse at 50% 50%, transparent 72%, rgba(44, 22, 6, 0.025) 100%),
-    linear-gradient(155deg, #FDFCFA 0%, #F5EEE4 38%, #FAF7F2 68%, #FDFCFA 100%);
+  background: #FFFFFF;
+  background-image: none;
   opacity: 1;
   transition: opacity 0.35s ease, visibility 0.35s ease;
   visibility: visible;
