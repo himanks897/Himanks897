@@ -875,6 +875,10 @@
   gap: 8px;
   margin-bottom: 14px;
   padding: 12px 16px;
+  /* position + z-index needed so the backdrop-filter stacking context
+     sits ABOVE its siblings and the popover is never clipped by them */
+  position: relative;
+  z-index: 20;
   overflow: visible;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: var(--glass-blur-sm);

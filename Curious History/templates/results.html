@@ -71,19 +71,6 @@
       </div>
     </div>
 
-    <!-- Who Was Alive Strip -->
-    {% if people_alive %}
-    <div class="who-alive-strip" role="region" aria-label="Famous people alive in {{ year }}">
-      <span class="who-alive-label">Also alive in {{ year }}:</span>
-      {% for person in people_alive %}
-      <span class="who-alive-person">
-        <strong>{{ person.name }}</strong>
-        {% if person.description %}— <em>{{ person.description[:60] }}</em>{% endif %}
-      </span>
-      {% if not loop.last %}<span style="color:var(--color-border);">·</span>{% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
   </div>
 
   <!-- ── Action Buttons (TOP) ─────────────────────────────────────────────── -->
