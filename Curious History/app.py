@@ -1996,29 +1996,6 @@ def compare():
     return render_template("compare.html")
 
 
-@app.route("/api/history-spell")
-def api_history_spell():
-    """History-aware spelling correction endpoint."""
-    q = request.args.get("q", "").strip()
-    if not q or len(q) < 3:
-        return jsonify({"suggestion": None})
-    _HISTORY_SPELL = {
-        'hitlar': 'Hitler', 'hittler': 'Hitler', 'napolean': 'Napoleon',
-        'ghandi': 'Gandhi', 'gandi': 'Gandhi', 'cleopetra': 'Cleopatra',
-        'ottomon': 'Ottoman', 'mugal': 'Mughal', 'chingis': 'Genghis',
-        'sparticus': 'Spartacus', 'crusaide': 'Crusade',
-        'rennaisance': 'Renaissance', 'medievel': 'Medieval',
-        'byzentine': 'Byzantine', 'mesopotama': 'Mesopotamia',
-        'bolshevik': 'Bolshevik Revolution', 'vikigns': 'Vikings',
-    }
-    q_lower = q.lower()
-    if q_lower in _HISTORY_SPELL:
-        return jsonify({"suggestion": _HISTORY_SPELL[q_lower]})
-    for misspell, correct in _HISTORY_SPELL.items():
-        if misspell in q_lower and len(misspell) > 4:
-            return jsonify({"suggestion": q.lower().replace(misspell, correct.lower()).title()})
-    return jsonify({"suggestion": None})
-
 
 # ─── Run ──────────────────────────────────────────────────────────────────────
 
