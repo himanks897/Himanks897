@@ -5,12 +5,12 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Light Brown Manuscript Paper — warm light parchment, like aged library book pages */
-  --color-bg:              #EDD9B2;
-  --color-surface:         #F5E8CC;
-  --color-surface-2:       #E5CA96;
-  --color-border:          #C49050;
-  --color-border-light:    #D8B870;
+  /* Refined Parchment — warm aged paper; surface is distinctly lighter than bg */
+  --color-bg:              #D9C49A;
+  --color-surface:         #F2E6C8;
+  --color-surface-2:       #E8D5A8;
+  --color-border:          #B8843C;
+  --color-border-light:    #CFA85C;
 
   --color-text-primary:    #1E0E04;
   --color-text-secondary:  #3E1E08;
@@ -461,8 +461,8 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.038'/%3E%3C/svg%3E"),
     /* Subtle edge vignette — aged manuscript corners */
     radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(110, 72, 20, 0.10) 100%),
-    /* Light brown manuscript paper gradient — warm parchment, like old library book pages */
-    linear-gradient(155deg, #F5E5C0 0%, #EAD5A8 42%, #EDD9B2 78%, #F2E2BC 100%);
+    /* Refined parchment gradient — deeper warm tone, aged manuscript feel */
+    linear-gradient(155deg, #E8D4A0 0%, #D8C292 42%, #DCC89C 78%, #E4D0A4 100%);
 }
 
 html.dyslexic body,
@@ -925,12 +925,16 @@ html.dyslexic p {
 
 /* ── Cards — warm parchment (not glass, keep the historic feel) ──────────── */
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-light);
-  border-top: 2px solid rgba(200,160,90,0.40);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(80,40,10,0.08);
+  box-shadow:
+    0 8px 32px rgba(100, 60, 10, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.05),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1.0);
   position: relative;
   overflow: hidden;
 }
@@ -938,17 +942,22 @@ html.dyslexic p {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.60), transparent);
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.00) 100%);
   pointer-events: none;
 }
 
 .card-sm {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-light);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: var(--radius-md);
   padding: 16px;
-  box-shadow: 0 2px 10px rgba(80,40,10,0.06);
+  box-shadow:
+    0 4px 18px rgba(100, 60, 10, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
 }
 
 /* ── Buttons — Oval Liquid Glass (pill shape, maximum transparency) ─────────── */

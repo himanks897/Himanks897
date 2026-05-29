@@ -2972,8 +2972,8 @@
   background: var(--color-bg);
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
-  /* Landing page uses a larger base font */
-  font-size: 22px;
+  /* Use em so html.font-lg/sm accessibility toggle scales this proportionally */
+  font-size: 1.375em;  /* = 22px at default 16px html; 25px at font-lg 20px; 19.25px at font-sm 14px */
 }
 
 /* ── Times New Roman + italic on everything in the landing page ──────────── */
@@ -2990,11 +2990,11 @@
 .landing-section-intro   { font-size: 1.22rem; line-height: 1.82; }
 .landing-about-text p    { font-size: 1.15rem; line-height: 1.82; }
 .landing-about-text ul li { font-size: 1.05rem; }
-.landing-audience-card h3 { font-size: 1.45rem; }
-.landing-audience-card p  { font-size: 1.18rem; line-height: 1.75; }
-.landing-audience-card ul li { font-size: 1.10rem; }
-.landing-usp-card h3     { font-size: 1.38rem; }
-.landing-usp-card p      { font-size: 1.15rem; line-height: 1.75; }
+.landing-audience-card h3 { font-size: clamp(1.1rem, 3.6vw, 1.45rem); }
+.landing-audience-card p  { font-size: clamp(0.95rem, 2.8vw, 1.18rem); line-height: 1.75; }
+.landing-audience-card ul li { font-size: clamp(0.88rem, 2.5vw, 1.10rem); }
+.landing-usp-card h3     { font-size: clamp(1.05rem, 3.2vw, 1.38rem); }
+.landing-usp-card p      { font-size: clamp(0.92rem, 2.6vw, 1.15rem); line-height: 1.75; }
 .landing-stat-num        { font-size: clamp(1.65rem, 3.5vw, 2.1rem); }
 .landing-stat-label      { font-size: 0.82rem; letter-spacing: 0.06em; }
 .landing-cta-title       { font-size: clamp(1.75rem, 3.5vw, 2.5rem); }
@@ -3379,21 +3379,21 @@
   gap: 18px;
 }
 .landing-audience-card {
-  background: rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 0.5px solid rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.40);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.90);
   border-radius: var(--radius-lg);
-  padding: 24px 20px;
+  padding: 26px 22px;
   overflow: hidden;
   position: relative;
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.07),
-    0 1px 4px rgba(0, 0, 0, 0.04),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.92);
+    0 8px 32px rgba(100, 60, 10, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1.0);
 }
 .landing-audience-card::before {
   content: '';
@@ -3422,7 +3422,7 @@
 }
 .landing-audience-card h3 {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.45rem;
+  font-size: clamp(1.1rem, 3.6vw, 1.45rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
@@ -3430,7 +3430,7 @@
 }
 .landing-audience-card p {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.18rem;
+  font-size: clamp(0.95rem, 2.8vw, 1.18rem);
   font-style: italic;
   line-height: 1.75;
   color: var(--color-text-secondary);
@@ -3443,21 +3443,21 @@
   gap: 14px;
 }
 .landing-usp-card {
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 0.5px solid rgba(255, 255, 255, 0.80);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.90);
   border-radius: var(--radius-lg);
-  padding: 22px 18px;
+  padding: 24px 20px;
   position: relative;
   overflow: hidden;
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease, background 0.18s ease;
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.07),
-    0 1px 4px rgba(0, 0, 0, 0.04),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.90);
+    0 8px 32px rgba(100, 60, 10, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1.0);
 }
 .landing-usp-card::before {
   content: '';
@@ -3477,17 +3477,20 @@
 }
 .landing-usp-vs {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: clamp(0.75rem, 1.8vw, 0.88rem);
   font-family: var(--font-ui);
-  font-weight: 600;
+  font-weight: 700;
   font-style: normal;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--color-gold);
-  background: var(--color-gold-light);
+  color: var(--color-accent-dark);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(255, 255, 255, 0.80);
   border-radius: var(--radius-full);
-  padding: 2px 8px;
-  margin-bottom: 8px;
+  padding: 4px 12px;
+  margin-bottom: 10px;
 }
 .landing-usp-icon {
   font-size: 1.5rem;
@@ -3495,7 +3498,7 @@
 }
 .landing-usp-card h3 {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.38rem;
+  font-size: clamp(1.05rem, 3.2vw, 1.38rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-text-primary);
@@ -3504,7 +3507,7 @@
 }
 .landing-usp-card p {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.15rem;
+  font-size: clamp(0.92rem, 2.6vw, 1.15rem);
   font-style: italic;
   line-height: 1.75;
   color: var(--color-text-secondary);
@@ -3913,7 +3916,7 @@
 }
 .landing-audience-card ul li {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.08rem;
+  font-size: clamp(0.88rem, 2.5vw, 1.08rem);
   font-style: italic;
   color: var(--color-text-secondary);
   line-height: 1.65;
@@ -3925,7 +3928,7 @@
   position: absolute;
   left: 0;
   color: var(--color-gold);
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 2.2vw, 1rem);
   font-style: normal;
 }
 
