@@ -293,8 +293,8 @@
   gap: 12px;
   padding: 12px 16px;
   background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(200%);
-  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border: 0.5px solid rgba(255, 255, 255, 0.72);
   border-radius: var(--radius-md);
   text-decoration: none;
@@ -606,10 +606,10 @@
   width: 100%;
   padding: 10px 14px;
   background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(200%);
-  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border: 0.5px solid rgba(255, 255, 255, 0.72);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-weight: 600;
   font-style: italic;
@@ -822,7 +822,7 @@
   display: inline-flex;
   align-items: center;
   padding: 10px 18px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0.5px solid rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(28px) saturate(180%);
@@ -1024,7 +1024,7 @@
   justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-style: italic;
   font-size: 0.82rem;
@@ -1032,8 +1032,8 @@
   cursor: pointer;
   border: 0.5px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(200%);
-  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   color: var(--color-text-secondary);
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease;
   min-height: 40px;
@@ -1202,7 +1202,7 @@
   line-height: 1.5;
   border-top: 1px solid var(--color-border);
   background: rgba(0,0,0,0.02);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-radius: var(--radius-full);
 }
 .article-image figcaption strong {
   display: block;
@@ -1443,7 +1443,7 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0.5px solid rgba(255, 255, 255, 0.78);
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(24px) saturate(180%);
@@ -1491,11 +1491,11 @@
   color: var(--color-accent);
   text-decoration: none;
   padding: 8px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0.5px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(200%);
-  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   cursor: pointer;
   min-height: 44px;
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease;
@@ -1753,7 +1753,7 @@
   gap: 12px;
   padding: 10px 14px;
   border: 0.5px solid rgba(255, 255, 255, 0.72);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-style: italic;
   font-size: 0.9rem;
@@ -1916,7 +1916,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0.5px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(12px) saturate(200%);
@@ -2697,7 +2697,7 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   color: var(--color-accent);
   border: 0.5px solid rgba(255, 255, 255, 0.78);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-size: 0.82rem;
   font-style: italic;
@@ -3959,7 +3959,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   border: 0.5px solid rgba(255, 255, 255, 0.80);
   background: rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(28px) saturate(190%);
@@ -4073,7 +4073,7 @@
   gap: 12px;
   width: 100%;
   padding: 13px 20px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-size: 0.95rem;
   font-weight: 600;
@@ -4092,7 +4092,7 @@
   border: 1.5px solid #dadce0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   margin-bottom: 0;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: var(--radius-full);
 }
 .login-btn-google:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.14); }
 .login-btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
@@ -4125,7 +4125,7 @@
     0 4px 20px rgba(0, 0, 0, 0.08),
     inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
     inset 0 -0.5px 0 rgba(255, 255, 255, 0.22);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border-radius: var(--radius-full);
   flex-direction: column;
   gap: 3px;
   padding: 14px 20px;
