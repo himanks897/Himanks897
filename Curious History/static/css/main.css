@@ -1,30 +1,30 @@
 /* main.css — Global design system, CSS variables, reset, and layout.
-   Historic parchment aesthetic with a fresh 2026-style interface. */
+   Light ivory — modern, classic, historic; maximum liquid-glass contrast. */
 
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Ivory Parchment — light, airy, historic; white glass cards pop cleanly against it */
-  --color-bg:              #F0E8D2;
-  --color-surface:         #FAF6EC;
-  --color-surface-2:       #EDE5C8;
-  --color-border:          #C09858;
-  --color-border-light:    #D8B870;
+  /* Pearl Ivory — very light warm white; glass cards & glass navbar pop crisply */
+  --color-bg:              #F3EFE8;
+  --color-surface:         #FDFCF9;
+  --color-surface-2:       #EBE6DA;
+  --color-border:          #C4A272;
+  --color-border-light:    #D8C08A;
 
   --color-text-primary:    #1E0E04;
   --color-text-secondary:  #3E1E08;
   --color-text-muted:      #6A4A22;
 
-  /* Liquid Glass — true transparent white glass */
-  --glass-bg:              rgba(255, 255, 255, 0.14);
-  --glass-bg-strong:       rgba(255, 255, 255, 0.28);
-  --glass-border:          rgba(255, 255, 255, 0.68);
-  --glass-border-dark:     rgba(255, 255, 255, 0.45);
-  --glass-shadow:          0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.85);
-  --glass-shadow-sm:       0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.75);
-  --glass-blur:            blur(32px) saturate(180%);
-  --glass-blur-sm:         blur(24px) saturate(170%);
+  /* Liquid Glass — strong frosted-glass effect; light background makes these pop */
+  --glass-bg:              rgba(255, 255, 255, 0.52);
+  --glass-bg-strong:       rgba(255, 255, 255, 0.74);
+  --glass-border:          rgba(255, 255, 255, 0.94);
+  --glass-border-dark:     rgba(255, 255, 255, 0.70);
+  --glass-shadow:          0 4px 28px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.96);
+  --glass-shadow-sm:       0 2px 14px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.88);
+  --glass-blur:            blur(36px) saturate(190%);
+  --glass-blur-sm:         blur(28px) saturate(180%);
 
   --color-accent:          #7A3A0E;
   --color-accent-dark:     #4A1E06;
@@ -49,8 +49,8 @@
   --dm-text-muted:         #8A6E50;
 
   /* Warm/Sepia mode (html.warm) */
-  --wm-bg:                 #E5CA96;
-  --wm-surface:            #F0D8AC;
+  --wm-bg:                 #EDD8A4;
+  --wm-surface:            #F5E8C0;
 
   /* Typography */
   --font-body:             'Lora', Georgia, 'Times New Roman', serif;
@@ -455,12 +455,14 @@ body {
   color: var(--color-text-primary);
   line-height: 1.7;
   min-height: 100vh;
-  /* Refined manuscript paper — subtle grain texture over a gentle warm gradient */
+  /* Pearl Ivory — ultra-light, barely-tinted gradient; glass elements stand out crisply */
   background-image:
-    /* Subtle edge vignette — light warmth in corners */
-    radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(140, 110, 60, 0.06) 100%),
-    /* Light ivory parchment gradient — fresh cream paper, historic & glass-compatible */
-    linear-gradient(155deg, #F5EDD8 0%, #EDE5C4 42%, #F0EAD0 78%, #F5EDD8 100%);
+    /* Very subtle warm top-centre glow */
+    radial-gradient(ellipse at 50% 0%, rgba(190, 150, 70, 0.07) 0%, transparent 55%),
+    /* Faint edge warmth */
+    radial-gradient(ellipse at 50% 50%, transparent 72%, rgba(100, 70, 20, 0.03) 100%),
+    /* Smooth light parchment gradient — near-white, hint of warm ivory */
+    linear-gradient(158deg, #FEFCF8 0%, #F3EDE2 38%, #F8F6EE 68%, #FEFCF8 100%);
 }
 
 html.dyslexic body,
@@ -527,8 +529,13 @@ html.dyslexic p {
   height: 100%;
   display: flex;
   align-items: center;
+  align-content: center;
   gap: 16px;
   padding: 0 24px;
+}
+/* Force every direct child of the navbar to sit on the same baseline */
+.navbar-inner > * {
+  align-self: center;
 }
 
 .nav-logo {
@@ -623,6 +630,7 @@ html.dyslexic p {
   gap: 14px;
   flex-shrink: 0;
   margin-left: auto;
+  height: 100%;
 }
 
 .nav-icon-btn {
@@ -655,10 +663,11 @@ html.dyslexic p {
 /* Gear icon wrap — relative so tooltip can anchor below it */
 .nav-a11y-wrap {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0;
+  justify-content: center;
   position: relative;
+  /* Remove flex-direction:column — tooltip is absolute, no column needed */
+  align-self: center;
 }
 
 /* Accessibility tooltip — hidden by default, appears on hover or .a11y-tip-show */
@@ -1160,7 +1169,8 @@ html.dyslexic p {
 /* ── Dropdowns ───────────────────────────────────────────────────────────── */
 .dropdown {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 .dropdown-menu {
   position: absolute;
@@ -1593,8 +1603,10 @@ footer, .loading-state,
   justify-content: center;
   background: var(--color-bg);
   background-image:
-    radial-gradient(ellipse at 30% 40%, rgba(201,146,42,0.10) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 65%, rgba(139,69,19,0.08) 0%, transparent 55%);
+    radial-gradient(ellipse at 50% 0%, rgba(190,150,70,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 30% 40%, rgba(201,146,42,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 65%, rgba(139,69,19,0.04) 0%, transparent 55%),
+    linear-gradient(158deg, #FEFCF8 0%, #F3EDE2 38%, #F8F6EE 68%, #FEFCF8 100%);
   opacity: 1;
   transition: opacity 0.35s ease, visibility 0.35s ease;
   visibility: visible;

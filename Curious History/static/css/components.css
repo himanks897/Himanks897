@@ -2988,8 +2988,9 @@
 .landing-hero-sub        { font-size: 1.25rem; line-height: 1.8; }
 .landing-section-title   { font-size: clamp(1.8rem, 3.6vw, 2.7rem); }
 .landing-section-intro   { font-size: 1.22rem; line-height: 1.82; }
-.landing-about-text p    { font-size: clamp(1.0rem, 2.8vw, 1.18rem); line-height: 1.82; }
-.landing-about-text ul li { font-size: clamp(1.0rem, 2.6vw, 1.15rem); }
+/* About section — noticeably larger per user request */
+.landing-about-text p    { font-size: clamp(1.18rem, 2.8vw, 1.40rem); line-height: 1.84; }
+.landing-about-text ul li { font-size: clamp(1.14rem, 2.6vw, 1.36rem); }
 .landing-audience-card h3 { font-size: clamp(1.1rem, 3.6vw, 1.45rem); }
 .landing-audience-card p  { font-size: clamp(0.95rem, 2.8vw, 1.18rem); line-height: 1.75; }
 .landing-audience-card ul li { font-size: clamp(0.88rem, 2.5vw, 1.10rem); }
@@ -3038,8 +3039,13 @@
   height: 64px;
   display: flex;
   align-items: center;
+  align-content: center;
   justify-content: space-between;
   padding: 0 28px;
+}
+/* Ensure all direct children are vertically centred in the landing nav */
+.landing-nav-inner > * {
+  align-self: center;
 }
 .landing-nav-logo {
   font-family: 'Times New Roman', Times, serif;
@@ -3273,9 +3279,9 @@
 }
 .landing-about-text p {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.02rem;
+  font-size: clamp(1.18rem, 2.8vw, 1.40rem);
   font-style: italic;
-  line-height: 1.75;
+  line-height: 1.84;
   color: var(--color-text-primary);
   margin-bottom: 10px;
 }
@@ -3291,10 +3297,10 @@
 }
 .landing-about-text ul li {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(1.0rem, 2.6vw, 1.15rem);
+  font-size: clamp(1.14rem, 2.6vw, 1.36rem);
   font-style: italic;
   color: var(--color-text-secondary);
-  line-height: 1.65;
+  line-height: 1.68;
   padding-left: 18px;
   position: relative;
 }
