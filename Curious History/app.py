@@ -23,11 +23,7 @@ load_dotenv()
 from config import Config
 from wikipedia_api import get_article, search_articles as wiki_search, get_related, get_on_this_day
 from api import wikipedia, images as img_api, maps as maps_api
-from api.gemini_synthesis import (
-    generate_summary,
-    simplify_paragraph, generate_timeline, generate_related_topics,
-    generate_mcq_quiz, generate_fill_blanks_quiz, define_terms,
-)
+# Gemini removed — all features use Wikipedia pipeline only
 from api.key_facts import (
     get_key_people, get_key_people_data,
     get_key_places, get_key_places_data,
@@ -723,6 +719,107 @@ def _fetch_commons_images(topic: str) -> list:
         return []
 
 
+# ─── Wikipedia-based replacements for all Gemini features ────────────────────
+
+def _wiki_summary(raw_content: str, word_count: int, topic: str, era: str) -> str:
+    """
+    Produce an HTML summary from Wikipedia source text targeting ~word_count words.
+    No AI — extracts and formats sentences directly from the source material.
+    """
+    if not raw_content:
+        return f"<p><em>No summary available for <strong>{topic}</strong>.</em></p>"
+
+    era_label = 'BCE' if era == 'bce' else 'CE'
+    # Strip wiki section headers and excessive whitespace
+    clean = re.sub(r'={2,}[^=]+=+', ' ', raw_content)
+    clean = re.sub(r'\[.*?\]', '', clean)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', clean)
+                 if len(s.strip()) > 30 and s.strip()[0].isupper()]
+
+    selected, total_words = [], 0
+    for sent in sentences:
+        w = len(sent.split())
+        if total_words + w > word_count + 40:
+            break
+        selected.append(sent)
+        total_words += w
+
+    if not selected:
+        return f"<p><em>Summary not available for <strong>{topic}</strong>.</em></p>"
+
+    paragraphs, chunk, chunk_w = [], [], 0
+    for sent in selected:
+        chunk.append(sent)
+        chunk_w += len(sent.split())
+        if chunk_w >= 80:
+            paragraphs.append('<p>' + ' '.join(chunk) + '</p>')
+            chunk, chunk_w = [], 0
+    if chunk:
+        paragraphs.append('<p>' + ' '.join(chunk) + '</p>')
+
+    header = (f'<p class="section-lead"><em>Summary of '
+              f'<strong>{topic}</strong> ({era_label}):</em></p>\n')
+    return header + '\n'.join(paragraphs)
+
+
+def _wiki_timeline(raw_content: str, topic: str) -> str:
+    """
+    Extract a chronological timeline from Wikipedia source text.
+    Finds sentences with explicit year/date references and orders them.
+    No AI — pure text parsing.
+    """
+    if not raw_content:
+        return '<p><em>Timeline not available.</em></p>'
+
+    year_pattern = re.compile(
+        r'\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|'
+        r'September|October|November|December)\s+\d{4}|\d{4}(?:\s+BCE|\s+CE)?)\b'
+    )
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', raw_content)
+                 if len(s.strip()) > 30]
+
+    entries = []
+    seen_years = set()
+    for sent in sentences:
+        m = year_pattern.search(sent)
+        if not m:
+            continue
+        date_str = m.group(0).strip()
+        if date_str in seen_years:
+            continue
+        seen_years.add(date_str)
+        clean_sent = sent[:220].strip()
+        if clean_sent and clean_sent[-1] not in '.!?':
+            clean_sent = _trim_to_sentence_short(clean_sent) or clean_sent
+        entries.append((date_str, clean_sent))
+        if len(entries) >= 8:
+            break
+
+    if not entries:
+        return '<p><em>No timeline entries found for this topic.</em></p>'
+
+    html = '<div class="timeline-wrap">\n'
+    for date_str, content in entries:
+        html += (
+            '<div class="timeline-entry">'
+            f'<div class="timeline-date"><strong>{date_str}</strong></div>'
+            f'<div class="timeline-content"><p>{content}</p></div>'
+            '</div>\n'
+        )
+    html += '</div>'
+    return html
+
+
+def _trim_to_sentence_short(text: str) -> str:
+    """Find last complete sentence in a short string."""
+    for i in range(len(text) - 1, max(len(text) - 100, 0), -1):
+        if text[i] in '.!?' and (i + 1 >= len(text) or text[i + 1] == ' '):
+            return text[:i + 1]
+    return text
+
+
 def gather_raw_content(topic: str, year: int, country: str,
                        detail: bool = False) -> tuple:
     """
@@ -925,13 +1022,11 @@ def results():
         f_images    = ex.submit(img_api.get_all_images, topic, year, country, 10)
         f_maps      = ex.submit(maps_api.get_all_maps, topic, country, year, 5)
         f_also      = ex.submit(wikipedia.get_also_this_year, year, country)
-        f_people    = ex.submit(wikipedia.get_famous_people_alive, year, country)
-        f_related   = ex.submit(generate_related_topics, topic, year, country)
-        f_wiki_rel  = ex.submit(get_related, topic, 6)
+        f_wiki_rel  = ex.submit(get_related, topic, 6)  # Wikipedia related articles
         f_archive   = ex.submit(_get_archive_data, topic)
         f_ol        = ex.submit(_fetch_ol_books, topic)
         f_commons   = ex.submit(_fetch_commons_images, topic)
-        f_wiki_srch = ex.submit(wiki_search, topic, 6)  # fallback if article not found
+        f_wiki_srch = ex.submit(wiki_search, topic, 6)
 
         # ── Phase 1a: get raw content first → needed for article formatting ────
         raw_result  = _safe(f_raw, ("", ["Wikipedia"]))
@@ -939,38 +1034,24 @@ def results():
             raw_result if isinstance(raw_result, tuple) else ("", ["Wikipedia"])
         )
 
-        # ── Phase 1b: format article from Wikipedia/DB content (no Gemini) ────────
-        # Gemini is only used for summaries and quizzes, NOT for article generation.
-        # The formatter produces complete, structured articles from raw source text.
+        # ── Phase 1b: format article entirely from Wikipedia/DB source text ─────
         article_data = format_for_article(raw_content, topic, year, country, era)
         article_html = article_data.get("html", "")
         importance   = article_data.get("importance_level", "National")
         key_terms    = article_data.get("key_terms", []) or extract_terms(article_html)
-
-        # ── Phase 1c: kick off define_terms while other futures complete ───────
-        f_terms = ex.submit(define_terms, key_terms[:8], f"{topic} {country}") \
-                  if key_terms else None
 
         # ── Collect all remaining futures ─────────────────────────────────────
         wiki_data_raw      = _safe(f_article,   None)
         event_images       = _safe(f_images,    [])
         event_maps         = _safe(f_maps,      [])
         also_year          = _safe(f_also,       [])
-        _raw_people        = _safe(f_people,    [])
-        # Filter out Wikipedia "List of …" articles that appear as fake "people"
-        people_alive       = [
-            p for p in _raw_people
-            if p and not (p.get("name", "") or "").lower().startswith("list of")
-            and not (p.get("description", "") or "").lower().startswith("list")
-            and len((p.get("name", "") or "").strip()) > 1
-        ]
-        related            = _safe(f_related,   [])
         wiki_related       = _safe(f_wiki_rel,  [])
         archive_data       = _safe(f_archive,   _EMPTY_ARCHIVE)
         ol_books           = _safe(f_ol,        [])
         commons_images     = _safe(f_commons,   [])
         wiki_suggestions_r = _safe(f_wiki_srch, [])
-        term_defs          = _safe(f_terms, {}) if f_terms else {}
+        related            = [r["title"] for r in wiki_related[:4]] if wiki_related else []
+        term_defs          = {}
 
     # ── Phase 2: post-process (no more network calls) ─────────────────────────
     wiki_suggestions = []
@@ -1186,16 +1267,6 @@ def api_also_this_year():
     return jsonify({"events": events})
 
 
-@app.route("/api/simplify", methods=["POST"])
-def api_simplify():
-    """Simplifies a paragraph using Gemini API."""
-    data = request.get_json()
-    paragraph = data.get("paragraph", "")
-    topic = data.get("topic", "")
-    if not paragraph:
-        return jsonify({"error": "No paragraph provided"}), 400
-    simplified = simplify_paragraph(paragraph, topic)
-    return jsonify({"html": simplified})
 
 
 @app.route("/api/more-detail", methods=["POST"])
@@ -1213,7 +1284,7 @@ def api_more_detail():
 
 @app.route("/api/summary", methods=["POST"])
 def api_summary():
-    """Generates a word-count-limited summary via Gemini."""
+    """Generates a word-count-limited summary from Wikipedia source text."""
     data = request.get_json()
     topic = data.get("topic", "")
     year = int(data.get("year", 1900))
@@ -1221,7 +1292,7 @@ def api_summary():
     era = data.get("era", "ce")
     word_count = int(data.get("words", 200))
     raw_content, sources = gather_raw_content(topic, year, country)
-    summary = generate_summary(topic, year, country, era, word_count, raw_content)
+    summary = _wiki_summary(raw_content, word_count, topic, era)
     return jsonify({"html": summary, "sources": sources})
 
 
@@ -1263,13 +1334,13 @@ def api_key_people():
 
 @app.route("/api/timeline", methods=["POST"])
 def api_timeline():
-    """Returns a chronological mini-timeline for an event."""
+    """Returns a chronological timeline extracted from Wikipedia source text."""
     data = request.get_json()
     topic = data.get("topic", "")
     year = int(data.get("year", 1900))
     country = data.get("country", "World")
     raw_content, _ = gather_raw_content(topic, year, country)
-    result = generate_timeline(topic, year, country, raw_content)
+    result = _wiki_timeline(raw_content, topic)
     return jsonify({"html": result})
 
 
@@ -1411,21 +1482,8 @@ def api_maps():
 
 @app.route("/api/quiz", methods=["POST"])
 def api_quiz():
-    """Generates a quiz (MCQ or fill-in-blanks) via Gemini."""
-    data = request.get_json()
-    topic = data.get("topic", "")
-    year = int(data.get("year", 1900))
-    country = data.get("country", "World")
-    era = data.get("era", "ce")
-    quiz_type = data.get("type", "mcq")
-    raw_content, _ = gather_raw_content(topic, year, country)
-
-    if quiz_type == "fitb":
-        result = generate_fill_blanks_quiz(topic, year, country, raw_content)
-    else:
-        result = generate_mcq_quiz(topic, year, country, raw_content)
-
-    return jsonify(result)
+    """Quiz feature — returns empty; AI quiz generation has been disabled."""
+    return jsonify({"questions": [], "unavailable": True})
 
 
 @app.route("/api/reactions", methods=["GET", "POST"])

@@ -18,8 +18,8 @@ class Config:
     SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
     SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 
-    # Gemini AI
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    # Gemini AI — disabled; key removed, all AI generation uses Wikipedia pipeline
+    GEMINI_API_KEY = ""
 
     # Wikimedia
     WIKIMEDIA_USER_AGENT = os.getenv(
