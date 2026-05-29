@@ -5,16 +5,16 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Old Manuscript Paper — aged golden vellum, like medieval illuminated manuscripts */
-  --color-bg:              #EDE4BE;
-  --color-surface:         #F5EDD2;
-  --color-surface-2:       #EEE8C8;
-  --color-border:          #C8B07C;
-  --color-border-light:    #DDD0A0;
+  /* Brownish Old Manuscript Paper — rich warm parchment, like aged historical documents */
+  --color-bg:              #C8A068;
+  --color-surface:         #D4AC78;
+  --color-surface-2:       #C49860;
+  --color-border:          #8A5A26;
+  --color-border-light:    #A87840;
 
-  --color-text-primary:    #1E140A;
-  --color-text-secondary:  #4A2E12;
-  --color-text-muted:      #7A5C38;
+  --color-text-primary:    #1E0E04;
+  --color-text-secondary:  #3E1E08;
+  --color-text-muted:      #5E3A14;
 
   /* Liquid Glass — true transparent white glass */
   --glass-bg:              rgba(255, 255, 255, 0.14);
@@ -26,12 +26,12 @@
   --glass-blur:            blur(32px) saturate(180%);
   --glass-blur-sm:         blur(24px) saturate(170%);
 
-  --color-accent:          #7A3A0E;
-  --color-accent-dark:     #4A1E06;
-  --color-accent-light:    #EED8B8;
+  --color-accent:          #6B2A06;
+  --color-accent-dark:     #3E1404;
+  --color-accent-light:    #E0B87A;
 
-  --color-gold:            #C9922A;
-  --color-gold-light:      #F5E3B8;
+  --color-gold:            #C08820;
+  --color-gold-light:      #D4A850;
   --color-highlight:       #F0C040;
 
   --color-success:         #2D6A3F;
@@ -49,8 +49,8 @@
   --dm-text-muted:         #8A6E50;
 
   /* Warm/Sepia mode (html.warm) */
-  --wm-bg:                 #EDE0C8;
-  --wm-surface:            #F5EBD8;
+  --wm-bg:                 #C09060;
+  --wm-surface:            #CCA070;
 
   /* Typography */
   --font-body:             'Lora', Georgia, 'Times New Roman', serif;
@@ -440,9 +440,9 @@ body {
     /* Paper grain — SVG fractal noise, slightly more visible for manuscript feel */
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.038'/%3E%3C/svg%3E"),
     /* Subtle edge vignette — aged manuscript darkens at the edges */
-    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(130, 100, 50, 0.07) 100%),
-    /* Old manuscript paper gradient — warm golden-cream, like medieval vellum */
-    linear-gradient(155deg, #F3EBCA 0%, #E8DFBA 42%, #EDE7C6 78%, #F2ECD0 100%);
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(80, 45, 10, 0.18) 100%),
+    /* Rich brownish manuscript paper gradient — warm parchment brown */
+    linear-gradient(155deg, #D4AE7A 0%, #C49662 42%, #C8A06C 78%, #D0AA78 100%);
 }
 
 html.dyslexic body,
@@ -496,8 +496,8 @@ html.dyslexic p {
   top: 0;
   z-index: 1000;
   height: var(--nav-height);
-  background: rgba(237, 228, 190, 0.82);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(192, 148, 88, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.40);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   box-shadow: 0 2px 20px rgba(80,40,10,0.08), inset 0 -1px 0 rgba(200,160,90,0.15);
