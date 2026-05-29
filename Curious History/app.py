@@ -21,6 +21,11 @@ from google.auth.transport import requests as google_requests
 load_dotenv()
 
 from config import Config
+from plans import Plan, PLAN_LIMITS, PLAN_FEATURES, PLAN_DISPLAY_NAMES
+from utils.plan_enforcement import (
+    get_current_plan, has_feature, plan_required,
+    check_search_limit, get_plan_status,
+)
 from wikipedia_api import get_article, search_articles as wiki_search, get_related, get_on_this_day
 from api import wikipedia, images as img_api, maps as maps_api
 # Gemini removed — all features use Wikipedia pipeline only
@@ -32,7 +37,7 @@ from api.key_facts import (
 from utils.content_formatter import format_for_article, format_for_detail
 from utils.reading_time import estimate as reading_time
 from utils.glossary import extract_terms
-from utils.citations import build_citation
+from utils.citations import build_citation, build_apa_citation, build_mla_citation
 
 import db as _pdb          # pipeline database (in-memory JSON cache)
 
@@ -46,8 +51,13 @@ GOOGLE_CLIENT_ID = "795621911465-a1122fukv8b3j96f2oq5bje7u9gnpooe.apps.googleuse
 
 @app.context_processor
 def inject_user():
-    """Makes current_user available in every Jinja2 template automatically."""
-    return {"current_user": session.get("user")}
+    """Makes current_user and current_plan available in every template."""
+    return {
+        "current_user":  session.get("user"),
+        "current_plan":  get_current_plan(),
+        "plan_display":  PLAN_DISPLAY_NAMES.get(get_current_plan(), "Guest"),
+        "has_feature":   has_feature,
+    }
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -1000,6 +1010,17 @@ def results():
     if not topic:
         return redirect(url_for("home"))
 
+    # ── Search limit check ────────────────────────────────────────────────────
+    allowed, limit_msg, searches_used, daily_limit = check_search_limit()
+    if not allowed:
+        return render_template(
+            "limit_reached.html",
+            message=limit_msg,
+            current_plan=get_current_plan(),
+            searches_used=searches_used,
+            daily_limit=daily_limit,
+        )
+
     try:
         year = int(year_str)
     except ValueError:
@@ -1177,6 +1198,7 @@ def results():
         archive_data=archive_data,
         wikidata_from_db=wikidata_from_db,
         all_sources=all_sources,
+        plan_status=get_plan_status(),
     )
 
 
@@ -1284,13 +1306,24 @@ def api_more_detail():
 
 @app.route("/api/summary", methods=["POST"])
 def api_summary():
-    """Generates a word-count-limited summary from Wikipedia source text."""
+    """Generates a word-count-limited summary from Wikipedia source text.
+    Word count is gated by plan: Explorer max 200, Scholar/Researcher up to 1000."""
     data = request.get_json()
     topic = data.get("topic", "")
     year = int(data.get("year", 1900))
     country = data.get("country", "World")
     era = data.get("era", "ce")
     word_count = int(data.get("words", 200))
+
+    # Server-side plan enforcement on summary length
+    if not has_feature("summary_200"):
+        return jsonify({"error": "upgrade_required", "feature": "summary_200",
+                        "required_plan": Plan.EXPLORER}), 403
+    if word_count > 200 and not has_feature("summary_500"):
+        word_count = 200  # silently cap for explorer
+    if word_count > 500 and not has_feature("summary_1000"):
+        word_count = 500  # silently cap for scholar-500
+
     raw_content, sources = gather_raw_content(topic, year, country)
     summary = _wiki_summary(raw_content, word_count, topic, era)
     return jsonify({"html": summary, "sources": sources})
@@ -1333,8 +1366,9 @@ def api_key_people():
 
 
 @app.route("/api/timeline", methods=["POST"])
+@plan_required("ai_timelines")
 def api_timeline():
-    """Returns a chronological timeline extracted from Wikipedia source text."""
+    """Returns a chronological timeline — Scholar and Researcher only."""
     data = request.get_json()
     topic = data.get("topic", "")
     year = int(data.get("year", 1900))
@@ -1481,8 +1515,9 @@ def api_maps():
 
 
 @app.route("/api/quiz", methods=["POST"])
+@plan_required("quizzes")
 def api_quiz():
-    """Quiz feature — returns empty; AI quiz generation has been disabled."""
+    """Quiz feature — Researcher plan only."""
     return jsonify({"questions": [], "unavailable": True})
 
 
@@ -1863,10 +1898,16 @@ def api_google_login():
     session["user_id"] = user["sub"]   # used by reactions / save endpoints
     session.permanent  = True
 
+    # Cache the user's subscription plan in session for fast access
+    from supabase.supabase_client import get_user_plan
+    plan_record = get_user_plan(user["sub"])
+    session["user_plan"] = plan_record.get("plan", Plan.GUEST)
+
     return jsonify({
         "name":    user["name"],
         "email":   user["email"],
         "picture": user["picture"],
+        "plan":    session["user_plan"],
     })
 
 
@@ -1875,6 +1916,108 @@ def api_logout():
     """Clears the session and signs the user out."""
     session.clear()
     return jsonify({"ok": True})
+
+
+# ─── Subscription / Plan Routes ───────────────────────────────────────────────
+
+@app.route("/pricing")
+def pricing():
+    """Pricing page — shows all subscription plans."""
+    return render_template(
+        "pricing.html",
+        plans=PLAN_LIMITS,
+        plan_features=PLAN_FEATURES,
+        plan_display=PLAN_DISPLAY_NAMES,
+        current_plan=get_current_plan(),
+    )
+
+
+@app.route("/account")
+def account():
+    """Account & billing page — shows current plan and usage."""
+    status = get_plan_status()
+    return render_template("account.html", status=status, current_user=session.get("user"))
+
+
+@app.route("/api/plan-status")
+def api_plan_status():
+    """Returns the current user's plan, usage, and feature flags as JSON."""
+    return jsonify(get_plan_status())
+
+
+@app.route("/subscribe/<plan_name>", methods=["POST"])
+def subscribe(plan_name: str):
+    """
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  PAYMENT GATEWAY HOOK                                            ║
+    ║  Replace the body of this function with Razorpay or Stripe       ║
+    ║  webhook verification before going live.                         ║
+    ║  The rest of the app (plan enforcement, UI, database writes)     ║
+    ║  requires NO changes — only swap this one function.              ║
+    ╚══════════════════════════════════════════════════════════════════╝
+    For now: directly upgrades the user's plan (testing mode only).
+    """
+    # TODO: PAYMENT GATEWAY HOOK — verify Razorpay/Stripe payment before upgrading
+    valid_plans = [Plan.EXPLORER, Plan.SCHOLAR, Plan.RESEARCHER]
+    if plan_name not in valid_plans:
+        return jsonify({"error": "Invalid plan"}), 400
+
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+
+    # TODO: verify payment receipt here before calling upsert_user_plan
+    from supabase.supabase_client import upsert_user_plan
+    upsert_user_plan(user["sub"], plan_name, subscription_active=True)
+    session["user_plan"] = plan_name
+
+    return redirect(url_for("account"))
+
+
+@app.route("/api/citation", methods=["POST"])
+@plan_required("citations_apa")
+def api_citation():
+    """Returns APA and MLA citations for an article — Scholar and Researcher only."""
+    data = request.get_json()
+    topic   = data.get("topic", "")
+    year    = int(data.get("year", 1900))
+    country = data.get("country", "World")
+    sources = data.get("sources", [])
+    return jsonify({
+        "apa": build_apa_citation(topic, year, country, sources),
+        "mla": build_mla_citation(topic, year, country, sources),
+    })
+
+
+@app.route("/compare")
+@plan_required("comparison_tool")
+def compare():
+    """Cross-article comparison tool — Researcher only. Coming soon."""
+    return render_template("compare.html")
+
+
+@app.route("/api/history-spell")
+def api_history_spell():
+    """History-aware spelling correction endpoint."""
+    q = request.args.get("q", "").strip()
+    if not q or len(q) < 3:
+        return jsonify({"suggestion": None})
+    _HISTORY_SPELL = {
+        'hitlar': 'Hitler', 'hittler': 'Hitler', 'napolean': 'Napoleon',
+        'ghandi': 'Gandhi', 'gandi': 'Gandhi', 'cleopetra': 'Cleopatra',
+        'ottomon': 'Ottoman', 'mugal': 'Mughal', 'chingis': 'Genghis',
+        'sparticus': 'Spartacus', 'crusaide': 'Crusade',
+        'rennaisance': 'Renaissance', 'medievel': 'Medieval',
+        'byzentine': 'Byzantine', 'mesopotama': 'Mesopotamia',
+        'bolshevik': 'Bolshevik Revolution', 'vikigns': 'Vikings',
+    }
+    q_lower = q.lower()
+    if q_lower in _HISTORY_SPELL:
+        return jsonify({"suggestion": _HISTORY_SPELL[q_lower]})
+    for misspell, correct in _HISTORY_SPELL.items():
+        if misspell in q_lower and len(misspell) > 4:
+            return jsonify({"suggestion": q.lower().replace(misspell, correct.lower()).title()})
+    return jsonify({"suggestion": None})
 
 
 # ─── Run ──────────────────────────────────────────────────────────────────────

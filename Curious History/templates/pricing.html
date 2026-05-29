@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Pricing — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:1100px;margin:0 auto;">
+
+  <div style="text-align:center;margin-bottom:48px;">
+    <h1 style="font-family:var(--font-body);font-size:clamp(1.8rem,4vw,2.8rem);
+               font-style:italic;font-weight:700;color:var(--color-accent);margin-bottom:10px;">
+      Choose Your Plan
+    </h1>
+    <p style="font-family:var(--font-body);font-style:italic;font-size:1.05rem;
+              color:var(--color-text-secondary);max-width:520px;margin:0 auto;">
+      Unlock deeper historical research. Every year. Every country. Every story.
+    </p>
+  </div>
+
+  <!-- Plan Cards Grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:48px;">
+
+    {# ── Explorer ── #}
+    <div style="background:rgba(255,255,255,0.18);backdrop-filter:blur(40px) saturate(180%);
+                border:0.5px solid rgba(255,255,255,0.80);border-radius:var(--radius-xl);
+                padding:32px 28px;position:relative;
+                box-shadow:0 4px 28px rgba(0,0,0,0.07),inset 0 1.5px 0 rgba(255,255,255,0.96);">
+      {% if current_plan == 'explorer' %}
+      <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+                  background:rgba(255,255,255,0.90);backdrop-filter:blur(20px);
+                  border:0.5px solid rgba(255,255,255,0.90);border-radius:var(--radius-full);
+                  padding:4px 18px;font-size:0.75rem;font-weight:700;color:var(--color-accent);
+                  white-space:nowrap;">✓ Current Plan</div>
+      {% endif %}
+      <div style="font-family:var(--font-body);font-size:1.5rem;font-weight:700;
+                  font-style:italic;color:var(--color-accent);margin-bottom:4px;">Explorer</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--color-text-primary);
+                  margin-bottom:4px;">₹99<span style="font-size:1rem;font-weight:400;color:var(--color-text-muted);">/month</span></div>
+      <div style="font-size:0.85rem;color:var(--color-text-muted);font-style:italic;margin-bottom:24px;">Perfect for students & curious learners</div>
+      <ul style="list-style:none;padding:0;margin:0 0 28px;display:flex;flex-direction:column;gap:10px;">
+        {% for feat in ['20 searches per day','Structured article results','AI summaries (200 words)','Historical images & maps','Surprise Me feature'] %}
+        <li style="display:flex;align-items:center;gap:10px;font-style:italic;font-size:0.9rem;color:var(--color-text-primary);">
+          <span style="color:#2D6A3F;font-weight:700;">✓</span> {{ feat }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% if current_plan == 'explorer' %}
+      <button class="btn btn-secondary" style="width:100%;justify-content:center;" disabled>Current Plan</button>
+      {% else %}
+      <form method="POST" action="{{ url_for('subscribe', plan_name='explorer') }}">
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started →</button>
+      </form>
+      {% endif %}
+    </div>
+
+    {# ── Scholar (Most Popular) ── #}
+    <div style="background:rgba(255,255,255,0.26);backdrop-filter:blur(48px) saturate(200%);
+                border:1px solid rgba(255,255,255,0.92);border-radius:var(--radius-xl);
+                padding:32px 28px;position:relative;
+                box-shadow:0 8px 40px rgba(0,0,0,0.10),inset 0 2px 0 rgba(255,255,255,1.0);
+                transform:translateY(-6px);">
+      <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+                  background:var(--color-accent);
+                  border-radius:var(--radius-full);padding:4px 18px;
+                  font-size:0.75rem;font-weight:700;color:#FFF8F0;white-space:nowrap;">
+        {% if current_plan == 'scholar' %}✓ Current Plan{% else %}⭐ Most Popular{% endif %}
+      </div>
+      <div style="font-family:var(--font-body);font-size:1.5rem;font-weight:700;
+                  font-style:italic;color:var(--color-accent);margin-bottom:4px;">Scholar</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--color-text-primary);
+                  margin-bottom:4px;">₹999<span style="font-size:1rem;font-weight:400;color:var(--color-text-muted);">/month</span></div>
+      <div style="font-size:0.85rem;color:var(--color-text-muted);font-style:italic;margin-bottom:24px;">For serious students & educators</div>
+      <ul style="list-style:none;padding:0;margin:0 0 28px;display:flex;flex-direction:column;gap:10px;">
+        {% for feat in ['50 searches per day','Everything in Explorer','AI summaries (200 / 500 / 1000 words)','AI generated timelines','Bookmarks & saved searches','APA & MLA auto-citations','Dark mode & accessibility tools'] %}
+        <li style="display:flex;align-items:center;gap:10px;font-style:italic;font-size:0.9rem;color:var(--color-text-primary);">
+          <span style="color:#2D6A3F;font-weight:700;">✓</span> {{ feat }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% if current_plan == 'scholar' %}
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Current Plan</button>
+      {% else %}
+      <form method="POST" action="{{ url_for('subscribe', plan_name='scholar') }}">
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started →</button>
+      </form>
+      {% endif %}
+    </div>
+
+    {# ── Researcher ── #}
+    <div style="background:rgba(255,255,255,0.18);backdrop-filter:blur(40px) saturate(180%);
+                border:0.5px solid rgba(255,255,255,0.80);border-radius:var(--radius-xl);
+                padding:32px 28px;position:relative;
+                box-shadow:0 4px 28px rgba(0,0,0,0.07),inset 0 1.5px 0 rgba(255,255,255,0.96);">
+      {% if current_plan == 'researcher' %}
+      <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+                  background:rgba(255,255,255,0.90);backdrop-filter:blur(20px);
+                  border:0.5px solid rgba(255,255,255,0.90);border-radius:var(--radius-full);
+                  padding:4px 18px;font-size:0.75rem;font-weight:700;color:var(--color-accent);
+                  white-space:nowrap;">✓ Current Plan</div>
+      {% endif %}
+      <div style="font-family:var(--font-body);font-size:1.5rem;font-weight:700;
+                  font-style:italic;color:var(--color-accent);margin-bottom:4px;">Researcher</div>
+      <div style="font-size:2rem;font-weight:700;color:var(--color-text-primary);
+                  margin-bottom:4px;">₹4,999<span style="font-size:1rem;font-weight:400;color:var(--color-text-muted);">/month</span></div>
+      <div style="font-size:0.85rem;color:var(--color-text-muted);font-style:italic;margin-bottom:24px;">For academics, historians & professionals</div>
+      <ul style="list-style:none;padding:0;margin:0 0 28px;display:flex;flex-direction:column;gap:10px;">
+        {% for feat in ['150 searches per day','Everything in Scholar','MCQ & fill-in-blank quizzes','Cross-article comparison tool','Priority access to new databases','Early access to new features','Priority support badge'] %}
+        <li style="display:flex;align-items:center;gap:10px;font-style:italic;font-size:0.9rem;color:var(--color-text-primary);">
+          <span style="color:#2D6A3F;font-weight:700;">✓</span> {{ feat }}
+        </li>
+        {% endfor %}
+      </ul>
+      {% if current_plan == 'researcher' %}
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" disabled>Current Plan</button>
+      {% else %}
+      <form method="POST" action="{{ url_for('subscribe', plan_name='researcher') }}">
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Get Started →</button>
+      </form>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Free Guest tier note -->
+  <div style="text-align:center;padding:20px;
+              background:rgba(255,255,255,0.12);backdrop-filter:blur(24px);
+              border:0.5px solid rgba(255,255,255,0.72);border-radius:var(--radius-lg);
+              max-width:600px;margin:0 auto 32px;">
+    <p style="font-style:italic;color:var(--color-text-secondary);font-size:0.92rem;">
+      <strong>Free Guest tier:</strong> 3 searches per day, article results only.
+      <a href="{{ url_for('login') }}" style="color:var(--color-accent);">Sign in with Google</a>
+      to get started with a paid plan.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

@@ -82,7 +82,8 @@
       More Detail
     </button>
 
-    <!-- Summary Dropdown -->
+    <!-- Summary Dropdown — gated by plan -->
+    {% if has_feature('summary_200') %}
     <div class="dropdown">
       <button class="action-btn" id="btn-summary-drop" aria-haspopup="true" aria-expanded="false" aria-label="Generate summary — choose word count">
         <span class="action-btn-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg></span>
@@ -90,18 +91,34 @@
       </button>
       <div class="dropdown-menu" id="summary-menu" role="menu">
         <button class="dropdown-item" role="menuitem" onclick="openSummary(200)">200 Words</button>
+        {% if has_feature('summary_500') %}
         <button class="dropdown-item" role="menuitem" onclick="openSummary(500)">500 Words</button>
+        {% else %}
+        <button class="dropdown-item" role="menuitem" disabled
+                style="opacity:0.5;cursor:not-allowed;"
+                title="Scholar plan required">500 Words 🔒</button>
+        {% endif %}
+        {% if has_feature('summary_1000') %}
         <button class="dropdown-item" role="menuitem" onclick="openSummary(1000)">1000 Words</button>
+        {% else %}
+        <button class="dropdown-item" role="menuitem" disabled
+                style="opacity:0.5;cursor:not-allowed;"
+                title="Scholar plan required">1000 Words 🔒</button>
+        {% endif %}
       </div>
     </div>
+    {% endif %}
 
-    <!-- Timeline -->
+    <!-- Timeline — Scholar and Researcher only -->
+    {% if has_feature('ai_timelines') %}
     <button class="action-btn" id="btn-timeline" aria-label="Show timeline">
       <span class="action-btn-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg></span>
       Timeline
     </button>
+    {% endif %}
 
-    <!-- Images -->
+    <!-- Images — Explorer and above -->
+    {% if has_feature('images_maps') %}
     <button class="action-btn" id="btn-images" aria-label="Open full image gallery">
       <span class="action-btn-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg></span>
       Images
@@ -112,8 +129,10 @@
       <span class="action-btn-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"/></svg></span>
       Maps
     </button>
+    {% endif %}
 
-    <!-- Quiz Me Dropdown -->
+    <!-- Quiz Me — Researcher only -->
+    {% if has_feature('quizzes') %}
     <div class="dropdown">
       <button class="action-btn" id="btn-quiz-drop" aria-haspopup="true" aria-expanded="false" aria-label="Quiz me — choose quiz type">
         <span class="action-btn-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg></span>
@@ -124,11 +143,40 @@
         <button class="dropdown-item" role="menuitem" onclick="openQuiz('fitb')">Fill in the Blanks</button>
       </div>
     </div>
+    {% endif %}
 
   </div>
 
-  <!-- ── Image Strip ──────────────────────────────────────────────────────── -->
-  {% if all_images %}
+  <!-- ── Inline upgrade prompt for guests / limited plans ──────────────────── -->
+  {% if current_plan == 'guest' %}
+  <div id="upgrade-prompt" style="display:flex;align-items:center;justify-content:space-between;
+       flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:14px 18px;
+       background:rgba(255,255,255,0.22);backdrop-filter:blur(32px) saturate(180%);
+       border:0.5px solid rgba(255,255,255,0.80);border-radius:var(--radius-full);
+       box-shadow:0 2px 12px rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.96);">
+    <span style="font-family:var(--font-body);font-style:italic;
+                 font-size:0.9rem;color:var(--color-text-secondary);">
+      🔒 <strong>Summaries, timelines, images, and quizzes</strong> are available on paid plans.
+    </span>
+    <a href="{{ url_for('pricing') }}" class="btn btn-primary btn-sm"
+       style="white-space:nowrap;">View Plans →</a>
+  </div>
+  {% elif current_plan == 'explorer' %}
+  <div id="upgrade-prompt" style="display:flex;align-items:center;justify-content:space-between;
+       flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:12px 18px;
+       background:rgba(255,255,255,0.16);backdrop-filter:blur(28px);
+       border:0.5px solid rgba(255,255,255,0.72);border-radius:var(--radius-full);
+       box-shadow:0 2px 10px rgba(0,0,0,0.05),inset 0 1px 0 rgba(255,255,255,0.90);">
+    <span style="font-family:var(--font-body);font-style:italic;
+                 font-size:0.85rem;color:var(--color-text-muted);">
+      Upgrade to <strong>Scholar</strong> for timelines, 1000-word summaries, and citations.
+    </span>
+    <a href="{{ url_for('pricing') }}" class="btn btn-ghost btn-sm">Upgrade →</a>
+  </div>
+  {% endif %}
+
+  <!-- ── Image Strip — Explorer and above only ───────────────────────────── -->
+  {% if all_images and has_feature('images_maps') %}
   <section class="article-image-strip" aria-label="Images related to {{ topic }}">
     <div class="strip-header">
       <span class="strip-label">Images</span>

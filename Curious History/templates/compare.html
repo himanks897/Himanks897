@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Compare Articles — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:900px;margin:0 auto;text-align:center;padding-top:60px;">
+  <div class="card" style="padding:56px 40px;">
+    <div style="font-size:2.5rem;margin-bottom:16px;">⚖️</div>
+    <h1 style="font-family:var(--font-body);font-size:2rem;font-style:italic;
+               font-weight:700;color:var(--color-accent);margin-bottom:12px;">
+      Cross-Article Comparison
+    </h1>
+    <p style="font-family:var(--font-body);font-style:italic;color:var(--color-text-secondary);
+              max-width:480px;margin:0 auto 8px;line-height:1.6;">
+      Compare two historical events, people, or periods side-by-side with structured analysis.
+    </p>
+    <div style="display:inline-block;background:rgba(201,146,42,0.18);backdrop-filter:blur(20px);
+                border:0.5px solid rgba(255,255,255,0.72);border-radius:var(--radius-full);
+                padding:6px 20px;font-size:0.82rem;font-weight:700;
+                color:var(--color-gold);margin:20px 0 32px;">
+      🚧 Coming Soon — Researcher Feature
+    </div>
+    <p style="font-size:0.85rem;font-style:italic;color:var(--color-text-muted);margin-bottom:24px;">
+      This feature is actively being developed and will be available soon for Researcher subscribers.
+    </p>
+    <a href="{{ url_for('home') }}" class="btn btn-ghost">← Back to Home</a>
+  </div>
+</div>
+{% endblock %}

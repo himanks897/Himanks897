@@ -113,13 +113,26 @@
         </button>
         <div class="dropdown-menu" id="user-menu" role="menu" aria-labelledby="user-menu-btn">
           {% if current_user %}
-            <!-- Signed-in state: show name + email header -->
+            <!-- Signed-in state: show name, email, and plan badge -->
             <div style="padding:10px 16px 8px;border-bottom:1px solid var(--color-border-light);">
               <div style="font-weight:600;font-size:0.875rem;color:var(--color-text-primary);
                           font-style:italic;">{{ current_user.name }}</div>
               <div style="font-size:0.75rem;color:var(--color-text-muted);
                           font-style:italic;">{{ current_user.email }}</div>
+              <!-- Plan badge -->
+              {% if current_plan and current_plan != 'guest' %}
+              <div style="display:inline-block;margin-top:6px;
+                          background:rgba(255,255,255,0.40);backdrop-filter:blur(16px);
+                          border:0.5px solid rgba(255,255,255,0.80);border-radius:var(--radius-full);
+                          padding:2px 10px;font-size:0.7rem;font-weight:700;
+                          color:var(--color-accent);letter-spacing:0.04em;">
+                {{ plan_display | upper }}
+              </div>
+              {% endif %}
             </div>
+            <a href="{{ url_for('account') }}" class="dropdown-item" role="menuitem">👤 My Account</a>
+            <a href="{{ url_for('pricing') }}" class="dropdown-item" role="menuitem">✨ Upgrade Plan</a>
+            <hr style="border:none;border-top:1px solid var(--color-border);margin:4px 0;">
           {% endif %}
           <a href="{{ url_for('saved') }}" class="dropdown-item" role="menuitem">📚 Saved Items</a>
           <button class="dropdown-item" id="clear-history-btn" role="menuitem">🕐 Search History</button>

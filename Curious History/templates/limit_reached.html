@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Search Limit Reached — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width:540px;margin:60px auto;text-align:center;">
+  <div class="card" style="padding:48px 36px;">
+    <div style="font-size:3rem;margin-bottom:16px;">📚</div>
+    <h1 style="font-family:var(--font-body);font-size:1.8rem;font-style:italic;
+               font-weight:700;color:var(--color-accent);margin-bottom:12px;">
+      Daily Limit Reached
+    </h1>
+    <p style="font-family:var(--font-body);font-style:italic;
+              color:var(--color-text-secondary);line-height:1.6;margin-bottom:8px;">
+      {{ message }}
+    </p>
+    <p style="font-size:0.85rem;font-style:italic;color:var(--color-text-muted);margin-bottom:28px;">
+      Used {{ searches_used }} of {{ daily_limit }} searches today.
+      Limit resets at midnight.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+      <a href="{{ url_for('pricing') }}" class="btn btn-primary btn-lg">
+        Upgrade for More Searches →
+      </a>
+      <a href="{{ url_for('home') }}" class="btn btn-ghost btn-sm">Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
