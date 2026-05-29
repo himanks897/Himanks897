@@ -364,31 +364,38 @@ def format_for_article(
 
     html_parts = []
 
-    # ── A. INTRODUCTION ────────────────────────────────────────────────────────
+    # ── A. INTRODUCTION — Hook → Historiography → Pivot → Thesis ──────────────
     if intro_secs:
         html_parts.append(
             '<div class="essay-section essay-intro">'
-            '<h2 class="essay-section-label">Introduction</h2>\n'
+            '<div class="essay-section-label">Introduction</div>\n'
         )
         for s in intro_secs[:1]:
             body_text = s[1]
             blocks    = _blocks_from_body(body_text)
             if blocks:
-                # Lead paragraph — first 3 sentences as flowing prose
                 sentences = [sent.strip() for sent in
                              re.split(r'(?<=[.!?])\s+', blocks[0]) if sent.strip()]
-                intro_para = ' '.join(sentences[:4])
-                html_parts.append(_format_paragraph(intro_para, extra_terms, lead=True))
-                # Background bullets from the rest of block 0
-                rest_sents = sentences[4:]
-                if len(rest_sents) >= 2:
-                    html_parts.append(_format_list(rest_sents, extra_terms))
-                # Second block as analysis paragraph
+                # Hook: first 2 sentences — broad historical landscape
+                hook = ' '.join(sentences[:2])
+                html_parts.append(f'<p class="section-lead">{_format_inline(hook, extra_terms)}</p>\n')
+                # Historiography: next 2–3 sentences framing scholarly debate
+                histo = ' '.join(sentences[2:5])
+                if histo:
+                    html_parts.append(f'<p>{_format_inline(histo, extra_terms)}</p>\n')
+                # Pivot + Thesis: drawn from block 1 if available
                 if len(blocks) > 1:
-                    html_parts.append(_format_paragraph(blocks[1][:400], extra_terms))
+                    pivot_sentences = [s.strip() for s in
+                                       re.split(r'(?<=[.!?])\s+', blocks[1]) if s.strip()]
+                    pivot = ' '.join(pivot_sentences[:1])
+                    thesis = ' '.join(pivot_sentences[1:3])
+                    if pivot:
+                        html_parts.append(f'<p><em>{_format_inline(pivot, extra_terms)}</em></p>\n')
+                    if thesis:
+                        html_parts.append(f'<p class="section-lead"><strong><em>{_format_inline(thesis, extra_terms)}</em></strong></p>\n')
         html_parts.append('</div>\n')
 
-    # ── B. MAIN BODY ───────────────────────────────────────────────────────────
+    # ── B. MAIN BODY — Topic Sentence → Contextualization → Evidence → Analysis ─
     ordered_body = body_secs[:max(max_sections - 2, 3)]
     if ordered_body:
         html_parts.append('<div class="essay-section essay-body">\n')
@@ -401,31 +408,71 @@ def format_for_article(
             if clean_title:
                 tag = 'h2' if level <= 2 else 'h3'
                 html_parts.append(f'<{tag}>{html_mod.escape(clean_title)}</{tag}>\n')
-            formatted = _format_body_original(body_text, extra_terms, max_blocks=max_paras_per_section)
-            if formatted:
-                html_parts.append(formatted)
-                sections_shown += 1
+
+            blocks = _blocks_from_body(body_text)
+            if not blocks:
+                continue
+
+            all_sents = [s.strip() for b in blocks[:3]
+                         for s in re.split(r'(?<=[.!?])\s+', b) if s.strip()]
+            if not all_sents:
+                continue
+
+            # Topic sentence
+            html_parts.append(f'<p class="section-lead">{_format_inline(all_sents[0], extra_terms)}</p>\n')
+
+            # Historical contextualization: sentences 2-3 (who/what/where/when)
+            if len(all_sents) > 2:
+                ctx = ' '.join(all_sents[1:3])
+                html_parts.append(f'<p>{_format_inline(ctx, extra_terms)}</p>\n')
+
+            # Evidence block: key facts as a structured list
+            evidence_sents = all_sents[3:7]
+            if len(evidence_sents) >= 2:
+                html_parts.append(_format_list(evidence_sents, extra_terms))
+
+            # Historical Analysis "So What?": narrative sentences
+            analysis_sents = all_sents[7:11]
+            if analysis_sents:
+                analysis = ' '.join(analysis_sents)
+                html_parts.append(f'<p>{_format_inline(analysis, extra_terms)}</p>\n')
+
+            # Counterargument/Nuance + Transition: last available sentences
+            remaining = all_sents[11:]
+            if remaining:
+                nuance = ' '.join(remaining[:2])
+                html_parts.append(
+                    f'<p><em>{_format_inline(nuance, extra_terms)}</em></p>\n'
+                )
+
+            sections_shown += 1
         html_parts.append('</div>\n')
 
-    # ── C. CONCLUSION ──────────────────────────────────────────────────────────
+    # ── C. CONCLUSION — Restatement → Synthesis → Broader Significance ─────────
     if concl_secs:
         html_parts.append(
             '<div class="essay-section essay-conclusion">'
-            '<h2 class="essay-section-label">Conclusion &amp; Legacy</h2>\n'
+            '<div class="essay-section-label">Conclusion &amp; Historical Significance</div>\n'
         )
+        all_concl_sents = []
         for s in concl_secs[:2]:
-            title, body_text, level = s[0], s[1], s[2]
-            clean_title = _clean_section_title(title)
-            # Only show subsection heading if it adds information (not just "Aftermath")
-            if clean_title and clean_title.lower() not in ('aftermath', 'legacy', 'conclusion'):
-                tag = 'h2' if level <= 2 else 'h3'
-                html_parts.append(f'<{tag}>{html_mod.escape(clean_title)}</{tag}>\n')
-            formatted = _format_body_original(body_text, extra_terms, max_blocks=max_paras_per_section)
-            if formatted:
-                html_parts.append(formatted)
+            blocks = _blocks_from_body(s[1])
+            for b in blocks[:2]:
+                all_concl_sents += [s.strip() for s in re.split(r'(?<=[.!?])\s+', b) if s.strip()]
+
+        if all_concl_sents:
+            # Restatement of thesis
+            html_parts.append(f'<p class="section-lead"><strong><em>{_format_inline(all_concl_sents[0], extra_terms)}</em></strong></p>\n')
+            # Synthesis of main points
+            if len(all_concl_sents) > 2:
+                synth = ' '.join(all_concl_sents[1:4])
+                html_parts.append(f'<p>{_format_inline(synth, extra_terms)}</p>\n')
+            # Broader Historical Significance
+            if len(all_concl_sents) > 4:
+                significance = ' '.join(all_concl_sents[4:6])
+                html_parts.append(f'<p><em>{_format_inline(significance, extra_terms)}</em></p>\n')
         html_parts.append('</div>\n')
     elif body_secs:
-        # Synthesise a brief conclusion from the last body section's first block
         last = body_secs[-1]
         last_blocks = _blocks_from_body(last[1])
         if last_blocks:
@@ -434,9 +481,9 @@ def format_for_article(
                 synth = ' '.join(sents[:3])
                 html_parts.append(
                     '<div class="essay-section essay-conclusion">'
-                    '<h2 class="essay-section-label">Conclusion</h2>\n'
+                    '<div class="essay-section-label">Conclusion</div>\n'
                 )
-                html_parts.append(_format_paragraph(synth, extra_terms))
+                html_parts.append(f'<p class="section-lead">{_format_inline(synth, extra_terms)}</p>\n')
                 html_parts.append('</div>\n')
 
     final_html = '\n'.join(html_parts)

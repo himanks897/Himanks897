@@ -56,7 +56,7 @@ def synthesise_article(topic: str, year: int, country: str, era: str, raw_conten
     if cached:
         return cached
 
-    prompt = f"""You are a history educator writing for students (Class 6-12) and researchers.
+    prompt = f"""You are a senior academic historian writing a peer-reviewed essay for advanced students and researchers.
 
 Topic: {topic}
 Year: {year} {'BCE' if era == 'bce' else 'CE'}
@@ -66,27 +66,46 @@ Era: {era.upper()}
 Raw source material:
 {raw_content[:4000]}
 
-Write a comprehensive, well-structured HTML article about this historical topic. Follow ALL these rules:
+Write a comprehensive academic essay in HTML following this EXACT structure:
 
-1. Use a MIX of paragraphs and bullet points — not just one or the other
-2. Wrap ALL important historical terms, names, dates, and places in <strong> tags
-3. Use <em> (italics) for quotes, foreign words, and emphasis
-4. Organise content CHRONOLOGICALLY — background first, then events in order, then consequences
-5. Include these sections using <h3> tags:
-   - Overview / Background
-   - Key Events (use <ul><li> bullet points for discrete events)
-   - Major Figures Involved
-   - Consequences & Legacy
-6. Each section should have at least 2-3 paragraphs OR a well-structured list
-7. Keep ALL important facts — do not omit information
-8. The content should be comprehensive (at least 600-800 words of actual content)
-9. At the end, include a <div class="key-terms-data"> containing a JSON-like list of key terms: term1|term2|term3
-10. Also include: <div class="importance-level">Global</div> with one of: Local, Regional, National, Continental, Global
-11. Format numbers and dates clearly: e.g., <strong>1962</strong>, <strong>October 20</strong>
-12. Do NOT include Wikipedia links or source URLs in the content
-13. Write in flowing, engaging prose mixed with clear bullet points
+1. INTRODUCTION (10-15% of total length):
+   - Hook: 1-2 sentences painting the broad historical landscape
+   - Historiography: 2-3 sentences on how historians have debated or framed this topic
+   - Pivot: 1 sentence narrowing to the specific event/period
+   - Thesis Statement: 1 complex sentence stating the core argument, primary line of reasoning, and roadmap of evidence
+   Wrap the entire introduction in <div class="essay-section essay-intro"><div class="essay-section-label">Introduction</div>...</div>
+   Use <p class="section-lead"> for the hook. Use <p> for historiography. Use <p><em> for the pivot. Use <p class="section-lead"><strong><em> for the thesis.
 
-Return ONLY the HTML content — no markdown, no ```html blocks, no explanations outside the HTML."""
+2. BODY PARAGRAPHS (70-80% of total length) — for each major section:
+   - Sub-Header: use <h2> (bolded), e.g. <h2>Origins and Causes</h2>
+   - Topic Sentence: <p class="section-lead"> — directly supports the thesis
+   - Historical Contextualization: <p> — 2 sentences covering who/what/where/when
+   - Primary Evidence: use <ul><li> for direct quotes, data, or firsthand sources
+   - Historical Analysis "So What?": <p> — 3-4 sentences explaining why the evidence matters
+   - Counterargument/Nuance: <p><em> — 1-2 sentences on gaps or alternative interpretations
+   Wrap all body sections in <div class="essay-section essay-body">...</div>
+
+3. CONCLUSION (10-15% of total length):
+   - Restatement of Thesis: <p class="section-lead"><strong><em> — restated in different words, confident tone
+   - Synthesis of Main Points: <p> — 2-3 sentences connecting the major themes
+   - Broader Historical Significance: <p><em> — 2 sentences on long-term impact and why it matters to modern historians
+   Wrap in <div class="essay-section essay-conclusion"><div class="essay-section-label">Conclusion &amp; Historical Significance</div>...</div>
+
+4. BIBLIOGRAPHY (separate section at end):
+   - Primary Sources subsection: firsthand documents, diaries, treaties, speeches — alphabetized by author/title
+   - Secondary Sources subsection: peer-reviewed books, articles, essays — alphabetized by author's last name
+   Wrap in <div class="essay-bibliography"><h2>Bibliography</h2><h3>Primary Sources</h3><ul>...</ul><h3>Secondary Sources</h3><ul>...</ul></div>
+   Use plausible/real citations where known; clearly label invented ones with [estimated].
+
+Additional rules:
+- Wrap ALL key historical terms, names, dates, and places in <strong> tags
+- Use <em> for quotes, foreign words, and nuanced claims
+- Minimum 800 words of actual content
+- Do NOT include Wikipedia links or raw source URLs in the essay text
+- At the end include: <div class="key-terms-data">term1|term2|term3</div>
+- At the end include: <div class="importance-level">Global</div> (one of: Local, Regional, National, Continental, Global)
+
+Return ONLY the HTML content — no markdown, no ```html blocks, no text outside the HTML."""
 
     result = _call_gemini(prompt, cache_key=cache_key, ttl=86400)
 
@@ -125,7 +144,7 @@ def generate_detailed_content(topic: str, year: int, country: str, era: str, raw
     if cached:
         return cached
 
-    prompt = f"""You are a senior historian writing an exhaustive reference article.
+    prompt = f"""You are a senior academic historian writing an exhaustive peer-reviewed reference essay.
 
 Topic: {topic}
 Year: {year} {'BCE' if era == 'bce' else 'CE'}
@@ -134,16 +153,43 @@ Country/Region: {country}
 Raw source material:
 {raw_content[:5000]}
 
-Write an EXTREMELY detailed, comprehensive HTML article. Rules:
-1. Cover EVERY important sub-event, cause, consequence, and related context
-2. Include detailed background history leading up to the event
-3. Use <h2> for major sections, <h3> for subsections
-4. Mix paragraphs and <ul>/<ol> lists throughout
-5. Wrap ALL key terms in <strong>, use <em> for quotes/emphasis
-6. Include: Causes, Events (chronological), Key People, Battles/Turning Points (if applicable), International Reactions, Short-term Consequences, Long-term Legacy
-7. Minimum 1000-1200 words of actual content
-8. No source URLs or Wikipedia links in the text
-9. Write in academic but accessible prose
+Write an EXTREMELY detailed academic essay in HTML following this EXACT structure:
+
+1. INTRODUCTION (10-15%):
+   - Hook (1-2 sentences, broad historical landscape)
+   - Historiography/Debate (2-3 sentences on how historians view this topic)
+   - Pivot (1 sentence narrowing to the specific event)
+   - Thesis Statement (1 complex sentence with core argument, line of reasoning, roadmap of evidence)
+   Wrap in <div class="essay-section essay-intro"><div class="essay-section-label">Introduction</div>...</div>
+
+2. BODY PARAGRAPHS (70-80%) — cover every sub-event, cause, consequence:
+   For each major section use <h2> sub-headers, then:
+   - Topic Sentence (<p class="section-lead">)
+   - Historical Contextualization (<p> — who/what/where/when)
+   - Primary Evidence (<ul><li> — direct quotes, data, firsthand sources)
+   - Historical Analysis "So What?" (<p> — 3-4 sentences explaining significance)
+   - Counterargument/Nuance (<p><em> — gaps or alternative interpretations)
+   - Transition Sentence (final sentence bridging to next section)
+   Cover: Causes, Events (chronological), Key People, Battles/Turning Points (if applicable),
+          International Reactions, Short-term Consequences, Long-term Legacy
+   Wrap all body in <div class="essay-section essay-body">...</div>
+
+3. CONCLUSION (10-15%):
+   - Restatement of Thesis (<p class="section-lead"><strong><em>)
+   - Synthesis of Main Points (<p> — 2-3 sentences connecting major themes)
+   - Broader Historical Significance (<p><em> — long-term impact, relevance to modern historians)
+   Wrap in <div class="essay-section essay-conclusion"><div class="essay-section-label">Conclusion &amp; Historical Significance</div>...</div>
+
+4. BIBLIOGRAPHY:
+   - Primary Sources (alphabetized by author/title)
+   - Secondary Sources (peer-reviewed; alphabetized by author's last name)
+   Wrap in <div class="essay-bibliography"><h2>Bibliography</h2><h3>Primary Sources</h3><ul>...</ul><h3>Secondary Sources</h3><ul>...</ul></div>
+
+Additional rules:
+- Wrap ALL key terms in <strong>, use <em> for quotes/emphasis
+- Minimum 1000-1200 words of actual content
+- No source URLs or raw Wikipedia links in the essay text
+- Write in rigorous academic but accessible prose
 
 Return ONLY HTML content."""
 

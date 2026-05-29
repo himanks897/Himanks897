@@ -24,6 +24,7 @@ from config import Config
 from wikipedia_api import get_article, search_articles as wiki_search, get_related, get_on_this_day
 from api import wikipedia, images as img_api, maps as maps_api
 from api.gemini_synthesis import (
+    synthesise_article,
     generate_summary,
     simplify_paragraph, generate_timeline, generate_related_topics,
     generate_mcq_quiz, generate_fill_blanks_quiz, define_terms,
@@ -484,6 +485,78 @@ _TOPIC_ABBREVIATIONS = {
 }
 
 
+# Famous historical person → broader historical context mapping
+_PERSON_CONTEXT_MAP = {
+    # WW2 / Nazi Germany
+    'adolf hitler': 'World War 2 Nazi Germany Third Reich Holocaust',
+    'hitler': 'World War 2 Nazi Germany Third Reich',
+    'eva braun': 'World War 2 Nazi Germany Hitler',
+    'himmler': 'World War 2 Nazi Germany SS Holocaust',
+    'goebbels': 'World War 2 Nazi Germany Propaganda',
+    'rommel': 'World War 2 North Africa Campaign Germany',
+    'göring': 'World War 2 Nazi Germany Luftwaffe',
+    'mussolini': 'World War 2 Fascist Italy',
+    # WW1
+    'kaiser wilhelm': 'World War 1 German Empire',
+    'franz ferdinand': 'World War 1 Assassination Sarajevo',
+    'haig': 'World War 1 British Western Front',
+    # Napoleon
+    'napoleon': 'Napoleonic Wars French Empire',
+    'napoleon bonaparte': 'Napoleonic Wars French Empire',
+    'josephine': 'Napoleon French Empire',
+    'wellington': 'Napoleonic Wars Battle of Waterloo',
+    # Ancient Rome
+    'julius caesar': 'Roman Republic Roman Empire',
+    'caesar': 'Roman Republic Roman Empire',
+    'augustus': 'Roman Empire Pax Romana',
+    'nero': 'Roman Empire Julio-Claudian Dynasty',
+    'cleopatra': 'Ancient Egypt Roman Republic',
+    'hannibal': 'Punic Wars Carthage Rome',
+    'alexander': 'Ancient Greece Macedonian Empire',
+    'alexander the great': 'Ancient Greece Macedonian Empire Persia',
+    # India
+    'gandhi': 'Indian Independence Movement Non-Cooperation',
+    'nehru': 'Indian Independence Movement Partition',
+    'ambedkar': 'Indian Independence Constitution Untouchability',
+    'subhas chandra bose': 'Indian National Army World War 2',
+    'aurangzeb': 'Mughal Empire Decline',
+    'akbar': 'Mughal Empire Golden Age',
+    'tipu sultan': 'Anglo-Mysore Wars British India',
+    # Russia / Soviet
+    'stalin': 'Soviet Union World War 2 Cold War Gulag',
+    'trotsky': 'Russian Revolution Soviet Union',
+    'rasputin': 'Russian Revolution Romanov Dynasty',
+    'nicholas ii': 'Russian Revolution Romanov Dynasty',
+    'kruschev': 'Cold War Soviet Union Cuban Missile Crisis',
+    # USA
+    'lincoln': 'American Civil War Emancipation',
+    'washington': 'American Revolution United States founding',
+    'jefferson': 'American Revolution Declaration Independence',
+    'kennedy': 'Cold War Cuban Missile Crisis Assassination',
+    'martin luther king': 'Civil Rights Movement USA',
+    # UK / Europe
+    'churchill': 'World War 2 British Empire',
+    'cromwell': 'English Civil War',
+    'henry viii': 'Tudor England Reformation',
+    'elizabeth i': 'Tudor England Spanish Armada',
+    'victoria': 'Victorian Era British Empire',
+    # China
+    'mao': 'Chinese Communist Revolution Cultural Revolution',
+    'mao zedong': 'Chinese Communist Revolution Cultural Revolution',
+    'chiang kai-shek': 'Chinese Civil War Republic of China',
+    # Other
+    'columbus': 'Age of Discovery Americas',
+    'vasco da gama': 'Age of Discovery Spice Trade India',
+    'spartacus': 'Roman Republic Slave Revolt',
+    'genghis khan': 'Mongol Empire Conquest',
+    'hirohito': 'World War 2 Imperial Japan',
+    'truman': 'World War 2 Atomic Bomb Cold War',
+    'eisenhower': 'World War 2 Cold War',
+    'de gaulle': 'World War 2 France Liberation',
+    'franco': 'Spanish Civil War Fascism',
+}
+
+
 def _expand_topic_abbr(topic: str) -> str:
     """Expand common abbreviations before word extraction."""
     _re = re  # module-level re
@@ -505,6 +578,23 @@ def _topic_words(topic: str) -> set:
     words = set(_re.findall(r'\b[a-zA-Z]{2,}\b', expanded.lower()))
     filtered = words - _TOPIC_STOPWORDS
     return filtered if filtered else words
+
+
+def _resolve_search_context(topic: str) -> str:
+    """
+    Enriches the search topic with broader historical context.
+    If the user types a person's name (e.g. 'Adolf Hitler'), we return
+    the enriched query 'World War 2 Nazi Germany Third Reich Holocaust'
+    so the database search and article generation cover the full context.
+    Returns the enriched topic string (or the original if no mapping found).
+    """
+    normalized = topic.lower().strip()
+    if normalized in _PERSON_CONTEXT_MAP:
+        return _PERSON_CONTEXT_MAP[normalized]
+    for person, context in _PERSON_CONTEXT_MAP.items():
+        if person in normalized and len(person) > 5:
+            return f"{topic} {context}"
+    return topic
 
 
 # Page-title markers that strongly indicate a sport/entertainment page
@@ -656,6 +746,30 @@ def gather_raw_content(topic: str, year: int, country: str,
             if "Wikipedia" not in sources:
                 sources.append("Wikipedia")
 
+    # ── Supplement with pipeline DB content from ALL registered sources ─────────
+    try:
+        db_conn = _pdb.get_connection()
+        if db_conn.get("records"):
+            db_records = _pdb.search_records_ranked(
+                db_conn, topic, content_types=("full_text",), limit=15
+            )
+            for r in db_records[:8]:
+                url   = r.get("source_url", "")
+                if "wikipedia.org" in url or "wikidata.org" in url:
+                    continue
+                snippet = _best_snippet(r)
+                if not snippet or len(snippet) < 60:
+                    snippet = _clean_snippet(r.get("summary") or r.get("full_text") or "")[:300]
+                if snippet and len(snippet) > 50:
+                    src_name = _source_label(url, r.get("region", ""))
+                    chunk = f"[{src_name}] {snippet}"
+                    if chunk[:80] not in "\n".join(raw_parts):
+                        raw_parts.append(chunk)
+                        if src_name not in sources:
+                            sources.append(src_name)
+    except Exception:
+        pass
+
     if not sources:
         sources = ["Wikipedia"]
 
@@ -776,6 +890,14 @@ def results():
 
         # ── Phase 1b: format article (CPU, fast) while other futures still run ─
         article_data = format_for_article(raw_content, topic, year, country, era)
+        # ── Use Gemini for full academic essay format when content is available ──
+        if raw_content and len(raw_content) > 300:
+            try:
+                gemini_data = synthesise_article(topic, year, country, era, raw_content)
+                if gemini_data.get("html") and len(gemini_data["html"]) > 500:
+                    article_data = gemini_data
+            except Exception:
+                pass  # fall back to formatter output
         article_html = article_data.get("html", "")
         importance   = article_data.get("importance_level", "National")
         key_terms    = article_data.get("key_terms", []) or extract_terms(article_html)
@@ -1506,6 +1628,61 @@ def api_search():
         return jsonify({"results": []})
     results = wikipedia.search_wikipedia(q, limit=6)
     return jsonify({"results": results})
+
+
+@app.route("/api/history-spell")
+def api_history_spell():
+    """
+    History-aware spelling correction.
+    Checks common misspelling dictionary first, then uses Gemini for unknown terms.
+    Returns suggested correction for historical terminologies only.
+    """
+    q = request.args.get("q", "").strip()
+    if not q or len(q) < 3:
+        return jsonify({"suggestion": None})
+
+    _HISTORY_SPELL = {
+        'hitlar': 'Hitler', 'hittler': 'Hitler', 'eidolf': 'Adolf',
+        'napolean': 'Napoleon', 'napoleen': 'Napoleon',
+        'caeser': 'Caesar', 'ceaser': 'Caesar',
+        'ghandi': 'Gandhi', 'gandi': 'Gandhi', 'mahatma ghandi': 'Mahatma Gandhi',
+        'cleopetra': 'Cleopatra', 'cleopatra': 'Cleopatra',
+        'alexnder': 'Alexander', 'macedona': 'Macedonia',
+        'ottomon': 'Ottoman', 'ottaman': 'Ottoman',
+        'mugal': 'Mughal', 'mughal': 'Mughal', 'moghul': 'Mughal',
+        'chingis': 'Genghis', 'gengis': 'Genghis', 'genghes': 'Genghis',
+        'sparticus': 'Spartacus', 'spartakus': 'Spartacus',
+        'crusaide': 'Crusade', 'crusaides': 'Crusades',
+        'rennaisance': 'Renaissance', 'renaisance': 'Renaissance', 'renaissence': 'Renaissance',
+        'reformation': 'Protestant Reformation',
+        'medievel': 'Medieval', 'medival': 'Medieval',
+        'byzentine': 'Byzantine', 'bizantine': 'Byzantine',
+        'mesopotama': 'Mesopotamia', 'mesopotemia': 'Mesopotamia',
+        'phaorah': 'Pharaoh', 'pharoah': 'Pharaoh',
+        'hieroglifics': 'Hieroglyphics', 'hieroglyphics': 'Hieroglyphics',
+        'feudalisim': 'Feudalism', 'feudalim': 'Feudalism',
+        'colonalisim': 'Colonialism', 'colonalim': 'Colonialism',
+        'imperalisim': 'Imperialism',
+        'bolshevik': 'Bolshevik Revolution', 'bolshevist': 'Bolshevik',
+        'mao setung': 'Mao Zedong', 'mao ze dong': 'Mao Zedong',
+        'hiroshema': 'Hiroshima',
+        'versaille': 'Versailles', 'versails': 'Versailles',
+        'austia-hungary': 'Austria-Hungary', 'austro-hungaria': 'Austria-Hungary',
+        'sumerians': 'Sumerians Mesopotamia', 'sumeria': 'Sumer Mesopotamia',
+        'aztecs': 'Aztec Empire', 'inkas': 'Inca Empire',
+        'vikigns': 'Vikings', 'vikingz': 'Vikings',
+        'mongols': 'Mongol Empire', 'mongal': 'Mongol',
+    }
+
+    q_lower = q.lower()
+    if q_lower in _HISTORY_SPELL:
+        return jsonify({"suggestion": _HISTORY_SPELL[q_lower]})
+
+    for misspell, correct in _HISTORY_SPELL.items():
+        if misspell in q_lower and len(misspell) > 4:
+            return jsonify({"suggestion": q.lower().replace(misspell, correct.lower()).title()})
+
+    return jsonify({"suggestion": None})
 
 
 # ─── Google Auth ──────────────────────────────────────────────────────────────

@@ -146,6 +146,48 @@ async function loadSuggestions() {
 
 loadSuggestions();
 
+// ── History-aware autocorrect ────────────────────────────────────────────────
+(function() {
+  const input = document.getElementById('topic-input');
+  const hint  = document.getElementById('topic-hint');
+  let spellTimer = null;
+  let currentSuggestion = null;
+
+  function showSpellSuggestion(suggestion) {
+    currentSuggestion = suggestion;
+    hint.innerHTML = `<em>Did you mean <strong style="cursor:pointer;color:var(--color-accent);text-decoration:underline;" id="spell-fix">"${suggestion}"</strong>? <span style="opacity:0.7;font-size:0.75rem;">(Click to apply)</span></em>`;
+    const fix = document.getElementById('spell-fix');
+    if (fix) fix.addEventListener('click', () => {
+      input.value = suggestion;
+      hint.innerHTML = '<em>Try the name of a war, person, movement, treaty, or period</em>';
+      currentSuggestion = null;
+    });
+  }
+
+  function resetHint() {
+    hint.innerHTML = '<em>Try the name of a war, person, movement, treaty, or period</em>';
+    currentSuggestion = null;
+  }
+
+  input.addEventListener('input', function() {
+    clearTimeout(spellTimer);
+    const val = this.value.trim();
+    if (val.length < 4) { resetHint(); return; }
+
+    spellTimer = setTimeout(async () => {
+      try {
+        const r = await fetch(`/api/history-spell?q=${encodeURIComponent(val)}`);
+        const data = await r.json();
+        if (data.suggestion && data.suggestion.toLowerCase() !== val.toLowerCase()) {
+          showSpellSuggestion(data.suggestion);
+        } else {
+          resetHint();
+        }
+      } catch(e) { /* silent fail */ }
+    }, 600);
+  });
+})();
+
 // ── Voice input ──────────────────────────────────────────────────────────────
 const micBtn = document.getElementById('mic-btn');
 let isRecording = false;

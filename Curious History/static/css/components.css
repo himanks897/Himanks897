@@ -22,7 +22,7 @@
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(196, 150, 88, 0.55) 0%, rgba(208, 162, 100, 0.60) 50%, rgba(196, 150, 88, 0.55) 100%);
+    linear-gradient(135deg, rgba(225, 192, 130, 0.35) 0%, rgba(235, 205, 148, 0.40) 50%, rgba(225, 192, 130, 0.35) 100%);
   z-index: 0;
 }
 
@@ -3026,11 +3026,11 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(192, 148, 88, 0.96);
+  background: rgba(225, 192, 130, 0.96);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 2px 16px rgba(60, 30, 5, 0.18), inset 0 -1px 0 rgba(255, 200, 120, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.48);
+  box-shadow: 0 2px 16px rgba(110, 72, 20, 0.10), inset 0 -1px 0 rgba(255, 215, 150, 0.18);
 }
 .landing-nav-inner {
   max-width: var(--max-width);
