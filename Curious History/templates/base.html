@@ -75,6 +75,15 @@
 
     <!-- Right icons -->
     <div class="nav-right">
+      <!-- Subscriptions button — only shown when logged in -->
+      {% if current_user %}
+      <a href="{{ url_for('pricing') }}"
+         class="nav-subscriptions-btn"
+         aria-label="View subscription plans">
+        💳 <span class="nav-sub-label">Subscriptions</span>
+      </a>
+      {% endif %}
+
       <!-- Accessibility gear button — label is now a tooltip, not always-visible text -->
       <div class="nav-a11y-wrap" id="a11y-btn-wrap">
         <button

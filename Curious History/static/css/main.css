@@ -261,6 +261,19 @@ html.dark .world-option:hover {
   border-color: rgba(139,69,19,0.6);
 }
 
+/* Dark mode subscriptions button */
+html.dark .nav-subscriptions-btn {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.14);
+  color: #D4956A;
+}
+html.dark .nav-subscriptions-btn:hover,
+html.dark .nav-subscriptions-btn:focus {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.22);
+  color: #E8A878;
+}
+
 /* Dark mode nav icon button */
 html.dark .nav-icon-btn {
   background: rgba(255,255,255,0.08);
@@ -659,6 +672,49 @@ html.dyslexic p {
   transform: translateY(-1px);
 }
 .nav-icon-btn:active { transform: scale(0.93); }
+
+/* ── Subscriptions nav button (logged-in users only) ───────────────────── */
+.nav-subscriptions-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 16px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 0.5px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--color-accent);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  align-self: center;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.90);
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+.nav-subscriptions-btn:hover,
+.nav-subscriptions-btn:focus {
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,0.96);
+  transform: translateY(-1px);
+}
+.nav-subscriptions-btn:active { transform: scale(0.96); }
+
+/* Hide the text label on small screens — keep emoji only */
+@media (max-width: 720px) {
+  .nav-sub-label { display: none; }
+  .nav-subscriptions-btn { padding: 7px 10px; }
+}
+@media (max-width: 480px) {
+  .nav-subscriptions-btn { display: none; }
+}
 
 /* Gear icon wrap — relative so tooltip can anchor below it */
 .nav-a11y-wrap {
