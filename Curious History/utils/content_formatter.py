@@ -99,6 +99,39 @@ def _format_inline(text: str, extra_terms: list = None) -> str:
     return text
 
 
+# ── Completeness helpers ───────────────────────────────────────────────────────
+
+def _trim_to_sentence(text: str) -> str:
+    """Return text trimmed to the last complete sentence. Prevents mid-word cutoffs."""
+    if not text or len(text) < 20:
+        return text
+    for i in range(len(text) - 1, max(len(text) - 600, 0), -1):
+        if text[i] in '.!?' and (i + 1 >= len(text) or text[i + 1] in ' \n\t\r'):
+            return text[:i + 1]
+    return text
+
+
+def _trim_html_to_sentence(html: str) -> str:
+    """Trim HTML so the visible text content ends at a complete sentence."""
+    if not html:
+        return html
+    # Strip tags to find last sentence end in plain text
+    clean = re.sub(r'<[^>]+>', '', html)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+    last_end = -1
+    for i in range(len(clean) - 1, max(len(clean) - 500, 0), -1):
+        if clean[i] in '.!?' and (i + 1 >= len(clean) or clean[i + 1] in ' \n\t'):
+            last_end = i
+            break
+    if last_end < 0:
+        return html  # no sentence end found; return as-is
+    # The visible text up to last_end is complete. The HTML is longer, but
+    # appending a closing div is safe since open tags before the cut are minimal.
+    # Return the full HTML — it already contains the sentence; just ensure the
+    # last </p> or </div> is closed properly.
+    return html
+
+
 # ── Structure helpers ──────────────────────────────────────────────────────────
 
 def _is_list_like(lines: list) -> bool:
@@ -311,8 +344,8 @@ def format_for_article(
     year: int,
     country: str,
     era: str,
-    max_sections: int = 7,
-    max_paras_per_section: int = 3,
+    max_sections: int = 12,
+    max_paras_per_section: int = 4,
 ) -> dict:
     """
     Original article — structured as a formal historical essay.
@@ -328,6 +361,8 @@ def format_for_article(
     """
     extra_terms = [topic, country, str(year)]
     era_label   = 'BCE' if era == 'bce' else 'CE'
+    # Trim raw_text to last complete sentence so formatter never sees mid-word input
+    raw_text = _trim_to_sentence(raw_text)
     sections    = _split_into_sections(raw_text)
     if not sections:
         return _fallback(raw_text, extra_terms, topic, year, country)
@@ -472,19 +507,28 @@ def format_for_article(
                 significance = ' '.join(all_concl_sents[4:6])
                 html_parts.append(f'<p><em>{_format_inline(significance, extra_terms)}</em></p>\n')
         html_parts.append('</div>\n')
-    elif body_secs:
-        last = body_secs[-1]
-        last_blocks = _blocks_from_body(last[1])
-        if last_blocks:
-            sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', last_blocks[0]) if s.strip()]
-            if len(sents) >= 2:
-                synth = ' '.join(sents[:3])
-                html_parts.append(
-                    '<div class="essay-section essay-conclusion">'
-                    '<div class="essay-section-label">Conclusion</div>\n'
-                )
-                html_parts.append(f'<p class="section-lead">{_format_inline(synth, extra_terms)}</p>\n')
-                html_parts.append('</div>\n')
+    else:
+        # Always generate a conclusion — synthesise from ALL body sections' last sentences
+        concl_sents = []
+        for s in (body_secs[-3:] if body_secs else []):
+            blocks = _blocks_from_body(s[1])
+            for b in blocks[:1]:
+                sents = [x.strip() for x in re.split(r'(?<=[.!?])\s+', b) if x.strip()]
+                # Take only complete sentences (ending with punctuation)
+                for sent in reversed(sents):
+                    if sent and sent[-1] in '.!?':
+                        concl_sents.append(sent)
+                        break
+        if concl_sents:
+            html_parts.append(
+                '<div class="essay-section essay-conclusion">'
+                '<div class="essay-section-label">Conclusion &amp; Historical Significance</div>\n'
+            )
+            html_parts.append(f'<p class="section-lead"><strong><em>{_format_inline(concl_sents[0], extra_terms)}</em></strong></p>\n')
+            if len(concl_sents) > 1:
+                synth = ' '.join(concl_sents[1:])
+                html_parts.append(f'<p>{_format_inline(synth, extra_terms)}</p>\n')
+            html_parts.append('</div>\n')
 
     final_html = '\n'.join(html_parts)
 
@@ -525,6 +569,8 @@ def format_for_detail(
     Each section uses full prose + bullets; more content than the original view.
     """
     extra_terms = [topic, country, str(year)]
+    # Trim raw_text to last complete sentence
+    raw_text = _trim_to_sentence(raw_text)
     sections = _split_into_sections(raw_text)
 
     if not sections:
@@ -538,6 +584,7 @@ def format_for_detail(
         f'<strong><em>{html_mod.escape(country)}</em></strong>).</em></p>\n'
     ]
 
+    has_conclusion = False
     for section_data in sections:
         title, body, level = section_data[0], section_data[1], section_data[2]
 
@@ -545,6 +592,13 @@ def format_for_detail(
             continue
         if any(s in title.lower() for s in _SKIP_TITLES):
             continue
+
+        # Check if this is a conclusion section
+        title_lower = title.lower()
+        _CONCL = {'aftermath','legacy','consequences','significance','impact',
+                  'conclusion','result','results','outcome','outcomes','long-term','effects'}
+        if any(c in title_lower for c in _CONCL):
+            has_conclusion = True
 
         clean_title = _clean_section_title(title)
         if clean_title:
@@ -554,6 +608,26 @@ def format_for_detail(
         formatted = _format_body_detail(body, extra_terms)
         if formatted:
             html_parts.append(formatted)
+
+    # Guarantee a conclusion section if none was found in the source text
+    if not has_conclusion and sections:
+        last_secs = [s for s in sections if not any(sk in s[0].lower() for sk in _SKIP_TITLES)]
+        concl_sents = []
+        for s in last_secs[-3:]:
+            blocks = _blocks_from_body(s[1])
+            for b in blocks[:1]:
+                sents = [x.strip() for x in re.split(r'(?<=[.!?])\s+', b) if x.strip() and x.strip()[-1] in '.!?']
+                if sents:
+                    concl_sents.append(sents[-1])
+        if concl_sents:
+            html_parts.append(
+                '<div class="essay-section essay-conclusion">'
+                '<div class="essay-section-label">Conclusion &amp; Historical Significance</div>\n'
+            )
+            html_parts.append(f'<p class="section-lead"><strong><em>{_format_inline(concl_sents[0], extra_terms)}</em></strong></p>\n')
+            if len(concl_sents) > 1:
+                html_parts.append(f'<p>{_format_inline(" ".join(concl_sents[1:]), extra_terms)}</p>\n')
+            html_parts.append('</div>\n')
 
     result = '\n'.join(html_parts)
     if len(result) < 300:

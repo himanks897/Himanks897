@@ -24,7 +24,6 @@ from config import Config
 from wikipedia_api import get_article, search_articles as wiki_search, get_related, get_on_this_day
 from api import wikipedia, images as img_api, maps as maps_api
 from api.gemini_synthesis import (
-    synthesise_article,
     generate_summary,
     simplify_paragraph, generate_timeline, generate_related_topics,
     generate_mcq_quiz, generate_fill_blanks_quiz, define_terms,
@@ -732,8 +731,8 @@ def gather_raw_content(topic: str, year: int, country: str,
     off-topic content to appear. Uses only topic-specific Wikipedia articles.
     Returns (combined_text, sources_list).
     """
-    main_limit  = 12000 if detail else 6000
-    extra_limit = 4000  if detail else 2000
+    main_limit  = 30000 if detail else 18000
+    extra_limit = 8000  if detail else 5000
 
     raw_parts = []
     sources   = []
@@ -820,6 +819,17 @@ def gather_raw_content(topic: str, year: int, country: str,
         if s not in seen:
             seen.add(s)
             unique_sources.append(s)
+
+    # Trim combined text to the last complete sentence so the formatter
+    # never receives mid-word or mid-sentence input.
+    if combined:
+        last_end = -1
+        for i in range(len(combined) - 1, max(len(combined) - 800, 0), -1):
+            if combined[i] in '.!?' and (i + 1 >= len(combined) or combined[i + 1] in ' \n\t\r'):
+                last_end = i
+                break
+        if last_end > 100:
+            combined = combined[:last_end + 1]
 
     return combined, unique_sources
 
@@ -929,17 +939,10 @@ def results():
             raw_result if isinstance(raw_result, tuple) else ("", ["Wikipedia"])
         )
 
-        # ── Phase 1b: Gemini academic essay is primary; formatter is fallback only ─
-        # Always call Gemini — it uses its own knowledge when raw_content is thin.
-        # The formatter only wins if Gemini is unavailable or returns garbage.
-        try:
-            gemini_data = synthesise_article(topic, year, country, era, raw_content)
-            if gemini_data.get("html") and len(gemini_data["html"]) > 800:
-                article_data = gemini_data
-            else:
-                article_data = format_for_article(raw_content, topic, year, country, era)
-        except Exception:
-            article_data = format_for_article(raw_content, topic, year, country, era)
+        # ── Phase 1b: format article from Wikipedia/DB content (no Gemini) ────────
+        # Gemini is only used for summaries and quizzes, NOT for article generation.
+        # The formatter produces complete, structured articles from raw source text.
+        article_data = format_for_article(raw_content, topic, year, country, era)
         article_html = article_data.get("html", "")
         importance   = article_data.get("importance_level", "National")
         key_terms    = article_data.get("key_terms", []) or extract_terms(article_html)
