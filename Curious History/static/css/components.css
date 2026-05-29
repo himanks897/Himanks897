@@ -2983,13 +2983,13 @@
 }
 
 /* ── Landing page text scale (base 22px → everything is noticeably larger) ─── */
-.landing-hero-logo       { font-size: clamp(2.8rem, 7vw, 5.2rem); }
+.landing-hero-logo       { font-size: clamp(2.0rem, 5vw, 3.6rem); }
 .landing-hero-tagline    { font-size: 1.4rem; letter-spacing: 0.01em; }
 .landing-hero-sub        { font-size: 1.25rem; line-height: 1.8; }
 .landing-section-title   { font-size: clamp(1.8rem, 3.6vw, 2.7rem); }
 .landing-section-intro   { font-size: 1.22rem; line-height: 1.82; }
-.landing-about-text p    { font-size: 1.15rem; line-height: 1.82; }
-.landing-about-text ul li { font-size: 1.05rem; }
+.landing-about-text p    { font-size: clamp(1.0rem, 2.8vw, 1.18rem); line-height: 1.82; }
+.landing-about-text ul li { font-size: clamp(1.0rem, 2.6vw, 1.15rem); }
 .landing-audience-card h3 { font-size: clamp(1.1rem, 3.6vw, 1.45rem); }
 .landing-audience-card p  { font-size: clamp(0.95rem, 2.8vw, 1.18rem); line-height: 1.75; }
 .landing-audience-card ul li { font-size: clamp(0.88rem, 2.5vw, 1.10rem); }
@@ -3003,7 +3003,7 @@
 .landing-footer-inner > p { font-size: 0.95rem; }
 .lpf-try-text            { font-size: 1.22rem; }
 .landing-preview-title   { font-size: clamp(1.12rem, 2.4vw, 1.45rem); }
-.landing-section-label   { font-size: 0.8rem; letter-spacing: 0.12em; }
+.landing-section-label   { font-size: clamp(0.82rem, 1.8vw, 0.92rem); letter-spacing: 0.12em; }
 .landing-hero-note-inline { font-size: 0.95rem; }
 
 /* ── Buttons, badges, pills stay upright (non-italic) ───────────────────── */
@@ -3096,7 +3096,7 @@
 }
 .landing-hero-logo {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  font-size: clamp(2.0rem, 5vw, 3.6rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
@@ -3291,11 +3291,11 @@
 }
 .landing-about-text ul li {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.78rem;
+  font-size: clamp(1.0rem, 2.6vw, 1.15rem);
   font-style: italic;
   color: var(--color-text-secondary);
-  line-height: 1.5;
-  padding-left: 14px;
+  line-height: 1.65;
+  padding-left: 18px;
   position: relative;
 }
 .landing-about-text ul li::before {
@@ -3303,7 +3303,7 @@
   position: absolute;
   left: 0;
   color: var(--color-gold);
-  font-size: 0.72rem;
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
   font-style: normal;
 }
 .landing-about-text ul li strong { color: var(--color-accent); font-weight: 700; font-style: italic; }
@@ -3527,14 +3527,7 @@
   overflow: hidden;
   position: relative;
 }
-/* Faint scroll-paper texture on the banner */
-.landing-preview-banner::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238b4513' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  pointer-events: none;
-}
+/* No texture on preview banner — clean glass look */
 
 .landing-preview-badge {
   display: flex;

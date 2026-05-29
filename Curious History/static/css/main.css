@@ -5,12 +5,12 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Refined Parchment — warm aged paper; surface is distinctly lighter than bg */
-  --color-bg:              #D9C49A;
-  --color-surface:         #F2E6C8;
-  --color-surface-2:       #E8D5A8;
-  --color-border:          #B8843C;
-  --color-border-light:    #CFA85C;
+  /* Ivory Parchment — light, airy, historic; white glass cards pop cleanly against it */
+  --color-bg:              #F0E8D2;
+  --color-surface:         #FAF6EC;
+  --color-surface-2:       #EDE5C8;
+  --color-border:          #C09858;
+  --color-border-light:    #D8B870;
 
   --color-text-primary:    #1E0E04;
   --color-text-secondary:  #3E1E08;
@@ -457,12 +457,10 @@ body {
   min-height: 100vh;
   /* Refined manuscript paper — subtle grain texture over a gentle warm gradient */
   background-image:
-    /* Paper grain — SVG fractal noise, slightly more visible for manuscript feel */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.038'/%3E%3C/svg%3E"),
-    /* Subtle edge vignette — aged manuscript corners */
-    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(110, 72, 20, 0.10) 100%),
-    /* Refined parchment gradient — deeper warm tone, aged manuscript feel */
-    linear-gradient(155deg, #E8D4A0 0%, #D8C292 42%, #DCC89C 78%, #E4D0A4 100%);
+    /* Subtle edge vignette — light warmth in corners */
+    radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(140, 110, 60, 0.06) 100%),
+    /* Light ivory parchment gradient — fresh cream paper, historic & glass-compatible */
+    linear-gradient(155deg, #F5EDD8 0%, #EDE5C4 42%, #F0EAD0 78%, #F5EDD8 100%);
 }
 
 html.dyslexic body,
