@@ -233,32 +233,50 @@
     speechSynthesis.onvoiceschanged = loadVoices;
   }
 
-  // Returns the best available English voice, prioritising natural-sounding ones.
+  // Returns the best available voice for Indian English audiences.
+  // Priority: Indian English voices → clear British English → any English.
   function getBestVoice() {
     const voices = _cachedVoices.length
       ? _cachedVoices
       : (window.speechSynthesis?.getVoices() || []);
 
-    // Ordered priority — macOS system voices first (most natural), then Google TTS
-    const preferred = [
-      'Samantha',               // macOS en-US — very clear & natural
-      'Alex',                   // macOS en-US — male, natural
-      'Karen',                  // macOS en-AU
-      'Daniel',                 // macOS en-GB
-      'Moira',                  // macOS en-IE
-      'Tessa',                  // macOS en-ZA
-      'Google US English',      // Chrome — clear
-      'Google UK English Female',
-      'Microsoft Zira',         // Windows — female, clear
-      'Microsoft David',        // Windows — male, clear
+    // 1st priority — Indian English voices (clear and familiar to Indian users)
+    const indianPreferred = [
+      'Rishi',                    // macOS en-IN — Indian English male, very clear
+      'Lekha',                    // macOS en-IN — Indian English female
+      'Google Indian English',    // Chrome en-IN — natural Indian English
+      'Google हिंदी',              // Chrome hi-IN — fallback if no en-IN
+      'Microsoft Heera',          // Windows en-IN — female Indian English
+      'Microsoft Ravi',           // Windows en-IN — male Indian English
     ];
-
-    for (const name of preferred) {
+    for (const name of indianPreferred) {
       const match = voices.find(v => v.name.includes(name));
       if (match) return match;
     }
-    // Fallback: any local (device) English voice, then any English
-    return voices.find(v => v.lang === 'en-US' && v.localService)
+
+    // 2nd priority — any en-IN voice available on device
+    const inVoice = voices.find(v => v.lang === 'en-IN');
+    if (inVoice) return inVoice;
+
+    // 3rd priority — clear British/Australian English (accent familiar in India)
+    const secondaryPreferred = [
+      'Daniel',                   // macOS en-GB — clear British male
+      'Karen',                    // macOS en-AU
+      'Google UK English Female',
+      'Google UK English Male',
+      'Microsoft George',         // Windows en-GB
+      'Microsoft Hazel',          // Windows en-GB
+      'Samantha',                 // macOS en-US — clear, last resort
+      'Microsoft Zira',
+    ];
+    for (const name of secondaryPreferred) {
+      const match = voices.find(v => v.name.includes(name));
+      if (match) return match;
+    }
+
+    // Final fallback: any local English voice
+    return voices.find(v => v.lang === 'en-GB' && v.localService)
+      || voices.find(v => v.lang === 'en-US' && v.localService)
       || voices.find(v => v.lang.startsWith('en-') && v.localService)
       || voices.find(v => v.lang.startsWith('en'))
       || null;
@@ -295,13 +313,16 @@
     window.speechSynthesis.cancel(); // clear any leftover utterance
 
     utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;   // natural pace
+    utterance.rate = 0.95;  // slightly slower — easier to follow
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    utterance.lang = 'en-US';
+    utterance.lang = 'en-IN'; // prefer Indian English; browser falls back to en if unavailable
 
     const voice = getBestVoice();
-    if (voice) utterance.voice = voice;
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang; // use the voice's actual lang for correct pronunciation
+    }
 
     utterance.onstart = () => {
       isReading = true;

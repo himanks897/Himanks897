@@ -7,9 +7,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const D = window.RESULT_DATA || {};
 
-  // ── Wrap paragraphs with simplify buttons ──────────────────────────────
-  wrapParagraphs();
-
   // ── Emoji Reactions ────────────────────────────────────────────────────
   initReactions();
 
@@ -33,60 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.initLightbox(window.__inlineImages);
   }
 });
-
-// ── Wrap article paragraphs for simplify functionality ────────────────────
-function wrapParagraphs() {
-  const body = document.getElementById('article-body');
-  if (!body) return;
-
-  const paras = body.querySelectorAll('p');
-  paras.forEach((p, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'para-wrap';
-    wrap.setAttribute('data-para-index', i);
-    p.parentNode.insertBefore(wrap, p);
-    wrap.appendChild(p);
-
-    const btn = document.createElement('button');
-    btn.className = 'simplify-btn';
-    btn.setAttribute('aria-label', 'Simplify this paragraph');
-    btn.innerHTML = '✏️ Simplify →';
-    btn.addEventListener('click', () => simplifyParagraph(wrap, p, i));
-    wrap.insertBefore(btn, p);
-  });
-}
-
-async function simplifyParagraph(wrap, para, idx) {
-  const D = window.RESULT_DATA || {};
-  const original = para.innerHTML;
-  const originalText = para.innerText;
-
-  para.innerHTML = '<em style="color:var(--color-text-muted);">Simplifying…</em>';
-
-  try {
-    const r = await fetch('/api/simplify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paragraph: originalText, topic: D.topic }),
-    });
-    const data = await r.json();
-    para.innerHTML = data.html || original;
-
-    // Add restore button
-    const restore = document.createElement('button');
-    restore.className = 'simplify-btn';
-    restore.style.display = 'inline-flex';
-    restore.innerHTML = '↩ Restore original';
-    restore.addEventListener('click', () => {
-      para.innerHTML = original;
-      restore.remove();
-    });
-    wrap.appendChild(restore);
-  } catch(e) {
-    para.innerHTML = original;
-    window.showToast?.('Could not simplify paragraph. Please try again.', 'error');
-  }
-}
 
 // ── Emoji Reactions ────────────────────────────────────────────────────────
 function initReactions() {

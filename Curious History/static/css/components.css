@@ -875,6 +875,7 @@
   gap: 8px;
   margin-bottom: 14px;
   padding: 12px 16px;
+  overflow: visible;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
@@ -1219,41 +1220,6 @@
   margin-bottom: 1em;
 }
 
-/* ── Paragraph Simplify ───────────────────────────────────────────────────── */
-.para-wrap {
-  position: relative;
-}
-.simplify-btn {
-  display: none;
-  position: absolute;
-  right: 0;
-  top: 0;
-  padding: 3px 8px;
-  font-size: 0.72rem;
-  font-style: italic;
-  border: 0.5px solid rgba(255, 255, 255, 0.78);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  color: var(--color-accent);
-  cursor: pointer;
-  transition: background 0.15s ease;
-  min-height: 28px;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.90);
-}
-.para-wrap:hover .simplify-btn,
-.para-wrap:focus-within .simplify-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-.simplify-btn:hover, .simplify-btn:focus, .simplify-btn:active {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(255, 255, 255, 0.96);
-  color: var(--color-accent);
-}
 
 /* ── Inline Expanded Content ──────────────────────────────────────────────── */
 .detail-content-panel,
@@ -1973,16 +1939,19 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.90);
   border-radius: var(--radius-md);
   padding: 12px 16px;
   min-width: 220px;
-  box-shadow: var(--shadow-lg);
-  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.98);
+  z-index: 600;
   display: none;
   font-size: 0.82rem;
   font-style: italic;
+  pointer-events: auto;
 }
 .confidence-popover.show { display: block; }
 .confidence-popover-source {
