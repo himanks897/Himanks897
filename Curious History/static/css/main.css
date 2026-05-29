@@ -5,30 +5,30 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
-  /* Classic Parchment — warm, light, historic manuscript feel */
-  --color-bg:              #F2E8D0;
-  --color-surface:         #FAF3E6;
-  --color-surface-2:       #F5EBD8;
-  --color-border:          #C8A87A;
-  --color-border-light:    #DCC9A0;
+  /* Old Manuscript Paper — aged golden vellum, like medieval illuminated manuscripts */
+  --color-bg:              #EDE4BE;
+  --color-surface:         #F5EDD2;
+  --color-surface-2:       #EEE8C8;
+  --color-border:          #C8B07C;
+  --color-border-light:    #DDD0A0;
 
-  --color-text-primary:    #2C1A0E;
-  --color-text-secondary:  #6B3D1E;
-  --color-text-muted:      #9A6B40;
+  --color-text-primary:    #1E140A;
+  --color-text-secondary:  #4A2E12;
+  --color-text-muted:      #7A5C38;
 
-  /* Liquid Glass — clean white frosted glass over parchment */
-  --glass-bg:              rgba(255, 255, 255, 0.82);
-  --glass-bg-strong:       rgba(255, 255, 255, 0.92);
-  --glass-border:          rgba(200, 175, 130, 0.40);
-  --glass-border-dark:     rgba(120, 80, 30, 0.18);
-  --glass-shadow:          0 4px 24px rgba(80, 40, 10, 0.10), inset 0 1px 0 rgba(255,255,255,0.90);
-  --glass-shadow-sm:       0 2px 12px rgba(80, 40, 10, 0.07), inset 0 1px 0 rgba(255,255,255,0.90);
-  --glass-blur:            blur(16px) saturate(150%);
-  --glass-blur-sm:         blur(10px) saturate(140%);
+  /* Liquid Glass — true transparent white glass */
+  --glass-bg:              rgba(255, 255, 255, 0.14);
+  --glass-bg-strong:       rgba(255, 255, 255, 0.28);
+  --glass-border:          rgba(255, 255, 255, 0.68);
+  --glass-border-dark:     rgba(255, 255, 255, 0.45);
+  --glass-shadow:          0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.85);
+  --glass-shadow-sm:       0 2px 12px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.75);
+  --glass-blur:            blur(32px) saturate(180%);
+  --glass-blur-sm:         blur(24px) saturate(170%);
 
-  --color-accent:          #8B4513;
-  --color-accent-dark:     #5C2D0A;
-  --color-accent-light:    #F0D9C0;
+  --color-accent:          #7A3A0E;
+  --color-accent-dark:     #4A1E06;
+  --color-accent-light:    #EED8B8;
 
   --color-gold:            #C9922A;
   --color-gold-light:      #F5E3B8;
@@ -430,13 +430,19 @@ html.font-lg { font-size: 20px; }
 
 body {
   font-family: var(--font-ui);
-  font-style: normal;        /* was italic globally — now only applied where intentional */
+  font-style: normal;
   background-color: var(--color-bg);
   color: var(--color-text-primary);
-  line-height: 1.7;          /* slightly more generous line height */
+  line-height: 1.7;
   min-height: 100vh;
-  /* Classic parchment gradient */
-  background-image: linear-gradient(160deg, #F5EEDC 0%, #EDE2C8 50%, #F2E8D2 100%);
+  /* Refined manuscript paper — subtle grain texture over a gentle warm gradient */
+  background-image:
+    /* Paper grain — SVG fractal noise, slightly more visible for manuscript feel */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.038'/%3E%3C/svg%3E"),
+    /* Subtle edge vignette — aged manuscript darkens at the edges */
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(130, 100, 50, 0.07) 100%),
+    /* Old manuscript paper gradient — warm golden-cream, like medieval vellum */
+    linear-gradient(155deg, #F3EBCA 0%, #E8DFBA 42%, #EDE7C6 78%, #F2ECD0 100%);
 }
 
 html.dyslexic body,
@@ -490,8 +496,8 @@ html.dyslexic p {
   top: 0;
   z-index: 1000;
   height: var(--nav-height);
-  background: rgba(245, 238, 220, 0.80);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.50);
+  background: rgba(237, 228, 190, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   box-shadow: 0 2px 20px rgba(80,40,10,0.08), inset 0 -1px 0 rgba(200,160,90,0.15);
@@ -982,26 +988,27 @@ html.dyslexic p {
   box-shadow: 0 1px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.90);
 }
 
-/* Primary — rich amber-brown glass with internal glow */
+/* Primary — true white liquid glass, accent-coloured text */
 .btn-primary {
-  background: rgba(139, 69, 19, 0.88);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  color: #FFF8F0;
-  border: 1px solid rgba(230, 170, 80, 0.55);
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  color: var(--color-accent);
+  font-weight: 700;
+  border: 0.5px solid rgba(255, 255, 255, 0.82);
   box-shadow:
-    0 4px 24px rgba(139,69,19,0.30),
-    0 1px 4px rgba(0,0,0,0.08),
-    inset 0 1px 0 rgba(255,210,130,0.45),
-    inset 0 -1px 0 rgba(0,0,0,0.10);
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.05),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.22);
 }
 .btn-primary:hover, .btn-primary:focus {
-  background: rgba(115, 52, 10, 0.94);
-  border-color: rgba(240, 185, 90, 0.65);
+  background: rgba(255, 255, 255, 0.36);
+  border-color: rgba(255, 255, 255, 0.96);
   box-shadow:
-    0 8px 36px rgba(139,69,19,0.40),
-    0 2px 8px rgba(0,0,0,0.10),
-    inset 0 1px 0 rgba(255,210,130,0.40);
+    0 8px 32px rgba(0, 0, 0, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98);
   transform: translateY(-2px);
 }
 .btn-primary:active { transform: scale(0.97); }
@@ -1042,22 +1049,23 @@ html.dyslexic p {
 }
 .btn-ghost:active { transform: scale(0.97); }
 
-/* Gold — warm golden glass */
+/* Gold — white liquid glass with gold text & border */
 .btn-gold {
-  background: rgba(201, 146, 42, 0.82);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  color: #FFF8E8;
-  border: 1px solid rgba(250, 210, 100, 0.55);
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  color: var(--color-gold);
+  font-weight: 600;
+  border: 1px solid rgba(180, 120, 20, 0.40);
   box-shadow:
-    0 4px 24px rgba(180,120,20,0.30),
-    0 1px 4px rgba(0,0,0,0.08),
-    inset 0 1px 0 rgba(255,240,150,0.50);
+    0 4px 20px rgba(180,120,20,0.10),
+    0 1px 4px rgba(0,0,0,0.05),
+    inset 0 1.5px 0 rgba(255,255,255,0.90);
 }
 .btn-gold:hover, .btn-gold:focus {
-  background: rgba(175, 118, 18, 0.92);
-  border-color: rgba(255, 215, 100, 0.70);
-  box-shadow: 0 8px 36px rgba(180,120,20,0.40), inset 0 1px 0 rgba(255,240,150,0.40);
+  background: rgba(255, 255, 255, 0.36);
+  border-color: rgba(180, 120, 20, 0.58);
+  box-shadow: 0 8px 32px rgba(180,120,20,0.14), inset 0 1.5px 0 rgba(255,255,255,0.95);
   transform: translateY(-2px);
 }
 .btn-gold:active { transform: scale(0.97); }

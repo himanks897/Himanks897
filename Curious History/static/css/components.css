@@ -2972,8 +2972,8 @@
   background: var(--color-bg);
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
-  /* Landing page uses a larger base font for better readability */
-  font-size: 18px;
+  /* Landing page uses a larger base font */
+  font-size: 22px;
 }
 
 /* ── Times New Roman + italic on everything in the landing page ──────────── */
@@ -2982,25 +2982,29 @@
   font-style: italic;
 }
 
-/* ── Landing page text scale overrides (larger than rest of site) ─────────── */
-.landing-hero-tagline    { font-size: 1.25rem; }
-.landing-hero-sub        { font-size: 1.12rem; }
-.landing-section-title   { font-size: clamp(1.6rem, 3.2vw, 2.2rem); }
-.landing-section-intro   { font-size: 1.12rem; }
-.landing-about-text p    { font-size: 1.08rem; }
-.landing-about-text ul li { font-size: 0.96rem; }
-.landing-audience-card h3 { font-size: 1.1rem; }
-.landing-audience-card p  { font-size: 0.98rem; }
-.landing-audience-card ul li { font-size: 0.92rem; }
-.landing-usp-card h3     { font-size: 1.08rem; }
-.landing-usp-card p      { font-size: 0.96rem; }
-.landing-stat-num        { font-size: clamp(1.4rem, 3vw, 1.75rem); }
-.landing-stat-label      { font-size: 0.76rem; }
-.landing-cta-title       { font-size: clamp(1.4rem, 3vw, 1.9rem); }
-.landing-cta-sub         { font-size: 0.96rem; }
-.landing-preview-article { font-size: 0.96rem; }
-.landing-footer-inner > p { font-size: 0.88rem; }
-.lpf-try-text            { font-size: 1.1rem; }
+/* ── Landing page text scale (base 22px → everything is noticeably larger) ─── */
+.landing-hero-logo       { font-size: clamp(2.8rem, 7vw, 5.2rem); }
+.landing-hero-tagline    { font-size: 1.4rem; letter-spacing: 0.01em; }
+.landing-hero-sub        { font-size: 1.25rem; line-height: 1.8; }
+.landing-section-title   { font-size: clamp(1.8rem, 3.6vw, 2.7rem); }
+.landing-section-intro   { font-size: 1.22rem; line-height: 1.82; }
+.landing-about-text p    { font-size: 1.15rem; line-height: 1.82; }
+.landing-about-text ul li { font-size: 1.05rem; }
+.landing-audience-card h3 { font-size: 1.28rem; }
+.landing-audience-card p  { font-size: 1.05rem; line-height: 1.72; }
+.landing-audience-card ul li { font-size: 1rem; }
+.landing-usp-card h3     { font-size: 1.22rem; }
+.landing-usp-card p      { font-size: 1.02rem; line-height: 1.72; }
+.landing-stat-num        { font-size: clamp(1.65rem, 3.5vw, 2.1rem); }
+.landing-stat-label      { font-size: 0.82rem; letter-spacing: 0.06em; }
+.landing-cta-title       { font-size: clamp(1.75rem, 3.5vw, 2.5rem); }
+.landing-cta-sub         { font-size: 1.1rem; line-height: 1.78; }
+.landing-preview-article { font-size: 1.05rem; line-height: 1.78; }
+.landing-footer-inner > p { font-size: 0.95rem; }
+.lpf-try-text            { font-size: 1.22rem; }
+.landing-preview-title   { font-size: clamp(1.12rem, 2.4vw, 1.45rem); }
+.landing-section-label   { font-size: 0.8rem; letter-spacing: 0.12em; }
+.landing-hero-note-inline { font-size: 0.95rem; }
 
 /* ── Buttons, badges, pills stay upright (non-italic) ───────────────────── */
 .landing-page .btn,
@@ -3022,11 +3026,11 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(254,251,243,0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  background: rgba(237, 228, 190, 0.96);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 2px 16px rgba(100, 75, 20, 0.08), inset 0 -1px 0 rgba(210, 180, 100, 0.20);
 }
 .landing-nav-inner {
   max-width: var(--max-width);
@@ -3093,31 +3097,31 @@
 }
 .landing-hero-logo {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(2.1rem, 5.5vw, 3.6rem);
+  font-size: clamp(2.8rem, 7vw, 5.2rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
   line-height: 1.05;
   letter-spacing: -0.025em;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .landing-hero-logo span { color: var(--color-gold); }
 .landing-hero-tagline {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(0.96rem, 2.1vw, 1.12rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.4rem);
   font-style: italic;
   color: var(--color-text-secondary);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   letter-spacing: 0.02em;
 }
 .landing-hero-sub {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.06rem;
+  font-size: clamp(1.1rem, 2.2vw, 1.28rem);
   font-style: italic;
   color: var(--color-text-muted);
-  max-width: 480px;
-  margin: 0 auto 10px;
-  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 auto 12px;
+  line-height: 1.78;
 }
 .landing-hero-sub strong {
   color: var(--color-accent);
@@ -3131,11 +3135,27 @@
   margin-bottom: 18px;
 }
 .landing-btn-primary {
-  background: var(--color-accent);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(139,69,19,0.30);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  color: var(--color-accent);
+  font-weight: 700;
+  border: 0.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.20);
 }
-.landing-btn-primary:hover { background: var(--color-accent-dark); }
+.landing-btn-primary:hover, .landing-btn-primary:focus {
+  background: rgba(255, 255, 255, 0.38);
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.07),
+    inset 0 1.5px 0 rgba(255, 255, 255, 1.0);
+  transform: translateY(-2px);
+}
 .landing-hero-note {
   font-size: 0.82rem;
   font-style: normal;
@@ -3228,21 +3248,21 @@
 }
 .landing-section-title {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(1.4rem, 2.9vw, 2.05rem);
+  font-size: clamp(1.8rem, 3.6vw, 2.7rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-text-primary);
   line-height: 1.2;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .landing-section-intro {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 1.02rem;
+  font-size: 1.22rem;
   font-style: italic;
   color: var(--color-text-secondary);
-  max-width: 560px;
-  line-height: 1.7;
-  margin-bottom: 30px;
+  max-width: 580px;
+  line-height: 1.82;
+  margin-bottom: 32px;
 }
 
 /* ── ABOUT SECTION ───────────────────────────────────────────────────────── */
@@ -3311,22 +3331,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 14px 8px;
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid var(--glass-border);
+  gap: 8px;
+  padding: 18px 10px;
+  background: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.82);
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-sm);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.07),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92);
   font-size: 1.5rem;
   text-align: center;
   opacity: 0;
   transform: scale(0.9);
-  transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.2s ease, background 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+.landing-icon-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.00) 100%);
+  pointer-events: none;
 }
 .landing-icon-card.lp-visible { opacity: 1; transform: scale(1); }
-.landing-icon-card:hover { box-shadow: 0 8px 28px rgba(100,60,10,0.2); transform: scale(1.04); }
+.landing-icon-card:hover {
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.10), inset 0 1.5px 0 rgba(255, 255, 255, 0.96);
+  border-color: rgba(255, 255, 255, 0.96);
+  transform: scale(1.05);
+}
 .landing-icon-card span {
   font-size: 0.64rem;
   font-family: 'Times New Roman', Times, serif;
@@ -3342,21 +3380,38 @@
   gap: 18px;
 }
 .landing-audience-card {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.82);
   border-radius: var(--radius-lg);
-  padding: 22px 18px;
+  padding: 24px 20px;
   overflow: hidden;
   position: relative;
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
-  box-shadow: var(--glass-shadow-sm);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.07),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.92);
+}
+.landing-audience-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.00) 100%);
+  pointer-events: none;
 }
 .landing-audience-card.lp-visible { opacity: 1; transform: translateY(0); }
-.landing-audience-card:hover { box-shadow: 0 10px 32px rgba(100,60,10,0.2); }
+.landing-audience-card:hover {
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10), inset 0 1.5px 0 rgba(255, 255, 255, 0.96);
+  border-color: rgba(255, 255, 255, 0.96);
+  transform: translateY(-2px);
+}
 .landing-audience-icon {
   margin-bottom: 10px;
   color: var(--color-accent);
@@ -3368,17 +3423,17 @@
 }
 .landing-audience-card h3 {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.98rem;
+  font-size: 1.18rem;
   font-weight: 700;
   font-style: italic;
   color: var(--color-accent);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .landing-audience-card p {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.86rem;
+  font-size: 1.02rem;
   font-style: italic;
-  line-height: 1.65;
+  line-height: 1.72;
   color: var(--color-text-secondary);
 }
 
@@ -3389,31 +3444,37 @@
   gap: 14px;
 }
 .landing-usp-card {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 0.5px solid rgba(255, 255, 255, 0.80);
   border-radius: var(--radius-lg);
-  padding: 20px 16px;
+  padding: 22px 18px;
   position: relative;
   overflow: hidden;
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
-  box-shadow: var(--glass-shadow-sm);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease, background 0.18s ease;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.07),
+    0 1px 4px rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.90);
 }
 .landing-usp-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,248,225,0.55), transparent);
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.00) 100%);
   pointer-events: none;
 }
 .landing-usp-card.lp-visible { opacity: 1; transform: translateY(0); }
 .landing-usp-card:hover {
-  box-shadow: 0 12px 40px rgba(100,60,10,0.22);
-  border-color: rgba(139,69,19,0.4);
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10), inset 0 1.5px 0 rgba(255, 255, 255, 0.96);
+  border-color: rgba(255, 255, 255, 0.96);
+  transform: translateY(-2px);
 }
 .landing-usp-vs {
   display: inline-block;
@@ -3435,29 +3496,32 @@
 }
 .landing-usp-card h3 {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.96rem;
+  font-size: 1.14rem;
   font-weight: 700;
   font-style: italic;
   color: var(--color-text-primary);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   line-height: 1.3;
 }
 .landing-usp-card p {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.84rem;
+  font-size: 0.98rem;
   font-style: italic;
-  line-height: 1.62;
+  line-height: 1.7;
   color: var(--color-text-secondary);
 }
 
 /* ── PEARL HARBOR PREVIEW BANNER ─────────────────────────────────────────── */
 .landing-preview-banner {
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255, 255, 255, 0.88);
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.96);
   overflow: hidden;
   position: relative;
 }
@@ -3700,20 +3764,20 @@
 }
 .landing-cta-title {
   font-family: 'Times New Roman', Times, serif;
-  font-size: clamp(1.15rem, 2.5vw, 1.7rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   font-weight: 700;
   font-style: italic;
   color: var(--color-text-primary);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   line-height: 1.2;
 }
 .landing-cta-sub {
   font-family: 'Times New Roman', Times, serif;
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   font-style: italic;
   color: var(--color-text-secondary);
-  line-height: 1.65;
-  margin-bottom: 24px;
+  line-height: 1.78;
+  margin-bottom: 28px;
 }
 .landing-cta-sub strong {
   color: var(--color-accent);
@@ -3876,9 +3940,11 @@
 
 /* Hero single CTA */
 .landing-hero-single-cta {
-  font-size: 1.05rem;
-  padding: 14px 36px;
-  box-shadow: 0 4px 18px rgba(139,69,19,0.30);
+  font-size: 1.1rem;
+  padding: 16px 44px;
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.10),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95);
   margin-bottom: 14px;
 }
 
@@ -3892,25 +3958,38 @@
 .lpa-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 13px;
-  border-radius: var(--radius-sm);
-  border: 0.5px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(12px) saturate(200%);
-  -webkit-backdrop-filter: blur(12px) saturate(200%);
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid rgba(255, 255, 255, 0.80);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
   font-family: var(--font-ui);
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 500;
   font-style: normal;
   color: var(--color-text-secondary);
   cursor: default;
   user-select: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.90);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.92);
+}
+.lpa-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.00) 100%);
+  pointer-events: none;
 }
 .lpa-btn svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
   color: var(--color-accent);
 }
@@ -4037,22 +4116,44 @@
 }
 
 .login-btn-guest {
-  background: var(--color-accent);
-  color: #fff;
-  border: 1.5px solid var(--color-accent);
-  box-shadow: 0 2px 10px rgba(139,69,19,0.20);
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
+  color: var(--color-accent);
+  font-weight: 700;
+  border: 0.5px solid rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.22);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
   flex-direction: column;
   gap: 3px;
   padding: 14px 20px;
+  position: relative;
+  overflow: hidden;
 }
-.login-btn-guest:hover { background: var(--color-accent-dark); box-shadow: 0 4px 14px rgba(139,69,19,0.30); }
-.login-btn-guest svg { width: 20px; height: 20px; flex-shrink: 0; position: absolute; left: 18px; }
+.login-btn-guest::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+.login-btn-guest:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), inset 0 1.5px 0 rgba(255, 255, 255, 0.98);
+}
+.login-btn-guest svg { width: 20px; height: 20px; flex-shrink: 0; position: absolute; left: 18px; z-index: 1; }
 
 .login-guest-note {
   font-size: 0.72rem;
-  opacity: 0.8;
+  opacity: 0.7;
   font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 .login-note {
