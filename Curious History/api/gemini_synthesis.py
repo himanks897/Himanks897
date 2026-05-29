@@ -57,7 +57,7 @@ def synthesise_article(topic: str, year: int, country: str, era: str, raw_conten
     Generates a fully formatted HTML article from raw Wikipedia/source content.
     Returns dict with {html, importance_level, key_terms, sources_used}.
     """
-    cache_key = f"article:{topic}:{year}:{country}"
+    cache_key = f"article_v5:{topic}:{year}:{country}"
     cached = cache.get(cache_key)
     if cached:
         return cached
@@ -152,7 +152,7 @@ def generate_detailed_content(topic: str, year: int, country: str, era: str, raw
     More comprehensive than the standard article — covers every sub-event, cause, consequence.
     Returns HTML string.
     """
-    cache_key = f"detailed:{topic}:{year}:{country}"
+    cache_key = f"detailed_v3:{topic}:{year}:{country}"
     cached = cache.get(cache_key)
     if cached:
         return cached

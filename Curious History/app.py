@@ -929,16 +929,17 @@ def results():
             raw_result if isinstance(raw_result, tuple) else ("", ["Wikipedia"])
         )
 
-        # ── Phase 1b: format article (CPU, fast) while other futures still run ─
-        article_data = format_for_article(raw_content, topic, year, country, era)
-        # ── Use Gemini for full academic essay format when content is available ──
-        if raw_content and len(raw_content) > 300:
-            try:
-                gemini_data = synthesise_article(topic, year, country, era, raw_content)
-                if gemini_data.get("html") and len(gemini_data["html"]) > 500:
-                    article_data = gemini_data
-            except Exception:
-                pass  # fall back to formatter output
+        # ── Phase 1b: Gemini academic essay is primary; formatter is fallback only ─
+        # Always call Gemini — it uses its own knowledge when raw_content is thin.
+        # The formatter only wins if Gemini is unavailable or returns garbage.
+        try:
+            gemini_data = synthesise_article(topic, year, country, era, raw_content)
+            if gemini_data.get("html") and len(gemini_data["html"]) > 800:
+                article_data = gemini_data
+            else:
+                article_data = format_for_article(raw_content, topic, year, country, era)
+        except Exception:
+            article_data = format_for_article(raw_content, topic, year, country, era)
         article_html = article_data.get("html", "")
         importance   = article_data.get("importance_level", "National")
         key_terms    = article_data.get("key_terms", []) or extract_terms(article_html)
