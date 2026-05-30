@@ -1298,7 +1298,6 @@ def results():
         all_images=event_images,
         maps=event_maps,
         also_year=also_year,
-        people_alive=people_alive,
         related=related,
         sources=sources,
         confidence=confidence,
