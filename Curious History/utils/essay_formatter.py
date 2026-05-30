@@ -149,8 +149,9 @@ def bold_key_terms(text: str, extra_terms: Optional[list[str]] = None) -> str:
     Applies:
       1. Controlled list (_ALWAYS_BOLD)
       2. Extra topic-specific terms passed by the caller
-      3. BCE/CE date patterns
-      4. Standalone 4-digit years (1300–2025)
+      3. BCE/CE / BC/AD date patterns (any year 1–4 digits)
+      4. Standalone historical CE years (800–2025)
+      5. Notable ancient years (44, 476, 753, 1066, 1453 etc.)
     Avoids double-bolding.
     """
     if not text:
@@ -170,17 +171,22 @@ def bold_key_terms(text: str, extra_terms: Optional[list[str]] = None) -> str:
                              re.IGNORECASE)
         text = pattern.sub(r'**\1**', text)
 
-    # Bold BCE/CE dates
+    # Bold BCE/CE / BC/AD dates (any 1-4 digit year)
     text = _YEAR_PATTERN.sub(lambda m: f'**{m.group(0)}**', text)
 
-    # Bold standalone CE years (only if not already bolded)
+    # Bold standalone historical CE years (800–2025) if not already bolded
     def _bold_year(m):
-        start = m.start()
-        before = text[max(0, start-2):start]
+        start  = m.start()
+        before = text[max(0, start - 2):start]
         if '**' in before or '⟦' in before:
             return m.group(0)
         return f'**{m.group(0)}**'
     text = _CE_YEAR.sub(_bold_year, text)
+
+    # Bold notable ancient years that appear without BCE/CE label but in historical context
+    # e.g. "in 44, Caesar was assassinated" — catch years 1–799 preceded by "in " or "of "
+    _ANCIENT_INLINE = re.compile(r'\b(?:in|of|around|circa|c\.)\s+(\d{1,3})\b', re.IGNORECASE)
+    text = _ANCIENT_INLINE.sub(lambda m: m.group(0).replace(m.group(1), f'**{m.group(1)}**'), text)
 
     # Restore protected spans
     text = _restore_bold_marker(text)
@@ -321,7 +327,7 @@ def format_as_essay(
     regions = [r.get("region") or "" for r in records if r.get("region")]
     dominant_era    = era_hint or (max(set(eras),    key=eras.count)    if eras    else "Historical Period")
     dominant_region = region_hint or (max(set(regions), key=regions.count) if regions else "World")
-    sources_used    = list(dict.fromkeys(r.get("source_name", "") for r in records if r.get("source_name")))
+    sources_used    = list(dict.fromkeys(str(r.get("source_name", "")) for r in records if r.get("source_name")))
 
     # Extract specific topic-level terms for extra bolding
     extra_terms = [topic] + [r.get("title", "") for r in records[:6]]
@@ -403,11 +409,15 @@ def format_as_essay(
 
     # ── 4. COUNTER-ARGUMENT ───────────────────────────────────────────────────
     counter = ""
+    # Counter-argument: use the record BEYOND body paragraphs, or the last body record
+    # if body fills all records. Old trigger was broken — text_records[-1] was always
+    # inside text_records[:max_paras], so condition never fired. Fixed: use index max_paras.
+    _alt_idx   = max_paras if len(text_records) > max_paras else max(0, len(text_records) - 1)
     if len(text_records) >= 3:
-        alt_record  = text_records[-1]
+        alt_record  = text_records[_alt_idx]
         alt_snippet = alt_record.get("snippet") or ""
         alt_source  = alt_record.get("source_name") or "Alternative Source"
-        if alt_snippet and alt_snippet not in (r.get("snippet") for r in text_records[:max_paras]):
+        if alt_snippet:
             counter_evidence = bold_key_terms(alt_snippet[:400], extra_terms)
             counter = (
                 "## Counter-Argument / Alternative Perspective\n\n"

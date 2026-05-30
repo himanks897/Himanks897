@@ -86,6 +86,51 @@ _SYNONYM_MAP: dict[str, list[str]] = {
     "china":        ["chinese", "ming", "qing", "han", "dynasty", "beijing"],
     "india":        ["indian", "mughal", "british india", "hinduism", "gandhi"],
     "japan":        ["japanese", "samurai", "meiji", "shogunate", "edo"],
+    # ── Year → Event synonyms ──────────────────────────────────────────────────
+    # User types a year; expand to the key event that happened that year
+    "1066":  ["norman conquest", "william the conqueror", "battle of hastings", "england"],
+    "1215":  ["magna carta", "king john", "england", "barons"],
+    "1347":  ["black death", "plague", "medieval", "pandemic"],
+    "1453":  ["fall of constantinople", "ottoman", "byzantine", "mehmed"],
+    "1492":  ["columbus", "age of exploration", "americas", "spain", "new world"],
+    "1517":  ["martin luther", "reformation", "protestant", "church"],
+    "1588":  ["spanish armada", "england", "elizabeth", "naval"],
+    "1618":  ["thirty years war", "protestant", "catholic", "europe"],
+    "1688":  ["glorious revolution", "william of orange", "england"],
+    "1776":  ["american revolution", "declaration of independence", "united states"],
+    "1789":  ["french revolution", "bastille", "robespierre", "paris", "bourbon"],
+    "1815":  ["waterloo", "napoleon", "congress of vienna", "france"],
+    "1848":  ["year of revolutions", "europe", "nationalism", "liberal"],
+    "1861":  ["american civil war", "lincoln", "confederate", "slavery"],
+    "1865":  ["civil war end", "lincoln assassination", "reconstruction"],
+    "1871":  ["german unification", "bismarck", "franco-prussian war"],
+    "1905":  ["russian revolution", "russo-japanese war", "nicholas ii"],
+    "1914":  ["world war i", "first world war", "great war", "sarajevo", "western front"],
+    "1917":  ["russian revolution", "bolshevik", "october revolution", "tsar"],
+    "1918":  ["armistice", "world war i end", "weimar", "versailles"],
+    "1929":  ["great depression", "wall street crash", "stock market", "economic"],
+    "1933":  ["nazi germany", "hitler", "third reich", "weimar"],
+    "1939":  ["world war ii", "second world war", "nazi", "poland invasion"],
+    "1941":  ["pearl harbor", "pacific war", "usa enters war", "barbarossa"],
+    "1944":  ["d-day", "normandy", "liberation", "operation overlord"],
+    "1945":  ["world war ii end", "hiroshima", "nagasaki", "allied victory", "holocaust"],
+    "1947":  ["india independence", "partition", "pakistan", "mount batten"],
+    "1948":  ["israel independence", "cold war", "berlin blockade", "marshall plan"],
+    "1953":  ["korean war armistice", "stalin death", "dna discovery"],
+    "1963":  ["kennedy assassination", "civil rights", "cold war", "cuba"],
+    "1969":  ["moon landing", "apollo", "vietnam war", "woodstock"],
+    "1989":  ["berlin wall fall", "cold war end", "tiananmen", "eastern europe"],
+    "1991":  ["soviet union collapse", "ussr dissolution", "gulf war", "cold war end"],
+    # Ancient years
+    "44 bc": ["julius caesar assassination", "roman republic", "ides of march"],
+    "44":    ["julius caesar", "roman republic", "assassination", "ides"],
+    "476":   ["fall of rome", "western roman empire", "romulus augustulus", "odoacer"],
+    "753":   ["rome founding", "romulus", "roman kingdom", "ancient rome"],
+    "323":   ["alexander death", "alexander the great", "macedon", "hellenistic"],
+    "31 bc": ["battle of actium", "octavian", "antony", "cleopatra", "rome"],
+    "70":    ["destruction of jerusalem", "roman siege", "jewish war", "temple"],
+    "313":   ["edict of milan", "constantine", "christianity", "roman empire"],
+    "1000":  ["viking age", "leif erikson", "medieval", "norse"],
 }
 
 # Stemming pairs: if the user types the left side, also search the right side
@@ -533,6 +578,40 @@ def _normalise_numerals(text: str) -> str:
 
 # ── Query expansion ───────────────────────────────────────────────────────────
 
+def _levenshtein(s1: str, s2: str) -> int:
+    """Compute edit distance between two strings."""
+    if len(s1) < len(s2):
+        return _levenshtein(s2, s1)
+    if not s2:
+        return len(s1)
+    prev = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        curr = [i + 1]
+        for j, c2 in enumerate(s2):
+            curr.append(min(prev[j + 1] + 1, curr[j] + 1,
+                            prev[j] + (c1 != c2)))
+        prev = curr
+    return prev[-1]
+
+
+def _fuzzy_expand(word: str) -> list[str]:
+    """
+    For a short word (≤15 chars), check if any synonym map key is within
+    edit distance 1 (single-char typo). Returns synonyms for close matches.
+    Only applied to non-numeric words to avoid spurious year matches.
+    """
+    if len(word) < 4 or len(word) > 15 or word.isdigit():
+        return []
+    extras: list[str] = []
+    for key, synonyms in _SYNONYM_MAP.items():
+        # Only compare single-word keys to avoid slow multi-word comparisons
+        if ' ' in key:
+            continue
+        if abs(len(key) - len(word)) <= 1 and _levenshtein(word, key) <= 1:
+            extras.extend(synonyms)
+    return extras
+
+
 def expand_query(topic: str) -> list[str]:
     """
     Return a list of all search phrases to match against records,
@@ -563,6 +642,13 @@ def expand_query(topic: str) -> list[str]:
     for (stem, short) in _STEM_PAIRS:
         if stem in topic_lower and short not in phrases:
             phrases.append(short)
+
+    # ── Fuzzy / typo expansion (single-word queries only, edit dist ≤ 1) ─────
+    for word in topic_lower.split():
+        fuzzy = _fuzzy_expand(word)
+        for f in fuzzy:
+            if f not in phrases:
+                phrases.append(f)
 
     # Deduplicate while preserving order
     seen: set[str] = set()
@@ -715,7 +801,10 @@ def search_records_ranked(conn: dict, topic: str,
         scored.values(),
         key=lambda x: (-x[1], -len(x[0].get("full_text") or x[0].get("summary") or ""))
     )
-    return [pair[0] for pair in sorted_pairs[:limit]]
+    # Fix 8: minimum score threshold — off-topic queries (score < 3) return nothing
+    # rather than loosely-matched garbage records.
+    MIN_SCORE = 3
+    return [pair[0] for pair in sorted_pairs[:limit] if pair[1] >= MIN_SCORE]
 
 
 # Keep the old name as an alias so existing callers don't break

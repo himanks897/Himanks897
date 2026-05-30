@@ -462,6 +462,21 @@ def _get_archive_data(topic: str) -> dict:
 
         all_ft = [r for r in all_ft if _is_relevant(r)]
 
+        # ── Fix 7: Remove empty-text records from docs results ────────────────
+        # Records with no summary and no full_text are titles-only and add no
+        # value to the user — filter them out before routing to sections.
+        def _has_content(r: dict) -> bool:
+            text = r.get("summary") or r.get("full_text") or ""
+            return len(str(text).strip()) >= 40
+
+        # ── Fix 10: Filter non-Latin transliterated titles from docs ──────────
+        def _is_latin_title(r: dict) -> bool:
+            title = r.get("title") or ""
+            non_latin = sum(1 for c in title if ord(c) > 0x024F)
+            return non_latin / max(len(title), 1) < 0.15
+
+        all_ft = [r for r in all_ft if _has_content(r) and _is_latin_title(r)]
+
         # ── Split by source type — each database gets its own lane ─────────────
         docs    = []   # IA + Cabinet Papers + Gutenberg + Wikisource + OL + text sources
         wiki    = []   # Wikipedia pipeline records

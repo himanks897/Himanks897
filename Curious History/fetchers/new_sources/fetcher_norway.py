@@ -171,8 +171,25 @@ def fetch(conn: dict, source_id: int) -> int:
                         # Skip clearly copyrighted items with no free access
                         pass  # Still include metadata — it's still educationally useful
 
-                    # Description
-                    description = str(meta.get("description") or meta.get("abstract") or "")[:600]
+                    # Description — NB API rarely returns description/abstract fields.
+                    # Build a synthetic English summary from available metadata so
+                    # the record has searchable text content rather than empty summary.
+                    description = str(meta.get("description") or meta.get("abstract") or "").strip()
+                    if not description:
+                        # Build synthetic description from metadata
+                        media_types = meta.get("mediaTypes") or []
+                        media_label = media_types[0].capitalize() if media_types else "Work"
+                        creator_part = f" by {creator}" if creator else ""
+                        date_part    = f", published {date_text}" if date_text else ""
+                        subject_part = (f". Topics covered: {', '.join(flat_subjects[:4])}."
+                                        if flat_subjects else ".")
+                        description  = (
+                            f"{media_label} from the National Library of Norway"
+                            f"{creator_part}{date_part}"
+                            f"{subject_part} "
+                            f"Part of the Norwegian national digital heritage collection "
+                            f"covering history, culture, and society."
+                        )[:600]
 
                     # Creator
                     creators_raw = meta.get("creators") or []
