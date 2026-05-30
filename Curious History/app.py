@@ -1112,17 +1112,21 @@ def year_select():
 
 @app.route("/country")
 def country_select():
-    """Screen 4 — Country selection."""
+    """Screen 4 — Country selection.
+    year is empty string when user skipped year selection (no default imposed).
+    """
     era = request.args.get("era", "ce")
-    year = request.args.get("year", "1900")
+    year = request.args.get("year", "")   # empty = user skipped year
     return render_template("country.html", era=era, year=year)
 
 
 @app.route("/topic")
 def topic_input():
-    """Screen 5 — Topic/keyword input with AI suggestions."""
+    """Screen 5 — Topic/keyword input with AI suggestions.
+    year is empty string when user skipped year selection.
+    """
     era = request.args.get("era", "ce")
-    year = request.args.get("year", "1900")
+    year = request.args.get("year", "")   # empty = user skipped year
     country = request.args.get("country", "World")
     return render_template("topic.html", era=era, year=year, country=country)
 
@@ -1133,7 +1137,7 @@ def results():
     All external API calls run in PARALLEL via ThreadPoolExecutor for speed.
     """
     topic    = request.args.get("topic", "")
-    year_str = request.args.get("year", "1900")
+    year_str = request.args.get("year", "")   # empty = user skipped year
     country  = request.args.get("country", "World")
     era      = request.args.get("era", "ce")
 
@@ -1152,7 +1156,7 @@ def results():
         )
 
     try:
-        year = int(year_str)
+        year = int(year_str) if year_str else 2026   # no year chosen → current year
     except ValueError:
         year = 1900
 
@@ -2085,6 +2089,35 @@ def account():
     """Account & billing page — shows current plan and usage."""
     status = get_plan_status()
     return render_template("account.html", status=status, current_user=session.get("user"))
+
+
+@app.route("/settings")
+def settings():
+    """Unified Settings page — Profile, Accessibility, and Subscriptions."""
+    status = get_plan_status()
+    return render_template(
+        "settings.html",
+        status=status,
+        current_user=session.get("user"),
+        plans=PLAN_LIMITS,
+        plan_features=PLAN_FEATURES,
+        plan_display=PLAN_DISPLAY_NAMES,
+    )
+
+
+@app.route("/api/update-display-name", methods=["POST"])
+def update_display_name():
+    """Allow signed-in users to override their display name in the session."""
+    user = session.get("user")
+    if not user:
+        return jsonify({"ok": False, "error": "Not signed in"}), 401
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    if not name or len(name) > 80:
+        return jsonify({"ok": False, "error": "Invalid name"}), 400
+    user["name"] = name
+    session["user"] = user
+    return jsonify({"ok": True, "name": name})
 
 
 @app.route("/api/plan-status")

@@ -16,7 +16,11 @@
 
   <!-- Context Banner -->
   <div class="context-banner" role="status" aria-live="polite">
+    {% if year %}
     <span>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}</span>
+    {% else %}
+    <span>Any Year</span>
+    {% endif %}
     <span>{{ country }}</span>
     <span>{{ 'Prehistory' if era == 'bce' else 'Modern History' }}</span>
   </div>
@@ -92,7 +96,11 @@
       <div class="spinner" style="width:24px;height:24px;margin:16px auto;"></div>
     </div>
     <p class="suggestions-label" id="suggestions-label" style="display:none;">
+      {% if year %}
       <em>Suggested topics for {{ country }}, {{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}:</em>
+      {% else %}
+      <em>Suggested topics for {{ country }}:</em>
+      {% endif %}
     </p>
     <div class="suggestions-chips" id="suggestions-chips" role="list" aria-label="Suggested topics"></div>
   </div>

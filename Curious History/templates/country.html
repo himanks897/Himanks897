@@ -12,13 +12,21 @@
       </svg>
       Back
     </a>
+    {% if year %}
     <a href="{{ url_for('topic_input', era=era, year=year, country='World') }}" class="page-skip-link" aria-label="Skip — use The Entire World">Skip →</a>
+    {% else %}
+    <a href="{{ url_for('topic_input', era=era, country='World') }}" class="page-skip-link" aria-label="Skip — use The Entire World">Skip →</a>
+    {% endif %}
   </div>
 
   <!-- Page Header -->
   <div class="country-page-header">
     <h1 class="country-page-title">Where in the world?</h1>
+    {% if year %}
     <p class="country-page-sub">Choose a country or region to explore history in <strong>{{ year }} {{ 'BCE' if era == 'bce' else 'CE' }}</strong></p>
+    {% else %}
+    <p class="country-page-sub">Choose a country or region to explore history across <strong>any time period</strong></p>
+    {% endif %}
 
     <!-- Country Search -->
     <div class="country-search-wrap">
@@ -45,7 +53,7 @@
 
     <!-- The Entire World (pinned) -->
     <a
-      href="{{ url_for('topic_input', era=era, year=year, country='World') }}"
+      href="{{ url_for('topic_input', era=era, year=year, country='World') if year else url_for('topic_input', era=era, country='World') }}"
       class="world-option"
       aria-label="The Entire World — for global events"
     >
@@ -136,7 +144,9 @@ function selectCountry(country) {
   event.target.classList.add('selected');
   event.target.setAttribute('aria-selected', 'true');
   setTimeout(() => {
-    window.location.href = `/topic?era=${era}&year=${encodeURIComponent(year)}&country=${encodeURIComponent(country)}`;
+    /* Only include year in URL if one was explicitly chosen (not skipped) */
+    const base = `/topic?era=${era}&country=${encodeURIComponent(country)}`;
+    window.location.href = year ? base + `&year=${encodeURIComponent(year)}` : base;
   }, 150);
 }
 

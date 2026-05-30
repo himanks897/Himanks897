@@ -133,6 +133,9 @@ const yearInput = document.getElementById('year-input');
 const yearDisplay = document.getElementById('year-display');
 const continueBtn = document.getElementById('year-continue-btn');
 
+/* ── Skip button: no year is carried over — user explicitly chose not to pick ── */
+document.getElementById('skip-year-btn').href = `/country?era=${era}`;
+
 function setYear(y) {
   if (isBce) {
     slider.value = 3001 - y;
@@ -142,6 +145,7 @@ function setYear(y) {
     yearInput.value = y;
   }
   updateDisplay(y);
+  updateSliderGradient();
 }
 
 function updateDisplay(year) {
@@ -154,11 +158,74 @@ function updateDisplay(year) {
   continueBtn.href = `/country?era=${era}&year=${actualYear < 0 ? actualYear : year}`;
 }
 
-// Init gradient
+/* Init gradient */
 function updateSliderGradient() {
   const max = isBce ? 3000 : 2026;
   const pct = (slider.value / max) * 100;
   slider.style.background = `linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) ${pct}%, var(--color-border) ${pct}%)`;
+}
+
+/* ── Scroll sound + haptic for year timeline ────────────────────────────────
+   Fires a soft mechanical tick + brief vibration every ~40ms while dragging.
+   Uses the same AudioContext pattern as base.html for consistency.           */
+var _yearCtx = null;
+function _getYearCtx() {
+  if (!_yearCtx) {
+    try { _yearCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  }
+  if (_yearCtx && _yearCtx.state === 'suspended') { try { _yearCtx.resume(); } catch(e){} }
+  return _yearCtx;
+}
+
+var _lastTickTime = 0;
+function _yearTick() {
+  var now = Date.now();
+  if (now - _lastTickTime < 40) return;
+  _lastTickTime = now;
+
+  /* Soft tick sound — lighter than the main click sound */
+  var ctx = _getYearCtx();
+  if (ctx) {
+    try {
+      var t = ctx.currentTime;
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -12; comp.knee.value = 12;
+      comp.ratio.value = 4; comp.attack.value = 0.001; comp.release.value = 0.08;
+      comp.connect(ctx.destination);
+
+      var master = ctx.createGain();
+      master.gain.setValueAtTime(0.55, t);
+      master.connect(comp);
+
+      /* Noise burst — brief click */
+      var len = Math.floor(ctx.sampleRate * 0.012);
+      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) {
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 1.5) * 0.6;
+      }
+      var src = ctx.createBufferSource();
+      src.buffer = buf;
+      var hpf = ctx.createBiquadFilter();
+      hpf.type = 'highpass'; hpf.frequency.value = 3000; hpf.Q.value = 0.5;
+      src.connect(hpf); hpf.connect(master); src.start(t);
+
+      /* Low thud */
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.018);
+      g.gain.setValueAtTime(0.25, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
+      osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + 0.025);
+    } catch(e) {}
+  }
+
+  /* Haptic — single short pulse */
+  if (navigator.vibrate) {
+    try { navigator.vibrate(8); } catch(e) {}
+  }
 }
 
 slider.addEventListener('input', function() {
@@ -167,6 +234,7 @@ slider.addEventListener('input', function() {
   yearInput.value = displayYear;
   updateDisplay(displayYear);
   updateSliderGradient();
+  _yearTick();
 });
 
 yearInput.addEventListener('input', function() {
@@ -178,19 +246,17 @@ yearInput.addEventListener('input', function() {
   updateSliderGradient();
 });
 
-// Init
+/* Also fire tick on keyboard arrow keys while slider is focused */
+slider.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' ||
+      e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    setTimeout(_yearTick, 10);
+  }
+});
+
+/* Init */
 const initYear = isBce ? 1500 : 1900;
 updateDisplay(initYear);
 updateSliderGradient();
-
-// Skip button — goes straight to country page with current year
-function updateSkipHref() {
-  const rawYear = parseInt(yearInput.value) || initYear;
-  const actualYear = isBce ? -rawYear : rawYear;
-  document.getElementById('skip-year-btn').href = `/country?era=${era}&year=${isBce ? actualYear : rawYear}`;
-}
-slider.addEventListener('input', updateSkipHref);
-yearInput.addEventListener('input', updateSkipHref);
-updateSkipHref();
 </script>
 {% endblock %}

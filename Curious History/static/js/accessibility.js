@@ -347,4 +347,9 @@
 
   window.stopReadAloud = stopReadAloud;
 
+  /* Expose core prefs functions so settings.html can bind its own controls */
+  window.ch_getPrefs  = getPrefs;
+  window.ch_savePrefs = savePrefs;
+  window.ch_applyAll  = applyAll;
+
 })();

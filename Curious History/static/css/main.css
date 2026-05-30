@@ -80,6 +80,25 @@
 
   /* Transitions */
   --transition:            200ms ease;
+
+  /* ── Unified Liquid Glass tokens ────────────────────────────────────────
+     Two tiers: surface (cards/panels) and interactive (buttons/chips).
+     All glass elements use ONLY these tokens so transparency is uniform.  */
+
+  /* Tier 1 — Surface glass: panels, cards, containers */
+  --lg-surface-bg:        rgba(255, 255, 255, 0.12);
+  --lg-surface-bg-hover:  rgba(255, 255, 255, 0.24);
+  --lg-surface-blur:      blur(40px) saturate(180%);
+  --lg-surface-border:    rgba(107, 56, 18, 0.28);
+  --lg-surface-shadow:    0 4px 24px rgba(44,22,6,0.08), inset 0 1.5px 0 rgba(255,255,255,0.92);
+  --lg-surface-shadow-sm: 0 2px 12px rgba(44,22,6,0.06), inset 0 1px 0 rgba(255,255,255,0.90);
+
+  /* Tier 2 — Interactive glass: buttons, chips, small interactive elements */
+  --lg-btn-bg:            rgba(255, 255, 255, 0.07);
+  --lg-btn-bg-hover:      rgba(255, 255, 255, 0.18);
+  --lg-btn-blur:          blur(28px) saturate(160%);
+  --lg-btn-border:        rgba(107, 56, 18, 0.38);
+  --lg-btn-shadow:        0 2px 10px rgba(44,22,6,0.06), inset 0 1px 0 rgba(255,255,255,0.90);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -115,6 +134,18 @@ html.dark {
   --glass-shadow-sm:       0 2px 12px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,235,190,0.04);
   --glass-blur:            blur(40px) saturate(180%);
   --glass-blur-sm:         blur(28px) saturate(170%);
+
+  /* Unified Liquid Glass tokens — dark-mode overrides (warm amber tint) */
+  --lg-surface-bg:        rgba(255, 235, 190, 0.05);
+  --lg-surface-bg-hover:  rgba(255, 235, 190, 0.10);
+  --lg-surface-border:    rgba(200, 148, 60, 0.25);
+  --lg-surface-shadow:    0 4px 24px rgba(0,0,0,0.45), inset 0 1.5px 0 rgba(255,235,190,0.06);
+  --lg-surface-shadow-sm: 0 2px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,235,190,0.05);
+
+  --lg-btn-bg:            rgba(255, 235, 190, 0.04);
+  --lg-btn-bg-hover:      rgba(255, 235, 190, 0.09);
+  --lg-btn-border:        rgba(200, 148, 60, 0.32);
+  --lg-btn-shadow:        0 2px 10px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,235,190,0.05);
 }
 
 /* Dark mode body — rich espresso gradient */
@@ -330,6 +361,135 @@ html.dark .nav-icon-btn:focus {
   background: rgba(255, 235, 190, 0.12);
   border-color: rgba(200, 148, 60, 0.60);
   color: var(--color-text-primary);
+}
+
+/* Dark mode accessibility tooltip — prevent cream-on-cream invisibility */
+html.dark .nav-a11y-label {
+  background: #2A1A0C;
+  color: #F0DEC0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+html.dark .nav-a11y-label::before {
+  border-bottom-color: #2A1A0C;
+}
+
+/* Dark mode page loader — dark background instead of white flash */
+html.dark .page-loader {
+  background: #160E06;
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(200, 130, 40, 0.06) 0%, transparent 50%),
+    linear-gradient(160deg, #1C1006 0%, #120A04 50%, #160E06 100%);
+}
+
+/* Dark mode — ensure all text inside cards, panels and archive adapts */
+html.dark .a11y-panel {
+  background: rgba(26, 15, 5, 0.97);
+  border-color: rgba(200, 148, 60, 0.30);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.60), inset 0 1px 0 rgba(255,235,190,0.05);
+}
+html.dark .a11y-panel-header {
+  border-bottom-color: rgba(200, 148, 60, 0.22);
+}
+html.dark .a11y-panel-title { color: var(--color-text-primary); }
+html.dark .a11y-close { color: var(--color-text-muted); }
+html.dark .a11y-label { color: var(--color-text-muted); }
+html.dark .a11y-toggle-label { color: var(--color-text-secondary); }
+html.dark .a11y-toggle-row { border-bottom-color: rgba(200, 148, 60, 0.15); }
+html.dark .a11y-btn {
+  background: rgba(255, 235, 190, 0.05);
+  border-color: rgba(200, 148, 60, 0.30);
+  color: var(--color-text-secondary);
+}
+html.dark .a11y-btn.active {
+  background: rgba(200, 130, 40, 0.18);
+  border-color: rgba(200, 148, 60, 0.65);
+  color: #E8A870;
+}
+html.dark .a11y-btn:hover, html.dark .a11y-btn:focus {
+  background: rgba(255, 235, 190, 0.10);
+  border-color: rgba(200, 148, 60, 0.55);
+  color: var(--color-text-primary);
+}
+
+/* Dark mode — session banner and toast */
+html.dark .toast {
+  background: rgba(24, 14, 4, 0.97);
+  border-color: rgba(200, 148, 60, 0.28);
+  color: var(--color-text-primary);
+}
+
+/* Dark mode — highlight tooltip */
+html.dark .highlight-tooltip {
+  background: #2A1A0C;
+  color: #F0DEC0;
+  border: 1px solid rgba(200, 148, 60, 0.35);
+}
+
+/* Dark mode — breadcrumb text */
+html.dark .breadcrumb ol li { color: var(--color-text-muted); }
+html.dark .breadcrumb ol li a { color: #D4956A; }
+
+/* Dark mode — page back button */
+html.dark .page-back-btn { color: var(--color-text-secondary); }
+html.dark .page-skip-link { color: #D4956A; }
+
+/* Dark mode — context banner */
+html.dark .context-banner {
+  background: rgba(200, 100, 20, 0.12);
+  border-color: rgba(200, 148, 60, 0.30);
+  color: var(--color-text-secondary);
+}
+
+/* Dark mode — guest limit modal */
+html.dark .guest-limit-modal {
+  background: rgba(24, 14, 4, 0.96);
+  border-color: rgba(200, 148, 60, 0.35);
+}
+html.dark .guest-limit-title { color: #D4956A; }
+html.dark .guest-limit-msg { color: var(--color-text-primary); }
+html.dark .guest-limit-sub { color: var(--color-text-secondary); }
+html.dark .guest-limit-dismiss {
+  background: rgba(255, 235, 190, 0.06);
+  color: var(--color-text-muted);
+}
+
+/* Dark mode — unified glass: override specular highlights for warm amber tint */
+html.dark .card::before,
+html.dark .card-sm::before {
+  background: linear-gradient(180deg, rgba(255,235,190,0.04) 0%, rgba(255,235,190,0.00) 100%);
+}
+html.dark .btn::before {
+  background: linear-gradient(180deg,
+    rgba(255,235,190,0.06) 0%,
+    rgba(255,235,190,0.02) 40%,
+    rgba(255,235,190,0.00) 100%);
+}
+html.dark .chip::before {
+  background: linear-gradient(180deg, rgba(255,235,190,0.04) 0%, rgba(255,235,190,0.00) 100%);
+}
+
+/* Dark mode — all token-based surfaces use amber tint (already via --lg-* overrides in html.dark).
+   The overrides below handle elements that were NOT converted to tokens (legacy inline values). */
+html.dark .also-year-card,
+html.dark .country-note,
+html.dark .sources-footer,
+html.dark .read-aloud-bar,
+html.dark .detail-content-panel,
+html.dark .action-result-panel {
+  border-color: rgba(200, 148, 60, 0.22);
+}
+html.dark .media-column {
+  border-left-color: rgba(200, 148, 60, 0.22);
+}
+html.dark .accordion-body {
+  border-color: rgba(200, 148, 60, 0.28);
+}
+html.dark .confidence-popover {
+  color: var(--color-text-secondary);
+}
+html.dark .confidence-popover-source {
+  border-bottom-color: rgba(200, 148, 60, 0.15);
+  color: var(--color-text-secondary);
 }
 
 /* Dark mode dropdown */
@@ -1011,18 +1171,15 @@ html.dyslexic p {
 }
 .page-skip-link:hover { opacity: 0.7; }
 
-/* ── Cards — liquid glass with brown border ──────────────────────────────── */
+/* ── Cards — unified liquid glass ────────────────────────────────────────── */
 .card {
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(36px) saturate(200%);
-  -webkit-backdrop-filter: blur(36px) saturate(200%);
-  border: 1.5px solid rgba(107, 56, 18, 0.22);
+  background: var(--lg-surface-bg);
+  backdrop-filter: var(--lg-surface-blur);
+  -webkit-backdrop-filter: var(--lg-surface-blur);
+  border: 1.5px solid var(--lg-surface-border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow:
-    0 8px 32px rgba(44, 22, 6, 0.09),
-    0 2px 6px rgba(44, 22, 6, 0.05),
-    inset 0 1.5px 0 rgba(255,255,255,0.95);
+  box-shadow: var(--lg-surface-shadow);
   position: relative;
   overflow: hidden;
 }
@@ -1032,23 +1189,21 @@ html.dyslexic p {
   top: 0; left: 0; right: 0;
   height: 50%;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.00) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.00) 100%);
   pointer-events: none;
 }
 
 .card-sm {
-  background: rgba(255, 255, 255, 0.38);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1.5px solid rgba(107, 56, 18, 0.18);
+  background: var(--lg-surface-bg);
+  backdrop-filter: var(--lg-surface-blur);
+  -webkit-backdrop-filter: var(--lg-surface-blur);
+  border: 1.5px solid var(--lg-surface-border);
   border-radius: var(--radius-md);
   padding: 16px;
-  box-shadow:
-    0 4px 18px rgba(44, 22, 6, 0.07),
-    inset 0 1px 0 rgba(255,255,255,0.90);
+  box-shadow: var(--lg-surface-shadow-sm);
 }
 
-/* ── Buttons — Transparent Liquid Glass + Brown Highlighted Borders ──────── */
+/* ── Buttons — unified liquid glass ─────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1069,19 +1224,13 @@ html.dyslexic p {
   position: relative;
   overflow: hidden;
   transition: box-shadow 0.22s ease, transform 0.14s ease, background 0.18s ease, border-color 0.18s ease;
-  /* Maximum liquid glass — almost invisible; brown border is the entire visual cue */
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(48px) saturate(200%);
-  -webkit-backdrop-filter: blur(48px) saturate(200%);
-  border: 1.5px solid rgba(107, 56, 18, 0.52);
-  box-shadow:
-    0 4px 28px rgba(44, 22, 6, 0.09),
-    0 1px 4px rgba(44, 22, 6, 0.05),
-    inset 0 2px 0 rgba(255,255,255,1.0),
-    inset 0 -0.5px 0 rgba(44, 22, 6, 0.04);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
+  border: 1.5px solid var(--lg-btn-border);
+  box-shadow: var(--lg-btn-shadow);
   color: var(--color-text-secondary);
 }
-/* Strong specular top shine — the main visual cue that makes it look like glass */
 .btn::before {
   content: '';
   position: absolute;
@@ -1089,103 +1238,91 @@ html.dyslexic p {
   height: 52%;
   border-radius: inherit;
   background: linear-gradient(180deg,
-    rgba(255,255,255,0.95) 0%,
-    rgba(255,255,255,0.40) 40%,
+    rgba(255,255,255,0.70) 0%,
+    rgba(255,255,255,0.20) 40%,
     rgba(255,255,255,0.00) 100%);
   pointer-events: none;
   z-index: 0;
 }
 .btn:hover, .btn:focus {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(107, 56, 18, 0.82);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.68);
   box-shadow:
-    0 10px 40px rgba(44, 22, 6, 0.13),
-    0 2px 8px rgba(44, 22, 6, 0.07),
-    inset 0 1.5px 0 rgba(255,255,255,1.0),
-    inset 0 -0.5px 0 rgba(44, 22, 6, 0.06);
+    0 8px 32px rgba(44, 22, 6, 0.11),
+    inset 0 1.5px 0 rgba(255,255,255,0.95);
   transform: translateY(-2px);
 }
 .btn:active {
   transform: scale(0.97) translateY(0);
-  box-shadow: 0 2px 8px rgba(44, 22, 6, 0.09), inset 0 1px 0 rgba(255,255,255,0.92);
+  box-shadow: 0 2px 8px rgba(44, 22, 6, 0.08), inset 0 1px 0 rgba(255,255,255,0.88);
 }
 
-/* Primary — liquid glass, brown accent text, stronger brown border */
+/* Primary — accent text, slightly stronger border */
 .btn-primary {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(48px) saturate(200%);
-  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
   color: var(--color-accent);
   font-weight: 700;
-  border: 1.5px solid rgba(107, 56, 18, 0.60);
-  box-shadow:
-    0 4px 24px rgba(44, 22, 6, 0.11),
-    0 1px 4px rgba(44, 22, 6, 0.06),
-    inset 0 1.5px 0 rgba(255,255,255,0.98),
-    inset 0 -0.5px 0 rgba(44, 22, 6, 0.05);
+  border: 1.5px solid rgba(107, 56, 18, 0.55);
+  box-shadow: var(--lg-btn-shadow);
 }
 .btn-primary:hover, .btn-primary:focus {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(107, 56, 18, 0.92);
-  box-shadow:
-    0 10px 40px rgba(44, 22, 6, 0.15),
-    0 2px 8px rgba(44, 22, 6, 0.08),
-    inset 0 1.5px 0 rgba(255,255,255,1.0);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.85);
+  box-shadow: 0 10px 36px rgba(44, 22, 6, 0.13), inset 0 1.5px 0 rgba(255,255,255,0.96);
   transform: translateY(-2px);
 }
 .btn-primary:active { transform: scale(0.97); }
 
-/* Secondary — liquid glass */
+/* Secondary */
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
   color: var(--color-accent);
-  border: 1.5px solid rgba(107, 56, 18, 0.42);
-  box-shadow: 0 2px 16px rgba(44, 22, 6, 0.07), inset 0 1px 0 rgba(255,255,255,0.90);
+  border: 1.5px solid rgba(107, 56, 18, 0.40);
+  box-shadow: var(--lg-btn-shadow);
 }
 .btn-secondary:hover, .btn-secondary:focus {
-  background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(107, 56, 18, 0.72);
-  box-shadow: 0 8px 28px rgba(44, 22, 6, 0.11), inset 0 1.5px 0 rgba(255,255,255,0.98);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.70);
+  box-shadow: 0 8px 28px rgba(44, 22, 6, 0.10), inset 0 1.5px 0 rgba(255,255,255,0.95);
   transform: translateY(-2px);
 }
 .btn-secondary:active { transform: scale(0.97); }
 
-/* Ghost — near-invisible glass, brown border defines the pill */
+/* Ghost */
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(36px) saturate(160%);
-  -webkit-backdrop-filter: blur(36px) saturate(160%);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
   color: var(--color-text-secondary);
-  border: 1.5px solid rgba(107, 56, 18, 0.35);
-  box-shadow: 0 2px 12px rgba(44, 22, 6, 0.05), inset 0 1px 0 rgba(255,255,255,0.88);
+  border: 1.5px solid rgba(107, 56, 18, 0.32);
+  box-shadow: var(--lg-btn-shadow);
 }
 .btn-ghost:hover, .btn-ghost:focus {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--lg-btn-bg-hover);
   color: var(--color-accent);
-  border-color: rgba(107, 56, 18, 0.65);
+  border-color: rgba(107, 56, 18, 0.62);
   transform: translateY(-1px);
 }
 .btn-ghost:active { transform: scale(0.97); }
 
-/* Gold — liquid glass, warm brown-gold text */
+/* Gold */
 .btn-gold {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(48px) saturate(200%);
-  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
   color: var(--color-gold);
   font-weight: 600;
-  border: 1.5px solid rgba(107, 56, 18, 0.52);
-  box-shadow:
-    0 4px 24px rgba(44, 22, 6, 0.09),
-    0 1px 4px rgba(44, 22, 6, 0.05),
-    inset 0 1.5px 0 rgba(255,255,255,0.95);
+  border: 1.5px solid rgba(107, 56, 18, 0.48);
+  box-shadow: var(--lg-btn-shadow);
 }
 .btn-gold:hover, .btn-gold:focus {
-  background: rgba(255, 255, 255, 0.36);
-  border-color: rgba(107, 56, 18, 0.80);
-  box-shadow: 0 8px 32px rgba(44, 22, 6, 0.13), inset 0 1.5px 0 rgba(255,255,255,1.0);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.78);
+  box-shadow: 0 8px 28px rgba(44, 22, 6, 0.11), inset 0 1.5px 0 rgba(255,255,255,0.96);
   transform: translateY(-2px);
 }
 .btn-gold:active { transform: scale(0.97); }
@@ -1193,7 +1330,7 @@ html.dyslexic p {
 .btn-sm  { min-height: 38px; padding: 7px 20px; font-size: 0.92rem; border-radius: var(--radius-full); }
 .btn-lg  { min-height: 54px; padding: 14px 42px; font-size: 1.08rem; border-radius: var(--radius-full); }
 
-/* ── Chips / Pills — Transparent Glass + Brown Border ───────────────────── */
+/* ── Chips / Pills — unified liquid glass ────────────────────────────────── */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -1202,16 +1339,16 @@ html.dyslexic p {
   font-size: 0.92rem;
   font-style: italic;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1.5px solid rgba(107, 56, 18, 0.42);
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
+  border: 1.5px solid var(--lg-btn-border);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-decoration: none;
   min-height: 36px;
   transition: box-shadow 0.18s ease, transform 0.1s ease, background 0.15s ease, border-color 0.18s ease;
-  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.05), inset 0 1px 0 rgba(255,255,255,0.90);
+  box-shadow: var(--lg-btn-shadow);
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -1221,26 +1358,26 @@ html.dyslexic p {
   position: absolute;
   top: 0; left: 0; right: 0; height: 52%;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.0) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.0) 100%);
   pointer-events: none;
 }
 .chip:hover, .chip:focus {
-  background: rgba(255, 255, 255, 0.42);
-  border-color: rgba(107, 56, 18, 0.68);
-  box-shadow: 0 4px 18px rgba(44, 22, 6, 0.10), inset 0 1px 0 rgba(255,255,255,0.98);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.65);
+  box-shadow: 0 4px 18px rgba(44, 22, 6, 0.09), inset 0 1px 0 rgba(255,255,255,0.95);
   transform: translateY(-1px);
 }
 .chip:active { transform: scale(0.96); }
 .chip-accent {
-  background: rgba(255, 255, 255, 0.30);
-  border-color: rgba(107, 56, 18, 0.55);
+  background: var(--lg-btn-bg);
+  border-color: rgba(107, 56, 18, 0.52);
   color: var(--color-accent);
-  box-shadow: 0 2px 10px rgba(44, 22, 6, 0.07), inset 0 1px 0 rgba(255,255,255,0.92);
+  box-shadow: var(--lg-btn-shadow);
 }
 .chip-accent:hover, .chip-accent:focus {
-  background: rgba(255, 255, 255, 0.50);
-  border-color: rgba(107, 56, 18, 0.82);
-  box-shadow: 0 4px 16px rgba(44, 22, 6, 0.11), inset 0 1px 0 rgba(255,255,255,0.98);
+  background: var(--lg-btn-bg-hover);
+  border-color: rgba(107, 56, 18, 0.80);
+  box-shadow: 0 4px 16px rgba(44, 22, 6, 0.10), inset 0 1px 0 rgba(255,255,255,0.95);
 }
 
 /* ── Dropdowns ───────────────────────────────────────────────────────────── */

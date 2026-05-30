@@ -1,0 +1,801 @@
+{% extends "base.html" %}
+{% block title %}Settings — Curious History{% endblock %}
+
+{% block content %}
+<div class="main-content settings-page" style="max-width:760px;margin:0 auto;">
+
+  <!-- Page header -->
+  <div class="page-nav-bar">
+    <a href="{{ url_for('home') }}" class="page-back-btn" aria-label="Back to Home">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" style="width:15px;height:15px;" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4L5 10l7 6"/>
+      </svg>
+      Back
+    </a>
+  </div>
+
+  <h1 style="font-family:var(--font-body);font-size:1.9rem;font-style:italic;
+             font-weight:700;color:var(--color-accent);margin-bottom:32px;">⚙ Settings</h1>
+
+  {% if not current_user %}
+  <!-- Guest state — prompt sign-in -->
+  <div class="card" style="text-align:center;padding:44px;">
+    <p style="font-style:italic;color:var(--color-text-secondary);margin-bottom:20px;font-size:1rem;">
+      Sign in with Google to access your profile, accessibility preferences, and subscription.
+    </p>
+    <a href="{{ url_for('login') }}" class="btn btn-primary">Sign In with Google →</a>
+  </div>
+  {% else %}
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1 — PROFILE
+       ═══════════════════════════════════════════════════ -->
+  <section class="settings-section card" style="margin-bottom:24px;">
+    <div class="settings-section-header">
+      <span class="settings-section-icon">👤</span>
+      <h2 class="settings-section-title">Profile</h2>
+    </div>
+
+    <div class="settings-profile-row">
+      <!-- Avatar -->
+      <div class="settings-avatar-wrap">
+        {% if current_user.picture %}
+        <img src="{{ current_user.picture }}"
+             alt="{{ current_user.name }}"
+             referrerpolicy="no-referrer"
+             class="settings-avatar"
+             id="settings-avatar-img">
+        {% else %}
+        <div class="settings-avatar settings-avatar-placeholder" id="settings-avatar-img">👤</div>
+        {% endif %}
+        <button class="settings-avatar-change-btn" id="avatar-change-btn"
+                aria-label="Change profile picture"
+                title="Profile picture is managed by your Google account">
+          ✎
+        </button>
+      </div>
+
+      <!-- Profile fields -->
+      <div class="settings-profile-fields">
+        <!-- Display Name -->
+        <div class="settings-field">
+          <label class="settings-field-label" for="profile-name">Display Name</label>
+          <div class="settings-field-row">
+            <input type="text" id="profile-name" class="settings-input"
+                   value="{{ current_user.name }}"
+                   placeholder="Your display name"
+                   aria-label="Display name">
+            <button class="btn btn-sm btn-secondary" id="save-name-btn" aria-label="Save name">Save</button>
+          </div>
+          <p id="save-name-msg" class="settings-field-hint" style="display:none;"></p>
+        </div>
+
+        <!-- Email — read only (comes from Google) -->
+        <div class="settings-field">
+          <label class="settings-field-label" for="profile-email">Email Address</label>
+          <div class="settings-field-row">
+            <input type="email" id="profile-email" class="settings-input"
+                   value="{{ current_user.email }}"
+                   readonly
+                   aria-label="Email address (read-only, managed by Google)"
+                   style="opacity:0.65;cursor:not-allowed;">
+            <span class="settings-field-badge">Google Account</span>
+          </div>
+          <p class="settings-field-hint">Email is managed by your Google account and cannot be changed here.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% endif %}
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 2 — ACCESSIBILITY
+       ═══════════════════════════════════════════════════ -->
+  <section class="settings-section card" style="margin-bottom:24px;">
+    <div class="settings-section-header">
+      <span class="settings-section-icon">♿</span>
+      <h2 class="settings-section-title">Accessibility</h2>
+    </div>
+    <p style="font-style:italic;font-size:0.88rem;color:var(--color-text-muted);margin-bottom:20px;">
+      All preferences are saved automatically and applied on every page.
+    </p>
+
+    <!-- Font Size -->
+    <div class="settings-a11y-row">
+      <div class="settings-a11y-label-col">
+        <span class="settings-a11y-label">Font Size</span>
+        <span class="settings-a11y-hint">Adjust text size across the whole site</span>
+      </div>
+      <div class="a11y-btn-group" role="group" aria-label="Font size">
+        <button class="a11y-btn" id="s-font-sm-btn" aria-pressed="false" aria-label="Small font">S</button>
+        <button class="a11y-btn active" id="s-font-md-btn" aria-pressed="true" aria-label="Medium font (default)">M</button>
+        <button class="a11y-btn" id="s-font-lg-btn" aria-pressed="false" aria-label="Large font">L</button>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="settings-a11y-row">
+      <div class="settings-a11y-label-col">
+        <span class="settings-a11y-label">Theme</span>
+        <span class="settings-a11y-hint">Choose your preferred colour scheme</span>
+      </div>
+      <div class="a11y-btn-group" role="group" aria-label="Theme">
+        <button class="a11y-btn active" id="s-theme-light-btn" aria-pressed="true" aria-label="Light theme">Light</button>
+        <button class="a11y-btn" id="s-theme-dark-btn" aria-pressed="false" aria-label="Dark theme">Dark</button>
+        <button class="a11y-btn" id="s-theme-warm-btn" aria-pressed="false" aria-label="Warm sepia theme">Warm</button>
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div class="settings-a11y-toggles">
+
+      <div class="settings-a11y-toggle-row">
+        <div class="settings-a11y-label-col">
+          <span class="settings-a11y-label">High Contrast</span>
+          <span class="settings-a11y-hint">Maximum contrast for visual clarity</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="s-toggle-contrast" role="switch" aria-label="Toggle high contrast mode">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-a11y-toggle-row">
+        <div class="settings-a11y-label-col">
+          <span class="settings-a11y-label">Dyslexia-Friendly Font</span>
+          <span class="settings-a11y-hint">Uses OpenDyslexic for easier reading</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="s-toggle-dyslexic" role="switch" aria-label="Toggle dyslexia-friendly font">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-a11y-toggle-row">
+        <div class="settings-a11y-label-col">
+          <span class="settings-a11y-label">Reduced Motion</span>
+          <span class="settings-a11y-hint">Minimises animations and transitions</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="s-toggle-motion" role="switch" aria-label="Toggle reduced motion">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-a11y-toggle-row">
+        <div class="settings-a11y-label-col">
+          <span class="settings-a11y-label">Read Aloud</span>
+          <span class="settings-a11y-hint">Enable text-to-speech on article pages</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="s-toggle-readaloud" role="switch" aria-label="Enable read aloud">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-a11y-toggle-row" style="border-bottom:none;">
+        <div class="settings-a11y-label-col">
+          <span class="settings-a11y-label">Colour Blind Mode</span>
+          <span class="settings-a11y-hint">Adds texture patterns to colour-coded elements</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="s-toggle-colorblind" role="switch" aria-label="Toggle colour blind mode">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 3 — SUBSCRIPTIONS
+       ═══════════════════════════════════════════════════ -->
+  <section class="settings-section card" style="margin-bottom:24px;">
+    <div class="settings-section-header">
+      <span class="settings-section-icon">💳</span>
+      <h2 class="settings-section-title">Subscriptions</h2>
+    </div>
+
+    {% if current_user and status.plan != 'guest' %}
+    <!-- Subscribed state -->
+    <div class="settings-plan-current">
+      <div class="settings-plan-badge">
+        ✓ You are currently subscribed to the
+        <strong style="color:var(--color-accent);">{{ status.plan_display }}</strong> plan
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;
+                    font-size:0.82rem;font-style:italic;color:var(--color-text-muted);margin-bottom:6px;">
+          <span>Searches used today</span>
+          <span>{{ status.searches_used }} / {{ status.searches_limit }}</span>
+        </div>
+        <div style="background:rgba(107,56,18,0.12);border-radius:var(--radius-full);height:8px;overflow:hidden;">
+          {% set pct = [(status.searches_used / status.searches_limit * 100)|int, 100]|min %}
+          <div style="height:100%;width:{{ pct }}%;background:var(--color-accent);
+                      border-radius:var(--radius-full);transition:width 0.4s ease;"></div>
+        </div>
+      </div>
+
+      <!-- Features grid -->
+      <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        {% for feat, label in [
+          ('summary_200', 'Summaries (200w)'),
+          ('summary_500', 'Summaries (500w)'),
+          ('summary_1000', 'Summaries (1000w)'),
+          ('ai_timelines', 'AI Timelines'),
+          ('images_maps', 'Images & Maps'),
+          ('bookmarks', 'Bookmarks'),
+          ('citations_apa', 'APA/MLA Citations'),
+          ('dark_mode', 'Dark Mode'),
+          ('quizzes', 'Quizzes'),
+        ] %}
+        <div style="display:flex;align-items:center;gap:8px;font-style:italic;font-size:0.83rem;
+                    color:{{ 'var(--color-text-primary)' if status.features.get(feat) else 'var(--color-text-muted)' }};">
+          <span style="font-weight:700;color:{{ '#2D6A3F' if status.features.get(feat) else 'var(--color-border)' }};">
+            {{ '✓' if status.features.get(feat) else '✗' }}
+          </span>
+          {{ label }}
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if status.plan != 'researcher' %}
+      <div style="margin-top:20px;">
+        <a href="{{ url_for('pricing') }}" class="btn btn-primary btn-sm">Upgrade Plan →</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <!-- Not subscribed — show available plans summary -->
+    <p style="font-style:italic;font-size:0.9rem;color:var(--color-text-secondary);margin-bottom:20px;">
+      Unlock deeper historical research with a paid plan.
+    </p>
+
+    <div class="settings-plans-grid">
+
+      <div class="settings-plan-card">
+        <div class="settings-plan-name">Guest</div>
+        <div class="settings-plan-price">Free</div>
+        <ul class="settings-plan-features">
+          <li>3 searches per day</li>
+          <li>Basic article results</li>
+        </ul>
+        <div class="settings-plan-status {% if not current_user or status.plan == 'guest' %}active{% endif %}">
+          {% if not current_user or status.plan == 'guest' %}✓ Current Plan{% else %}—{% endif %}
+        </div>
+      </div>
+
+      <div class="settings-plan-card">
+        <div class="settings-plan-name">Explorer</div>
+        <div class="settings-plan-price">₹99<span>/month</span></div>
+        <ul class="settings-plan-features">
+          <li>20 searches per day</li>
+          <li>Summaries (200 words)</li>
+          <li>Historical images & maps</li>
+          <li>Surprise Me feature</li>
+        </ul>
+        <button class="btn btn-secondary btn-sm" disabled style="opacity:0.55;cursor:not-allowed;width:100%;justify-content:center;">
+          Coming Soon
+        </button>
+      </div>
+
+      <div class="settings-plan-card settings-plan-card-featured">
+        <div class="settings-plan-popular">Most Popular</div>
+        <div class="settings-plan-name">Scholar</div>
+        <div class="settings-plan-price">₹199<span>/month</span></div>
+        <ul class="settings-plan-features">
+          <li>50 searches per day</li>
+          <li>Summaries up to 1000 words</li>
+          <li>AI Timelines</li>
+          <li>APA/MLA Citations</li>
+          <li>Dark mode</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" disabled style="opacity:0.55;cursor:not-allowed;width:100%;justify-content:center;">
+          Coming Soon
+        </button>
+      </div>
+
+      <div class="settings-plan-card">
+        <div class="settings-plan-name">Researcher</div>
+        <div class="settings-plan-price">₹399<span>/month</span></div>
+        <ul class="settings-plan-features">
+          <li>Unlimited searches</li>
+          <li>All Scholar features</li>
+          <li>Quizzes & comparisons</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-gold btn-sm" disabled style="opacity:0.55;cursor:not-allowed;width:100%;justify-content:center;">
+          Coming Soon
+        </button>
+      </div>
+
+    </div>
+
+    <p style="font-size:0.78rem;font-style:italic;color:var(--color-text-muted);
+              text-align:center;margin-top:16px;">
+      🔒 Payment gateway coming soon — plans are displayed for preview only.
+    </p>
+    {% endif %}
+  </section>
+
+</div>
+
+<!-- ── Settings page CSS ──────────────────────────────────────────────────── -->
+<style>
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid var(--color-border-light);
+}
+.settings-section-icon { font-size: 1.4rem; }
+.settings-section-title {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-accent);
+  margin: 0;
+}
+
+/* Profile */
+.settings-profile-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.settings-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.settings-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid var(--color-border);
+  display: block;
+}
+.settings-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  border: 2.5px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+.settings-avatar-change-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  border: 2px solid var(--color-surface);
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.settings-profile-fields {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.settings-field { display: flex; flex-direction: column; gap: 6px; }
+.settings-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+.settings-field-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.settings-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--lg-btn-bg);
+  backdrop-filter: var(--lg-btn-blur);
+  -webkit-backdrop-filter: var(--lg-btn-blur);
+  border: 1.5px solid var(--lg-btn-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 0.92rem;
+  color: var(--color-text-primary);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.settings-input:focus {
+  outline: none;
+  border-color: rgba(107, 56, 18, 0.68);
+  background: var(--lg-btn-bg-hover);
+}
+.settings-field-badge {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  background: var(--lg-surface-bg);
+  border: 1.5px solid var(--lg-surface-border);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.settings-field-hint {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Accessibility rows */
+.settings-a11y-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+.settings-a11y-label-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 140px;
+}
+.settings-a11y-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.settings-a11y-hint {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+.settings-a11y-toggles { margin-top: 4px; }
+.settings-a11y-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+
+/* Current plan display */
+.settings-plan-current {
+  background: var(--lg-surface-bg);
+  backdrop-filter: var(--lg-surface-blur);
+  -webkit-backdrop-filter: var(--lg-surface-blur);
+  border: 1.5px solid var(--lg-surface-border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  box-shadow: var(--lg-surface-shadow-sm);
+}
+.settings-plan-badge {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-text-primary);
+  padding: 10px 16px;
+  background: var(--lg-surface-bg);
+  border: 1.5px solid var(--lg-surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--lg-surface-shadow-sm);
+}
+
+/* Plans grid */
+.settings-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+.settings-plan-card {
+  background: var(--lg-surface-bg);
+  backdrop-filter: var(--lg-surface-blur);
+  -webkit-backdrop-filter: var(--lg-surface-blur);
+  border: 1.5px solid var(--lg-surface-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+  position: relative;
+  box-shadow: var(--lg-surface-shadow-sm);
+}
+.settings-plan-card-featured {
+  border-color: rgba(107, 56, 18, 0.52);
+  box-shadow: var(--lg-surface-shadow);
+}
+.settings-plan-popular {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.settings-plan-name {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+.settings-plan-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+.settings-plan-price span {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+.settings-plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.settings-plan-features li {
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  padding-left: 16px;
+  position: relative;
+}
+.settings-plan-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+  font-weight: 700;
+  font-style: normal;
+}
+.settings-plan-status {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 6px 0;
+}
+.settings-plan-status.active {
+  color: #2D6A3F;
+  font-weight: 700;
+}
+
+/* Dark mode overrides — tokens already override at :root level in html.dark,
+   so these just handle element-specific text that needs explicit colour set. */
+html.dark .settings-input {
+  color: var(--color-text-primary);
+}
+html.dark .settings-a11y-row,
+html.dark .settings-a11y-toggle-row {
+  border-bottom-color: rgba(200, 148, 60, 0.14);
+}
+html.dark .settings-section-header {
+  border-bottom-color: rgba(200, 148, 60, 0.20);
+}
+html.dark .settings-avatar {
+  border-color: rgba(200, 148, 60, 0.40);
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .settings-profile-row { flex-direction: column; align-items: center; }
+  .settings-plans-grid { grid-template-columns: 1fr 1fr; }
+  .settings-a11y-row,
+  .settings-a11y-toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .settings-field-row { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 420px) {
+  .settings-plans-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ── Settings page script ──────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Restore saved accessibility preferences into this page's controls ── */
+  function restoreSettings() {
+    if (!window.ch_getPrefs) return;
+    const prefs = window.ch_getPrefs();
+
+    /* Font size */
+    const fontMap = { sm: 's-font-sm-btn', md: 's-font-md-btn', lg: 's-font-lg-btn' };
+    Object.entries(fontMap).forEach(function([size, id]) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const active = (prefs.fontSize === size) || (!prefs.fontSize && size === 'md');
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+
+    /* Theme */
+    const themeMap = { light: 's-theme-light-btn', dark: 's-theme-dark-btn', warm: 's-theme-warm-btn' };
+    Object.entries(themeMap).forEach(function([theme, id]) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const active = (prefs.theme === theme) || (!prefs.theme && theme === 'light');
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+
+    /* Toggles */
+    const toggleMap = {
+      's-toggle-contrast':  'highContrast',
+      's-toggle-dyslexic':  'dyslexic',
+      's-toggle-motion':    'reducedMotion',
+      's-toggle-readaloud': 'readAloud',
+      's-toggle-colorblind':'colorBlind',
+    };
+    Object.entries(toggleMap).forEach(function([id, key]) {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!prefs[key];
+    });
+  }
+
+  /* ── Bind font size buttons ── */
+  function bindFontBtns() {
+    const sizes = [
+      { id: 's-font-sm-btn', size: 'sm' },
+      { id: 's-font-md-btn', size: 'md' },
+      { id: 's-font-lg-btn', size: 'lg' },
+    ];
+    sizes.forEach(function({ id, size }) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        sizes.forEach(function({ id: oid }) {
+          var ob = document.getElementById(oid);
+          if (ob) { ob.classList.remove('active'); ob.setAttribute('aria-pressed', 'false'); }
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-pressed', 'true');
+        var html = document.documentElement;
+        html.classList.remove('font-sm', 'font-lg');
+        if (size === 'sm') html.classList.add('font-sm');
+        if (size === 'lg') html.classList.add('font-lg');
+        if (window.ch_savePrefs) window.ch_savePrefs({ fontSize: size });
+      });
+    });
+  }
+
+  /* ── Bind theme buttons ── */
+  function bindThemeBtns() {
+    var themes = [
+      { id: 's-theme-light-btn', theme: 'light' },
+      { id: 's-theme-dark-btn',  theme: 'dark'  },
+      { id: 's-theme-warm-btn',  theme: 'warm'  },
+    ];
+    themes.forEach(function({ id, theme }) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        themes.forEach(function({ id: oid }) {
+          var ob = document.getElementById(oid);
+          if (ob) { ob.classList.remove('active'); ob.setAttribute('aria-pressed', 'false'); }
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-pressed', 'true');
+        var html = document.documentElement;
+        html.classList.remove('dark', 'warm');
+        if (theme === 'dark') html.classList.add('dark');
+        if (theme === 'warm') html.classList.add('warm');
+        if (window.ch_savePrefs) window.ch_savePrefs({ theme: theme });
+      });
+    });
+  }
+
+  /* ── Bind toggle switches ── */
+  function bindToggle(inputId, prefKey, htmlClass) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    input.addEventListener('change', function() {
+      var on = this.checked;
+      if (htmlClass) document.documentElement.classList.toggle(htmlClass, on);
+      if (window.ch_savePrefs) window.ch_savePrefs({ [prefKey]: on });
+      if (prefKey === 'readAloud') {
+        var bar = document.getElementById('read-aloud-bar');
+        if (bar) bar.style.display = on ? 'flex' : 'none';
+        if (!on && window.stopReadAloud) window.stopReadAloud();
+      }
+    });
+  }
+
+  /* ── Save display name ── */
+  var saveNameBtn = document.getElementById('save-name-btn');
+  var saveNameMsg = document.getElementById('save-name-msg');
+  if (saveNameBtn) {
+    saveNameBtn.addEventListener('click', function() {
+      var name = (document.getElementById('profile-name') || {}).value || '';
+      if (!name.trim()) return;
+      fetch('/api/update-display-name', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (saveNameMsg) {
+          saveNameMsg.textContent = data.ok ? '✓ Name saved.' : (data.error || 'Could not save.');
+          saveNameMsg.style.display = 'block';
+          saveNameMsg.style.color = data.ok ? 'var(--color-success)' : 'var(--color-error)';
+          setTimeout(function() { saveNameMsg.style.display = 'none'; }, 3000);
+        }
+      })
+      .catch(function() {
+        if (saveNameMsg) {
+          saveNameMsg.textContent = 'Network error — try again.';
+          saveNameMsg.style.display = 'block';
+          saveNameMsg.style.color = 'var(--color-error)';
+        }
+      });
+    });
+  }
+
+  /* ── Avatar change tooltip ── */
+  var avatarBtn = document.getElementById('avatar-change-btn');
+  if (avatarBtn) {
+    avatarBtn.addEventListener('click', function() {
+      window.showToast
+        ? window.showToast('Profile picture is managed by your Google account.', 'info')
+        : alert('Profile picture is managed by your Google account.');
+    });
+  }
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    restoreSettings();
+    bindFontBtns();
+    bindThemeBtns();
+    bindToggle('s-toggle-contrast',   'highContrast', 'high-contrast');
+    bindToggle('s-toggle-dyslexic',   'dyslexic',     'dyslexic');
+    bindToggle('s-toggle-motion',     'reducedMotion','reduced-motion');
+    bindToggle('s-toggle-readaloud',  'readAloud',     null);
+    bindToggle('s-toggle-colorblind', 'colorBlind',   'colorblind');
+  });
+
+})();
+</script>
+
+{% endblock %}

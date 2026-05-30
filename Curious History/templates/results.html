@@ -252,39 +252,6 @@
         </div>
 
 
-        {# ── History Essay — PEEL-structured academic essay from all sources ──── #}
-        {% if essay_content %}
-        <section id="history-essay-section"
-                 style="margin-bottom:32px;padding:24px 28px;
-                        background:rgba(255,255,255,0.18);
-                        backdrop-filter:blur(36px) saturate(180%);
-                        border:1px solid rgba(255,255,255,0.72);
-                        border-radius:14px;
-                        box-shadow:0 4px 24px rgba(0,0,0,0.07),inset 0 1px 0 rgba(255,255,255,0.95);"
-                 aria-label="Historical Essay: {{ topic }}">
-
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;
-                      border-bottom:2px solid var(--color-accent-light);padding-bottom:10px;">
-            <span style="font-size:1.1rem;">📖</span>
-            <span style="font-family:var(--font-body);font-size:0.83rem;font-weight:700;
-                         color:var(--color-accent-dark);text-transform:uppercase;letter-spacing:0.06em;">
-              Historical Essay
-            </span>
-            <span style="font-family:var(--font-body);font-size:0.7rem;font-weight:400;
-                         color:var(--color-text-muted);text-transform:none;letter-spacing:0;
-                         margin-left:4px;">
-              PEEL structure · Sources cross-referenced · Key terms bolded
-            </span>
-          </div>
-
-          <div class="essay-content"
-               style="font-family:var(--font-body);font-size:0.9rem;line-height:1.75;
-                      color:var(--color-text-primary);">
-            {{ essay_content | markdown | safe }}
-          </div>
-        </section>
-        {% endif %}
-
         <!-- ── Multi-Source Archive — server-rendered, source-separated ────────
              Each database shows up in its own sub-section.
              Sections only render if that source has matching records for the topic.
