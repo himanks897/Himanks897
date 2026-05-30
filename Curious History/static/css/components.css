@@ -3315,8 +3315,8 @@
 .landing-about-text ul li strong { color: var(--color-accent); font-weight: 700; font-style: italic; }
 /* Icon card SVG sizing */
 .landing-icon-card svg {
-  width: 26px;
-  height: 26px;
+  width: 52px;
+  height: 52px;
   display: block;
   color: var(--color-accent);
 }
@@ -3328,16 +3328,16 @@
 .landing-about-icon-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  max-width: 380px;
+  max-width: 460px;
 }
 .landing-icon-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 18px 10px;
+  gap: 12px;
+  padding: 22px 12px;
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(36px) saturate(190%);
   -webkit-backdrop-filter: blur(36px) saturate(190%);
@@ -3371,11 +3371,12 @@
   transform: scale(1.05);
 }
 .landing-icon-card span {
-  font-size: 0.64rem;
+  font-size: 0.88rem;
   font-family: 'Times New Roman', Times, serif;
   font-style: italic;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   line-height: 1.3;
+  font-weight: 600;
 }
 
 /* ── AUDIENCE / PURPOSE GRID ─────────────────────────────────────────────── */
@@ -3896,10 +3897,10 @@
    LANDING PAGE EXTRAS — icon-card SVGs, action preview buttons
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Icon card SVG size */
+/* Icon card SVG size — large enough to visually match the adjacent text */
 .landing-icon-card svg {
-  width: 32px;
-  height: 32px;
+  width: 52px;
+  height: 52px;
   color: var(--color-accent);
   stroke: var(--color-accent);
 }
