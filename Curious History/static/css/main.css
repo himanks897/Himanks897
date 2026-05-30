@@ -858,33 +858,33 @@ html.dyslexic p {
   padding: 7px 4px;
   font-size: 0.8rem;
   font-style: italic;
-  border: 0.5px solid rgba(255, 255, 255, 0.72);
+  border: 1.5px solid rgba(107, 56, 18, 0.40);
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(36px) saturate(180%);
+  -webkit-backdrop-filter: blur(36px) saturate(180%);
   color: var(--color-text-secondary);
   cursor: pointer;
   text-align: center;
   min-height: 36px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.80);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(44,22,6,0.05);
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .a11y-btn.active {
-  background: rgba(255, 255, 255, 0.40);
-  border-color: rgba(255, 255, 255, 0.90);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(107, 56, 18, 0.72);
   color: var(--color-accent);
   font-weight: 700;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.96);
+  box-shadow: 0 2px 10px rgba(44,22,6,0.08), inset 0 1.5px 0 rgba(255,255,255,0.98);
 }
 .a11y-btn:hover, .a11y-btn:focus {
-  background: rgba(255, 255, 255, 0.30);
-  border-color: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.92);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(107, 56, 18, 0.65);
+  box-shadow: 0 2px 10px rgba(44,22,6,0.06), inset 0 1.5px 0 rgba(255,255,255,0.96);
 }
 .a11y-btn.active:hover, .a11y-btn.active:focus, .a11y-btn.active:active {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.30);
+  border-color: rgba(107, 56, 18, 0.88);
   color: var(--color-accent);
 }
 .a11y-toggle-row {
@@ -1077,11 +1077,11 @@ html.dyslexic p {
   box-shadow:
     0 4px 28px rgba(44, 22, 6, 0.09),
     0 1px 4px rgba(44, 22, 6, 0.05),
-    inset 0 1.5px 0 rgba(255,255,255,0.95),
+    inset 0 2px 0 rgba(255,255,255,1.0),
     inset 0 -0.5px 0 rgba(44, 22, 6, 0.04);
   color: var(--color-text-secondary);
 }
-/* Clean white specular — like polished glass */
+/* Strong specular top shine — the main visual cue that makes it look like glass */
 .btn::before {
   content: '';
   position: absolute;
@@ -1089,8 +1089,8 @@ html.dyslexic p {
   height: 52%;
   border-radius: inherit;
   background: linear-gradient(180deg,
-    rgba(255,255,255,0.82) 0%,
-    rgba(255,255,255,0.28) 50%,
+    rgba(255,255,255,0.95) 0%,
+    rgba(255,255,255,0.40) 40%,
     rgba(255,255,255,0.00) 100%);
   pointer-events: none;
   z-index: 0;
