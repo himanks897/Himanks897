@@ -18,7 +18,337 @@ import json
 import re
 from datetime import datetime
 
+# ── Historical synonym / abbreviation map ─────────────────────────────────────
+# Maps common user inputs (abbreviations, alternate names, misspellings) to
+# the canonical forms stored in the database. All values are lowercase.
+# When the user types any key, ALL listed values are also searched.
+_SYNONYM_MAP: dict[str, list[str]] = {
+    # World Wars
+    "ww1":          ["world war i", "world war 1", "great war", "first world war"],
+    "ww2":          ["world war ii", "world war 2", "second world war", "nazi"],
+    "wwi":          ["world war i", "world war 1", "great war", "first world war"],
+    "wwii":         ["world war ii", "world war 2", "second world war"],
+    "great war":    ["world war i", "world war 1", "ww1", "wwi"],
+    "cold war":     ["ussr", "soviet", "communism", "nuclear", "nato"],
+    # Countries / empires — alternate names
+    "usa":          ["united states", "america", "american"],
+    "us":           ["united states", "america", "american"],
+    "uk":           ["united kingdom", "britain", "british", "england"],
+    "ussr":         ["soviet union", "russia", "communist", "bolshevik"],
+    "soviet":       ["ussr", "russia", "communism", "stalinist", "bolshevik"],
+    "rome":         ["roman", "roman empire", "roman republic", "latins"],
+    "roman empire": ["rome", "romans", "caesar", "augustus", "latin"],
+    "greece":       ["greek", "ancient greece", "hellenic", "athenian"],
+    "greek":        ["greece", "athens", "sparta", "hellenic", "olympia"],
+    "egypt":        ["egyptian", "pharaoh", "nile", "cairo", "hieroglyph"],
+    "persia":       ["persian", "achaemenid", "iran", "darius", "xerxes"],
+    "ottoman":      ["turkey", "turkish", "ottoman empire", "istanbul"],
+    "byzantine":    ["eastern roman", "constantinople", "byzantium"],
+    "mongol":       ["mongolia", "genghis", "kublai", "mongol empire"],
+    "aztec":        ["mexico", "mesoamerica", "tenochtitlan", "nahua"],
+    "inca":         ["peru", "andean", "south america", "quechua"],
+    "maya":         ["mesoamerica", "yucatan", "guatemala", "mayan"],
+    # Civilisations
+    "mesopotamia":  ["iraq", "babylon", "assyrian", "sumerian", "tigris", "euphrates"],
+    "babylon":      ["babylonian", "mesopotamia", "nebuchadnezzar", "hammurabi"],
+    "sumerian":     ["sumer", "mesopotamia", "gilgamesh", "uruk", "cuneiform"],
+    "assyrian":     ["assyria", "nineveh", "mesopotamia", "ashurbanipal"],
+    "pharaoh":      ["egypt", "egyptian", "nile", "pyramid", "hieroglyph"],
+    "pyramid":      ["egypt", "giza", "pharaoh", "ancient egypt"],
+    # Key events
+    "french revolution": ["france", "robespierre", "napoleon", "bastille", "1789"],
+    "industrial revolution": ["britain", "steam engine", "factory", "coal", "textiles"],
+    "renaissance":  ["italy", "florence", "michelangelo", "da vinci", "humanism"],
+    "reformation":  ["protestant", "luther", "calvin", "church", "religious war"],
+    "crusades":     ["holy land", "jerusalem", "pope", "knights", "saladin"],
+    "black death":  ["plague", "bubonic", "pandemic", "medieval", "1348"],
+    "silk road":    ["trade", "china", "central asia", "spice", "marco polo"],
+    # Key figures
+    "alexander":    ["alexander the great", "macedon", "greece", "persia"],
+    "napoleon":     ["french revolution", "france", "waterloo", "empire"],
+    "hitler":       ["nazi", "germany", "world war ii", "holocaust", "third reich"],
+    "cleopatra":    ["egypt", "ptolemaic", "roman", "caesar", "antony"],
+    "caesar":       ["julius caesar", "rome", "roman republic", "rubicon"],
+    "gandhi":       ["india", "independence", "british india", "nonviolence"],
+    "churchill":    ["world war ii", "britain", "winston", "blitz", "allied"],
+    "stalin":       ["ussr", "soviet union", "communism", "gulags", "cold war"],
+    "columbus":     ["age of exploration", "americas", "1492", "spain"],
+    "gilgamesh":    ["mesopotamia", "sumerian", "flood narrative", "uruk", "enkidu"],
+    # Historical periods
+    "medieval":     ["middle ages", "feudal", "crusades", "byzantine", "gothic"],
+    "ancient":      ["classical antiquity", "greece", "rome", "egypt", "mesopotamia"],
+    "colonial":     ["colonialism", "empire", "imperialism", "british", "french"],
+    "slavery":      ["slave trade", "atlantic", "abolition", "plantation", "emancipation"],
+    "holocaust":    ["nazi", "world war ii", "jewish", "concentration camp", "genocide"],
+    # Geographic terms
+    "middle east":  ["arab", "islam", "ottoman", "persia", "levant", "mesopotamia"],
+    "africa":       ["african", "sahara", "ethiopia", "colonialism", "egypt"],
+    "china":        ["chinese", "ming", "qing", "han", "dynasty", "beijing"],
+    "india":        ["indian", "mughal", "british india", "hinduism", "gandhi"],
+    "japan":        ["japanese", "samurai", "meiji", "shogunate", "edo"],
+}
+
+# Stemming pairs: if the user types the left side, also search the right side
+_STEM_PAIRS: list[tuple[str, str]] = [
+    ("colonializ",  "colonial"),
+    ("colonialis",  "colonial"),
+    ("industriali", "industrial"),
+    ("revolution",  "revolut"),
+    ("democrac",    "democrat"),
+    ("civilization","civiliz"),
+    ("civilisation","civilis"),
+    ("emperor",     "empire"),
+    ("imperial",    "empire"),
+    ("archaeolog",  "archaeol"),
+    ("philosophi",  "philosoph"),
+    ("religious",   "religion"),
+    ("economical",  "econom"),
+    ("political",   "politic"),
+    ("military",    "militari"),
+    ("conquered",   "conquer"),
+    ("established", "establ"),
+]
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "curious_history.json")
+
+# ── Source metadata registry ──────────────────────────────────────────────────
+# Maps source name → {"tier", "primary", "secondary", "description", "manuscript"}
+#   tier        : "text" | "image" | "map" | "mixed" | "specialist"
+#   primary     : main content type delivered
+#   secondary   : secondary content type (if mixed), else None
+#   manuscript  : True if source contains primary manuscripts needing English-only filter
+SOURCE_METADATA: dict[str, dict] = {
+    # ── Text-rich ─────────────────────────────────────────────────────────────
+    "Perseus Digital Library": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Complete English translations of Herodotus, Thucydides, Caesar, Livy, Plutarch, Suetonius, Tacitus, and Plato. Deepest text per record (avg 6,000 chars).",
+        "manuscript": False,
+    },
+    "Our World in Data": {
+        "tier": "text", "primary": "dataset", "secondary": None,
+        "description": "Long-form CSV datasets on historical population, GDP, warfare, and mortality. Data-rich content (avg 8,000 chars).",
+        "manuscript": False,
+    },
+    "BL Zenodo Datasets": {
+        "tier": "text", "primary": "dataset", "secondary": None,
+        "description": "British Library open research datasets with rich metadata descriptions.",
+        "manuscript": False,
+    },
+    "Wikipedia": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Pre-fetched English Wikipedia article summaries — broadest topic coverage across all eras and regions.",
+        "manuscript": False,
+    },
+    "Wikidata": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Structured entity facts: dates, classifications, relationships for key historical topics.",
+        "manuscript": False,
+    },
+    "BL Research Repository (OAI-PMH)": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "British Library scholarly papers, theses, and digitised collections via OAI-PMH. Largest single text source (1,642 records).",
+        "manuscript": False,
+    },
+    "BL British National Bibliography": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "British Library book catalogue with detailed bibliographic descriptions.",
+        "manuscript": False,
+    },
+    "Internet Archive": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Digitised public-domain books, journals, and historical texts across all eras and languages.",
+        "manuscript": False,
+    },
+    "Internet Archive — Ancient History": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language scholarly books on ancient Greece, Rome, Egypt, and Mesopotamia. English-only filter enforced.",
+        "manuscript": False,
+    },
+    "Cabinet Papers UK": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "UK government cabinet documents and policy papers via Open Library.",
+        "manuscript": False,
+    },
+    "Qatar Digital Library": {
+        "tier": "text", "primary": "metadata_only", "secondary": None,
+        "description": "Islamic and Arabic manuscript metadata links. Full text not stored — metadata only.",
+        "manuscript": False,
+    },
+    "National Library Norway (nb.no)": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Norwegian national library catalogue — titles and metadata for Norwegian and Nordic history.",
+        "manuscript": False,
+    },
+    "HathiTrust Digital Library": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language digitised books from 57 global historical topics. Language-filtered to English only.",
+        "manuscript": False,
+    },
+    "Internet Archive — India": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language texts on Indian history — ancient, Mughal, colonial, and independence eras.",
+        "manuscript": False,
+    },
+    "Internet Archive — Africa": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language texts on African history across all regions and periods.",
+        "manuscript": False,
+    },
+    "SOAS University London": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Academic papers and theses from SOAS — world leader in Africa, Asia, and Middle East studies.",
+        "manuscript": False,
+    },
+    "OpenITI — Islamic Texts": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language Islamic history scholarship. Arabic/Persian raw texts excluded — English only.",
+        "manuscript": False,
+    },
+    "Library of Congress": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "US and world history documents from the Library of Congress collections.",
+        "manuscript": False,
+    },
+    "National Diet Library Japan": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "English-language books on Japanese and East Asian history from Japan's national library.",
+        "manuscript": False,
+    },
+    "Memoria Chilena": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Chilean and Latin American history from the Biblioteca Nacional de Chile. Spanish-language content.",
+        "manuscript": False,
+    },
+    # ── Manuscript sources (English-only, curated translations) ───────────────
+    "CDLI — Cuneiform Digital Library": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Mesopotamian cuneiform texts — Gilgamesh, Hammurabi Code, Babylonian myths. English translations only. Raw cuneiform never stored.",
+        "manuscript": True,
+    },
+    "ORACC — Annotated Cuneiform Corpus": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Annotated Mesopotamian cuneiform — royal inscriptions, Assyrian archives, Babylonian law. English translations only.",
+        "manuscript": True,
+    },
+    "TLA — Thesaurus Linguae Aegyptiae": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Ancient Egyptian texts — Book of the Dead, Pyramid Texts, literary works. Hieroglyphic source never stored; English only.",
+        "manuscript": True,
+    },
+    "ISAC — Oriental Institute Chicago": {
+        "tier": "text", "primary": "full_text", "secondary": None,
+        "description": "Oriental Institute scholarly publications on Egypt, Mesopotamia, Persia, and the ancient Near East.",
+        "manuscript": False,
+    },
+    # ── Image-rich ────────────────────────────────────────────────────────────
+    "Finna Finland": {
+        "tier": "image", "primary": "image", "secondary": "full_text",
+        "description": "Finnish and Nordic cultural heritage — largest image source (3,105 records). Photographs, illustrations, portraits, and maps.",
+        "manuscript": False,
+    },
+    "BL Wikimedia Commons": {
+        "tier": "image", "primary": "image", "secondary": None,
+        "description": "British Library's historical image collection via Wikimedia Commons (839 images).",
+        "manuscript": False,
+    },
+    "Wikimedia Commons": {
+        "tier": "image", "primary": "image", "secondary": None,
+        "description": "Pre-fetched historical images across all eras — battle maps, portraits, archaeological photographs.",
+        "manuscript": False,
+    },
+    # ── Map-rich ──────────────────────────────────────────────────────────────
+    "National Library Sweden (KB)": {
+        "tier": "mixed", "primary": "image", "secondary": "full_text",
+        "description": "Sweden's national library — #1 map source (724 maps) plus 1,703 images and 601 documents. Scandinavian and European historical cartography.",
+        "manuscript": False,
+    },
+    # ── Mixed (significant text AND images) ───────────────────────────────────
+    "DPLA": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "Digital Public Library of America — 3,131 documents plus 1,341 images (including 227 maps). Deep US history coverage.",
+        "manuscript": False,
+    },
+    "Polona Poland": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "Polish national digital library — 4,084 documents and 807 images (120 maps). Richest combined source.",
+        "manuscript": False,
+    },
+    "Europeana Romania": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "Eastern European cultural heritage — 1,657 documents and 775 images (102 maps). Romania, Bulgaria, Serbia, Balkans.",
+        "manuscript": False,
+    },
+    "BnF Gallica France": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "French national library — 3,011 documents and 361 images. Strong French history text coverage.",
+        "manuscript": False,
+    },
+    "Europeana": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "Pan-European cultural heritage — near-equal split of 709 documents and 727 images across global topics.",
+        "manuscript": False,
+    },
+    "Europeana Middle East & Global": {
+        "tier": "mixed", "primary": "full_text", "secondary": "image",
+        "description": "Middle Eastern, Islamic, and global cultural heritage via Europeana — documents and images on Ottoman, Persian, Arab history.",
+        "manuscript": False,
+    },
+    # ── Specialist ────────────────────────────────────────────────────────────
+    "Open Context — Archaeology Data": {
+        "tier": "specialist", "primary": "artefact", "secondary": None,
+        "description": "Archaeological finds from Mediterranean, Near East, Egypt, and Mesopotamia excavations — pottery, tools, structures (255 artefact records).",
+        "manuscript": False,
+    },
+    "Project Mercury — Roman Datasets": {
+        "tier": "specialist", "primary": "place", "secondary": "full_text",
+        "description": "Roman geographic and historical data — provinces, cities, amphitheatres, roads, battles, and emperors.",
+        "manuscript": False,
+    },
+    "Nomisma — Ancient Coins": {
+        "tier": "specialist", "primary": "artefact", "secondary": None,
+        "description": "Ancient coin linked open data — Greek, Roman, Byzantine, Persian coinage via SPARQL. Built-in records for 8 key coin types.",
+        "manuscript": False,
+    },
+    "Pleiades — Ancient World Gazetteer": {
+        "tier": "specialist", "primary": "place", "secondary": None,
+        "description": "Community gazetteer of ancient places — cities, temples, sites, rivers for Greece, Rome, Egypt, and Mesopotamia.",
+        "manuscript": False,
+    },
+    "BL GitHub Georeferencer": {
+        "tier": "specialist", "primary": "metadata_only", "secondary": None,
+        "description": "British Library georeferenced map metadata from GitHub.",
+        "manuscript": False,
+    },
+}
+
+
+# ── Map detection keywords ────────────────────────────────────────────────────
+_MAP_KEYWORDS = frozenset([
+    'map', 'maps', 'carte', 'atlas', 'mappa', 'topograph', 'topographic',
+    'kart', 'landkart', 'kaart', 'mapa', 'cartograph', 'cartography',
+    'plan of', 'chart of', 'survey map', 'military map', 'battle map',
+    'siege plan', 'floor plan', 'town plan', 'city plan',
+])
+
+
+def is_map_record(record: dict) -> bool:
+    """Return True if an image record is a historical map."""
+    if record.get("record_type") != "image":
+        return False
+    t    = (record.get("title") or "").lower()
+    s    = (record.get("summary") or "").lower()
+    tags = " ".join(record.get("tags") or []).lower()
+    combined = f"{t} {s} {tags}"
+    return any(kw in combined for kw in _MAP_KEYWORDS)
+
+
+def get_source_metadata(source_name: str) -> dict:
+    """Return metadata dict for a source, with safe defaults."""
+    return SOURCE_METADATA.get(source_name, {
+        "tier": "text", "primary": "full_text",
+        "secondary": None, "description": "", "manuscript": False,
+    })
+
 
 # ── Source registry ───────────────────────────────────────────────────────────
 SOURCES = [
@@ -189,9 +519,6 @@ def get_count_by_content_type(conn: dict) -> dict:
 
 
 # ── Numeral normalisation ─────────────────────────────────────────────────────
-# Maps English number words ↔ Roman numerals so "world war two" matches
-# "World War II" and vice versa.
-
 _WORD_TO_ROMAN = {
     'one': 'i', 'two': 'ii', 'three': 'iii', 'four': 'iv', 'five': 'v',
     'six': 'vi', 'seven': 'vii', 'eight': 'viii', 'nine': 'ix', 'ten': 'x',
@@ -200,19 +527,60 @@ _ROMAN_TO_WORD = {v: k for k, v in _WORD_TO_ROMAN.items()}
 
 
 def _normalise_numerals(text: str) -> str:
-    """Replace number words with Roman numerals (for phrase matching)."""
     words = text.split()
     return ' '.join(_WORD_TO_ROMAN.get(w, w) for w in words)
+
+
+# ── Query expansion ───────────────────────────────────────────────────────────
+
+def expand_query(topic: str) -> list[str]:
+    """
+    Return a list of all search phrases to match against records,
+    expanded from the original topic using:
+      1. The raw topic and its numeral-normalised form
+      2. Synonym expansion from _SYNONYM_MAP (multi-word and single-word keys)
+      3. Stem pairs so "colonialism" also hits "colonial"
+
+    All returned strings are lowercase.
+    """
+    topic_lower = topic.lower().strip()
+    topic_norm  = _normalise_numerals(topic_lower)
+
+    phrases: list[str] = [topic_lower]
+    if topic_norm != topic_lower:
+        phrases.append(topic_norm)
+
+    # ── Synonym expansion ────────────────────────────────────────────────────
+    # Try the full topic as a key first, then individual words
+    matched_keys: set[str] = set()
+    for key, synonyms in _SYNONYM_MAP.items():
+        if key in topic_lower:
+            if key not in matched_keys:
+                matched_keys.add(key)
+                phrases.extend(synonyms)
+
+    # ── Stem pair expansion ──────────────────────────────────────────────────
+    for (stem, short) in _STEM_PAIRS:
+        if stem in topic_lower and short not in phrases:
+            phrases.append(short)
+
+    # Deduplicate while preserving order
+    seen: set[str] = set()
+    result: list[str] = []
+    for p in phrases:
+        if p and p not in seen:
+            seen.add(p)
+            result.append(p)
+    return result
 
 
 # ── Keyword extraction ────────────────────────────────────────────────────────
 
 def _extract_keywords(topic: str) -> list:
     """
-    Extract meaningful search keywords from a topic string.
-    Keeps historically important words (war, world, empire, etc.).
-    For words > 8 chars, also adds the first 7 chars for prefix/suffix matching
-    (e.g. "colonialism" → also "colonia", matching "colonial" and "decolonization").
+    Extract meaningful search keywords from a topic string, including
+    synonym-expanded terms. Keeps historically important words.
+    For words > 8 chars, also adds the first 7 chars for prefix matching.
     """
     _STOPWORDS = {
         'the', 'and', 'for', 'with', 'from', 'this', 'that', 'was', 'were',
@@ -221,12 +589,18 @@ def _extract_keywords(topic: str) -> list:
         'also', 'when', 'been', 'more', 'into', 'over', 'two', 'one',
         'then', 'than', 'they', 'them', 'their', 'all', 'any', 'how',
     }
-    raw = [w.lower() for w in re.split(r'\W+', topic)
-           if len(w) >= 3 and w.lower() not in _STOPWORDS]
 
-    expanded: list = []
-    seen: set = set()
-    for w in raw:
+    # Start from the full expanded phrase list
+    all_phrases = expand_query(topic)
+    raw_words: list[str] = []
+    for phrase in all_phrases:
+        for w in re.split(r'\W+', phrase):
+            if len(w) >= 3 and w.lower() not in _STOPWORDS:
+                raw_words.append(w.lower())
+
+    expanded: list[str] = []
+    seen: set[str] = set()
+    for w in raw_words:
         if w not in seen:
             expanded.append(w)
             seen.add(w)
@@ -246,6 +620,8 @@ def _record_text(r: dict) -> str:
         r.get("title")    or "",
         r.get("summary")  or "",
         r.get("full_text") or "",
+        r.get("era")      or "",
+        r.get("region")   or "",
         " ".join(r.get("tags") or []),
     ]
     return " ".join(parts).lower()
@@ -256,31 +632,26 @@ def search_records_ranked(conn: dict, topic: str,
                           limit: int = 20,
                           url_pattern: str = None) -> list:
     """
-    Multi-keyword relevance-ranked search across all records in memory.
+    Multi-keyword, synonym-aware, relevance-ranked search.
 
-    Scoring is source-neutral — every database competes equally on content:
-
-      Title match bonuses (record title contains the topic/keyword):
-        +8   full phrase found in record title
-        +2   per matching keyword found in title
-
-      Body-text match bonuses (phrase/keyword found in summary or full_text):
-        +10  full phrase found in body text  (rewards long primary-source docs)
-        +1   per matching keyword in body text
-
-      Content-depth bonus:
-        +3   record has >400 chars of text (rewards IA/Cabinet Papers over
-             short Wikipedia summaries; both get the bonus if rich enough)
-
-      Image penalty:
-        -4   record_type == "image" (images stay below textual records)
-
-    Higher score → more relevant.
-    Ties broken by total body-text length (more content = more useful).
+    Scoring per record:
+      +15  title IS exactly the query (exact match)
+      +8   query phrase found in title
+      +10  query phrase found in body
+      +6   synonym/expanded phrase found in title
+      +4   synonym/expanded phrase found in body
+      +2   per individual keyword found in title
+      +1   per individual keyword found in body
+      +3   content depth bonus (>400 chars)
+      +2   era/region matches query context
+      -4   record_type == "image"
     """
+    # Build all search variants (topic + synonyms + stems)
+    all_phrases   = expand_query(topic)
+    primary_phrase = all_phrases[0]                # original query, lowercase
+    extra_phrases  = all_phrases[1:]               # synonyms / stems
+
     keywords      = _extract_keywords(topic)
-    topic_lower   = topic.lower()
-    topic_numeral = _normalise_numerals(topic_lower)   # "world war two" → "world war ii"
 
     candidates = [
         r for r in conn.get("records", [])
@@ -291,43 +662,44 @@ def search_records_ranked(conn: dict, topic: str,
 
     scored: dict = {}
     for r in candidates:
-        title     = (r.get("title") or "").lower()
-        body      = " ".join([
+        title = (r.get("title") or "").lower()
+        body  = " ".join([
             r.get("summary")   or "",
             r.get("full_text") or "",
             " ".join(r.get("tags") or []),
+            r.get("era")       or "",
+            r.get("region")    or "",
         ]).lower()
-        full_text = " ".join([title, body])  # everything combined
         score = 0
 
         # ── Exact title match ─────────────────────────────────────────────────
-        # A record whose title IS the topic (e.g. "Roman Empire" for query
-        # "Roman Empire") should always beat articles that merely contain the
-        # phrase (e.g. "Holy Roman Empire").  Also fires on numeral-normalised
-        # form so "World War II" matches query "world war two".
-        if title == topic_lower or title == topic_numeral:
+        if title == primary_phrase or any(title == p for p in extra_phrases[:3]):
             score += 15
 
-        # ── Phrase match ──────────────────────────────────────────────────────
-        # Check both the original phrase and the numeral-normalised version
-        # so "world war two" phrase-matches "world war ii" in title/body.
-        phrase_in_title = topic_lower in title or topic_numeral in title
-        phrase_in_body  = topic_lower in body  or topic_numeral in body
-        if phrase_in_title:
+        # ── Primary phrase match in title / body ──────────────────────────────
+        if primary_phrase in title:
             score += 8
-        if phrase_in_body:
-            score += 10          # separate from title — both can fire
+        if primary_phrase in body:
+            score += 10
 
-        # ── Keyword match ─────────────────────────────────────────────────────
-        for kw in keywords[:6]:
+        # ── Synonym / expanded phrase match ───────────────────────────────────
+        for phrase in extra_phrases[:8]:
+            if phrase in title:
+                score += 6
+                break   # only award once per position
+        for phrase in extra_phrases[:8]:
+            if phrase in body:
+                score += 4
+                break
+
+        # ── Per-keyword match ─────────────────────────────────────────────────
+        for kw in keywords[:12]:
             if kw in title:
                 score += 2
-            if kw in body:      # separate from title — both can fire
+            if kw in body:
                 score += 1
 
         # ── Content depth bonus ───────────────────────────────────────────────
-        # Rewards primary-source docs (IA, Cabinet Papers) that have rich text;
-        # also rewards Wikipedia summaries if they are detailed (>400 chars).
         content_len = len(r.get("full_text") or r.get("summary") or "")
         if content_len > 400:
             score += 3
@@ -339,7 +711,6 @@ def search_records_ranked(conn: dict, topic: str,
         if score > 0:
             scored[r["id"]] = (r, score)
 
-    # Ties broken by content length (longer = more useful)
     sorted_pairs = sorted(
         scored.values(),
         key=lambda x: (-x[1], -len(x[0].get("full_text") or x[0].get("summary") or ""))
@@ -366,6 +737,35 @@ def get_classical_by_keywords(conn: dict, keywords: list) -> list:
     results = []
     for r in conn.get("records", []):
         if r.get("era") != "Classical Antiquity":
+            continue
+        text = _record_text(r)
+        if any(kw in text for kw in keywords):
+            results.append(r)
+    return results
+
+
+# Ancient-era prefix set for fast membership test
+_ANCIENT_ERA_PREFIXES = (
+    "ancient mesopotamia", "ancient egypt", "ancient rome", "ancient greece",
+    "ancient persia", "ancient near east", "ancient nubia", "ancient syria",
+    "ancient anatolia", "ancient phoenicia", "ancient", "byzantine",
+)
+
+
+def get_ancient_by_keywords(conn: dict, keywords: list) -> list:
+    """
+    Return ancient-world records (Mesopotamia, Egypt, Rome, Greece, Persia …)
+    that contain ANY of the given keywords.  Used as a supplement so ancient
+    source records (CDLI, ORACC, TLA, ISAC, Pleiades, Mercury, Nomisma,
+    Open Context, Internet Archive Ancient) appear in search results alongside
+    Wikipedia/IA content.
+    """
+    if not keywords:
+        return []
+    results = []
+    for r in conn.get("records", []):
+        era = (r.get("era") or "").lower()
+        if not any(era.startswith(p) for p in _ANCIENT_ERA_PREFIXES):
             continue
         text = _record_text(r)
         if any(kw in text for kw in keywords):

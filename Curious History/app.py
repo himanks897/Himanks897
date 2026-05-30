@@ -38,12 +38,65 @@ from utils.content_formatter import format_for_article, format_for_detail
 from utils.reading_time import estimate as reading_time
 from utils.glossary import extract_terms
 from utils.citations import build_citation, build_apa_citation, build_mla_citation
+try:
+    from utils.essay_formatter import format_as_essay, bold_key_terms
+    _ESSAY_FORMATTER_AVAILABLE = True
+except Exception:
+    _ESSAY_FORMATTER_AVAILABLE = False
+    def format_as_essay(*a, **kw): return ""
+    def bold_key_terms(t, *a, **kw): return t
 
 import db as _pdb          # pipeline database (in-memory JSON cache)
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
+
+
+# ── Markdown Jinja2 filter ────────────────────────────────────────────────────
+# Converts essay Markdown (produced by essay_formatter) to safe HTML for the
+# results template. Uses a minimal in-house renderer to avoid a heavy dependency.
+_MD_BOLD   = re.compile(r'\*\*(.+?)\*\*')
+_MD_ITALIC = re.compile(r'\*(.+?)\*')
+_MD_H1     = re.compile(r'^# (.+)$',  re.MULTILINE)
+_MD_H2     = re.compile(r'^## (.+)$', re.MULTILINE)
+_MD_H3     = re.compile(r'^### (.+)$',re.MULTILINE)
+_MD_HR     = re.compile(r'^---+$',    re.MULTILINE)
+_MD_LI     = re.compile(r'^- (.+)$',  re.MULTILINE)
+
+def _markdown_to_html(text: str) -> str:
+    """Minimal Markdown → HTML converter for the essay display."""
+    if not text:
+        return ""
+    import html as _html
+    t = _html.escape(text, quote=False)
+    # Headings
+    t = _MD_H3.sub(r'<h4 class="essay-h3">\1</h4>', t)
+    t = _MD_H2.sub(r'<h3 class="essay-h2">\1</h3>', t)
+    t = _MD_H1.sub(r'<h2 class="essay-h1">\1</h2>', t)
+    # Horizontal rule
+    t = _MD_HR.sub('<hr class="essay-hr">', t)
+    # Bold / italic
+    t = _MD_BOLD.sub(r'<strong>\1</strong>', t)
+    t = _MD_ITALIC.sub(r'<em>\1</em>', t)
+    # List items
+    t = _MD_LI.sub(r'<li>\1</li>', t)
+    # Paragraphs — blank-line separated
+    paras = re.split(r'\n{2,}', t)
+    result = []
+    for p in paras:
+        p = p.strip()
+        if not p:
+            continue
+        if p.startswith('<h') or p.startswith('<hr') or p.startswith('<li'):
+            result.append(p)
+        else:
+            # Preserve single newlines as <br> within a paragraph
+            p = p.replace('\n', '<br>')
+            result.append(f'<p class="essay-para">{p}</p>')
+    return '\n'.join(result)
+
+app.jinja_env.filters['markdown'] = _markdown_to_html
 
 # Google OAuth Client ID (public — safe to embed in frontend too)
 GOOGLE_CLIENT_ID = "795621911465-a1122fukv8b3j96f2oq5bje7u9gnpooe.apps.googleusercontent.com"
@@ -65,12 +118,27 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "static", "data")
 
 # Classical-topic keyword hints (used in several places)
 _CLASSICAL_HINTS = frozenset({
+    # Greco-Roman
     'rome', 'roman', 'greece', 'greek', 'persian', 'caesar',
     'herodotus', 'thucydides', 'plutarch', 'livy', 'polybius',
     'suetonius', 'tacitus', 'hannibal', 'alexander', 'antiquity',
     'classical', 'ancient', 'athen', 'sparta', 'carthage',
     'peloponnesian', 'gallic', 'republic', 'senate', 'tribune',
     'crassus', 'pompey', 'cicero', 'augustus', 'nero',
+    # Ancient Mesopotamia
+    'mesopotamia', 'sumerian', 'sumer', 'akkadian', 'akkad',
+    'babylonian', 'babylon', 'assyrian', 'assyria', 'nineveh',
+    'gilgamesh', 'hammurabi', 'cuneiform', 'tigris', 'euphrates',
+    'ur', 'uruk', 'nippur', 'lagash', 'ebla', 'mari',
+    # Ancient Egypt
+    'egypt', 'egyptian', 'pharaoh', 'hieroglyph', 'pyramid',
+    'nile', 'thebes', 'karnak', 'amarna', 'cleopatra', 'ramesses',
+    'tutankhamun', 'hatshepsut', 'akhenaten', 'osiris', 'isis',
+    'nubia', 'kush', 'memphis', 'papyrus', 'mummy', 'ptolem',
+    # Ancient Near East / Persia
+    'hittite', 'hatti', 'ugarit', 'phoenician', 'canaan',
+    'achaemenid', 'persepolis', 'darius', 'cyrus', 'xerxes',
+    'zoroastrian', 'elam', 'elamite',
 })
 
 
@@ -231,6 +299,23 @@ def _source_label(url: str, region: str = "") -> str:
         return "Memoria Chilena"
     if "openiti.org" in url:
         return "OpenITI"
+    # ── Ancient-world sources ─────────────────────────────────────────────────
+    if "cdli.earth" in url:
+        return "CDLI — Cuneiform Digital Library"
+    if "oracc.museum.upenn.edu" in url:
+        return "ORACC — Cuneiform Corpus"
+    if "pleiades.stoa.org" in url:
+        return "Pleiades — Ancient World Gazetteer"
+    if "opencontext.org" in url:
+        return "Open Context — Archaeology"
+    if "nomisma.org" in url:
+        return "Nomisma — Ancient Coins"
+    if "projectmercury.eu" in url:
+        return "Project Mercury — Roman Studies"
+    if "thesaurus-linguae-aegyptiae.de" in url:
+        return "TLA — Ancient Egyptian Texts"
+    if "isac.uchicago.edu" in url or "isac-idb.uchicago.edu" in url:
+        return "ISAC — Oriental Institute Chicago"
     return "Historical Archive"
 
 
@@ -295,7 +380,7 @@ def _get_archive_data(topic: str) -> dict:
       primary  – Classical Antiquity primary sources (pill chips, all eras)
       metadata – Qatar Digital Library document links
     """
-    _EMPTY = {"docs": [], "wiki": [], "images": [], "primary": [], "metadata": []}
+    _EMPTY = {"docs": [], "wiki": [], "images": [], "maps": [], "primary": [], "metadata": [], "essay": ""}
     try:
         conn = _pdb.get_connection()
         if not conn.get("records"):
@@ -316,6 +401,16 @@ def _get_archive_data(topic: str) -> dict:
             extra = _pdb.get_classical_by_keywords(conn, kw[:5])
             seen  = {r["id"] for r in all_ft}
             for r in extra:
+                if r["id"] not in seen:
+                    all_ft.append(r)
+
+        # ── Ancient-world supplement (CDLI, ORACC, TLA, ISAC, Pleiades …) ─────
+        # Ensures ancient-world records always surface for relevant topics,
+        # even if they narrowly miss the top-80 relevance cutoff above.
+        if classical_topic and kw:
+            extra_ancient = _pdb.get_ancient_by_keywords(conn, kw[:6])
+            seen = {r["id"] for r in all_ft}
+            for r in extra_ancient:
                 if r["id"] not in seen:
                     all_ft.append(r)
 
@@ -368,9 +463,10 @@ def _get_archive_data(topic: str) -> dict:
         all_ft = [r for r in all_ft if _is_relevant(r)]
 
         # ── Split by source type — each database gets its own lane ─────────────
-        docs    = []   # IA + Cabinet Papers + Gutenberg + Wikisource + OL
+        docs    = []   # IA + Cabinet Papers + Gutenberg + Wikisource + OL + text sources
         wiki    = []   # Wikipedia pipeline records
-        images  = []   # Wikimedia Commons records
+        images  = []   # Historical photographs, illustrations, portraits
+        maps    = []   # Historical maps, atlases, cartography
         primary = []   # Classical Antiquity primary sources (only for classical topics)
 
         for r in all_ft:
@@ -379,41 +475,60 @@ def _get_archive_data(topic: str) -> dict:
             rtype = r.get("record_type") or ""
 
             # Wikidata records → already shown in the Wikidata facts panel,
-            # so skip them here to avoid duplication.
+            # skip here to avoid duplication.
             if "wikidata.org" in url:
                 continue
 
-            # Wikipedia articles → overview section, regardless of era.
-            # (Some Wikipedia articles are tagged "Classical Antiquity" by the
-            # pipeline fetcher — e.g. "Silk Road" — but they are still Wikipedia
-            # overview articles, not primary-source documents.)
+            # Wikipedia articles → overview section
             if "en.wikipedia.org" in url:
                 wiki.append(r)
                 continue
 
-            # Wikimedia Commons images → images section, regardless of era.
+            # Image records — route to maps vs images based on content
             if rtype == "image" or "commons.wikimedia.org" in url:
-                images.append(r)
+                if _pdb.is_map_record(r):
+                    maps.append(r)
+                else:
+                    images.append(r)
                 continue
 
-            # Classical primary sources (non-Wikipedia) → pill chips only when
-            # the topic is genuinely about Classical Antiquity.
-            # Without this guard, "world war two" would show Herodotus/Caesar
-            # because they contain the word "war".
+            # Classical primary sources → pill chips only for classical topics
             if era == "Classical Antiquity":
                 if classical_topic:
                     primary.append(r)
                 continue
 
-            # Everything else: IA, Cabinet Papers, Gutenberg, Wikisource, OL
+            # Everything else → docs (text content)
             docs.append(r)
 
+        fmt_docs    = [_fmt_record(r) for r in docs[:12]]
+        fmt_wiki    = [_fmt_record(r) for r in wiki[:3]]
+        fmt_images  = [_fmt_record(r) for r in images[:6]]
+        fmt_maps    = [_fmt_record(r) for r in maps[:6]]
+        fmt_primary = [_fmt_record(r) for r in primary[:8]]
+        fmt_meta    = [_fmt_record(r) for r in meta_records[:5]]
+
+        # ── History Essay — format ALL results as PEEL academic essay ──────────
+        # Combine docs + wiki + primary into a single ordered list for the essay.
+        # Images are passed separately so the formatter can insert descriptions.
+        essay_records = fmt_docs + fmt_wiki + fmt_primary
+        era_hint    = docs[0].get("era") if docs else (wiki[0].get("era") if wiki else "")
+        region_hint = docs[0].get("region") if docs else ""
+        essay_md = format_as_essay(
+            topic       = topic,
+            records     = essay_records,
+            era_hint    = era_hint,
+            region_hint = region_hint,
+        ) if essay_records else ""
+
         return {
-            "docs":     [_fmt_record(r) for r in docs[:8]],   # +2 slots for new sources
-            "wiki":     [_fmt_record(r) for r in wiki[:3]],
-            "images":   [_fmt_record(r) for r in images[:6]],  # +2 slots for Europeana images
-            "primary":  [_fmt_record(r) for r in primary[:8]],
-            "metadata": [_fmt_record(r) for r in meta_records[:5]],
+            "docs":     fmt_docs,
+            "wiki":     fmt_wiki,
+            "images":   fmt_images,
+            "maps":     fmt_maps,
+            "primary":  fmt_primary,
+            "metadata": fmt_meta,
+            "essay":    essay_md,
         }
     except Exception:
         return _EMPTY
@@ -1196,6 +1311,7 @@ def results():
         wiki_error=wiki_error,
         wiki_related=wiki_related,
         archive_data=archive_data,
+        essay_content=archive_data.get("essay", ""),
         wikidata_from_db=wikidata_from_db,
         all_sources=all_sources,
         plan_status=get_plan_status(),
@@ -1753,17 +1869,35 @@ def api_multi_facts():
 def api_archive_records():
     """
     Pipeline DB search for a topic — source-separated results.
-    Returns: docs, wiki, images, primary, metadata
+    Returns: docs, wiki, images, primary, metadata, essay
     """
     topic = request.args.get("topic", "")
     if not topic:
         return jsonify({"docs": [], "wiki": [], "images": [],
-                        "primary": [], "metadata": []})
+                        "primary": [], "metadata": [], "essay": ""})
     try:
         return jsonify(_get_archive_data(topic))
     except Exception as e:
         return jsonify({"docs": [], "wiki": [], "images": [],
-                        "primary": [], "metadata": [], "error": str(e)})
+                        "primary": [], "metadata": [], "essay": "", "error": str(e)})
+
+
+@app.route("/api/essay")
+def api_essay():
+    """
+    Return the PEEL History Essay for a topic as JSON {essay_html, essay_md}.
+    Independently cacheable — used when the essay section is loaded on demand.
+    """
+    topic = request.args.get("topic", "")
+    if not topic:
+        return jsonify({"essay_md": "", "essay_html": ""})
+    try:
+        data     = _get_archive_data(topic)
+        essay_md = data.get("essay", "")
+        essay_html = _markdown_to_html(essay_md)
+        return jsonify({"essay_md": essay_md, "essay_html": essay_html})
+    except Exception as e:
+        return jsonify({"essay_md": "", "essay_html": "", "error": str(e)})
 
 
 @app.route("/api/search")

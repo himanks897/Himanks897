@@ -120,6 +120,8 @@ def _fetch_set(conn: dict, source_id: int, set_id: str) -> int:
 
                 ext_id = src_url.split("/")[-1] if "/" in src_url else src_url
 
+                inferred_region = _infer_region(title, subjects)
+                inferred_era    = _infer_era(inferred_region)
                 ok = insert_record(conn, source_id, {
                     "title":       title[:300],
                     "summary":     description or None,
@@ -128,7 +130,8 @@ def _fetch_set(conn: dict, source_id: int, set_id: str) -> int:
                     "external_id": f"soas-{ext_id}",
                     "record_type": "document",
                     "tags":        subjects[:8] + ["SOAS University"],
-                    "region":      _infer_region(title, subjects),
+                    "region":      inferred_region,
+                    "era":         inferred_era,
                 })
                 if ok:
                     inserted      += 1
@@ -169,6 +172,17 @@ def _infer_region(title: str, subjects: list) -> str:
                                 "malaysia", "thailand", "burma"]):
         return "Southeast Asia"
     return "Asia"
+
+
+def _infer_era(region: str) -> str:
+    _ERA_MAP = {
+        "Africa":       "African History",
+        "Middle East":  "Middle Eastern History",
+        "South Asia":   "South Asian History",
+        "East Asia":    "East Asian History",
+        "Southeast Asia": "Southeast Asian History",
+    }
+    return _ERA_MAP.get(region, "Asian History")
 
 
 def fetch(conn: dict, source_id: int) -> int:

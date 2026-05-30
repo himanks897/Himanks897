@@ -143,6 +143,7 @@ def _fetch_country_topic(topic: str, country: str,
                     "record_type": rtype,
                     "tags":        tags,
                     "region":      country.title(),
+                    "era":         "Eastern European History",
                 })
                 if ok:
                     inserted += 1

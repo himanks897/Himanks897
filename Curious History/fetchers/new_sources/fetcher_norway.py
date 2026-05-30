@@ -213,6 +213,7 @@ def fetch(conn: dict, source_id: int) -> int:
                         "record_type": "document",
                         "tags":        tags,
                         "region":      "Norway",
+                        "era":         "Scandinavian / Nordic History",
                     })
                     if ok:
                         inserted      += 1

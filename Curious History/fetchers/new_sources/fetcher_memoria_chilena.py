@@ -5,12 +5,18 @@ Memoria Chilena is the digital library of the Biblioteca Nacional de Chile,
 providing access to Chilean and Latin American historical documents,
 photographs, maps, and primary sources.
 
-Endpoint : OAI-PMH at http://www.memoriachilena.gob.cl/oai/request
+Endpoint : OAI-PMH at https://www.memoriachilena.gob.cl/oai/request
 Auth     : None required
 License  : CC BY 4.0 — commercial use allowed
 Docs     : https://www.memoriachilena.gob.cl/602/w3-channel.html
 Coverage : Chile, Latin America, colonial history, indigenous history,
            19th–20th century South America
+
+MANUSCRIPT RULE: Records where the title and description are entirely in
+Spanish are stored as-is (Memoria Chilena is a Spanish-language archive).
+However, records where the description contains non-Latin script (Mapuche
+logograms, etc.) are filtered out. Titles in Spanish are acceptable since
+they convey findable historical information about Chile/Latin America.
 """
 
 import time
@@ -19,7 +25,7 @@ import requests
 from db import insert_record
 
 SOURCE_NAME  = "Memoria Chilena"
-OAI_ENDPOINT = "http://www.memoriachilena.gob.cl/oai/request"
+OAI_ENDPOINT = "https://www.memoriachilena.gob.cl/oai/request"
 HEADERS      = {"User-Agent": "CuriousHistory/1.0 (himanks897@gmail.com)"}
 
 OAI_NS    = "http://www.openarchives.org/OAI/2.0/"
@@ -41,6 +47,14 @@ def _dc_all(el, tag) -> list:
         return []
     return [c.text.strip() for c in el.findall(f"{{{DC_NS}}}{tag}")
             if c.text and c.text.strip()]
+
+
+def _has_non_latin_script(text: str) -> bool:
+    """Return True if text contains significant non-Latin script characters."""
+    if not text:
+        return False
+    non_latin = sum(1 for c in text if ord(c) > 0x024F)
+    return non_latin / max(len(text), 1) > 0.15
 
 
 def fetch(conn: dict, source_id: int) -> int:
@@ -102,6 +116,11 @@ def fetch(conn: dict, source_id: int) -> int:
 
                 if not title:
                     continue
+
+                # Skip records with significant non-Latin script
+                if _has_non_latin_script(title) or _has_non_latin_script(desc):
+                    continue
+
                 if not src_url and header is not None:
                     oai_id = header.findtext(f"{{{ns}}}identifier") or ""
                     src_url = oai_id
@@ -113,6 +132,7 @@ def fetch(conn: dict, source_id: int) -> int:
                     "summary":     desc or None,
                     "date_text":   date_v[:20],
                     "region":      "Chile",
+                    "era":         "Latin American History",
                     "source_url":  src_url,
                     "external_id": f"mc-{ext_id[:80]}",
                     "record_type": "document",

@@ -17,6 +17,7 @@ import time
 import requests
 
 from db import insert_record
+from fetchers.new_sources.era_utils import infer_era as _infer_topic_era
 
 SOURCE_NAME = "Europeana"
 API_BASE    = "https://api.europeana.eu/record/v2/search.json"
@@ -223,6 +224,7 @@ def fetch(conn: dict, source_id: int) -> int:
                         "record_type": rtype,
                         "tags":        tags,
                         "region":      country.title() if country else None,
+                        "era":         _infer_topic_era(f"{topic} {country}"),
                     })
                     if ok:
                         inserted      += 1

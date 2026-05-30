@@ -22,6 +22,7 @@ import time
 import requests
 
 from db import insert_record
+from fetchers.new_sources.era_utils import infer_era as _infer_topic_era
 
 SOURCE_NAME  = "DPLA"
 API_BASE     = "https://api.dp.la/v2/items"
@@ -214,6 +215,7 @@ def fetch(conn: dict, source_id: int) -> int:
                         "record_type": record_type,
                         "tags":        tags,
                         "region":      "United States",
+                        "era":         _infer_topic_era(topic),
                     })
                     if ok:
                         inserted      += 1

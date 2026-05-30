@@ -5,15 +5,22 @@ Usage:
     python main.py              # add new records without wiping existing data
     python main.py --reset      # wipe DB, rebuild from scratch (takes ~30 min)
     python main.py --new-only   # run only the 10 new global sources
+    python main.py --ancient-only  # run only the 9 ancient-world sources
 
 Database : curious_history.json
-Sources  : 28+ free public APIs (original 8 + 10 new global sources via
-           new_sources_pathway)
+Sources  : 37+ free public APIs (original 8 + 10 new global sources +
+           9 ancient-world sources via ancient_sources_pathway)
 
 New global sources cover:
   Japan (NDL), India (IA DLI), Africa (IA), Middle East (Europeana ME,
   OpenITI), South/SE Asia (SOAS, HathiTrust), Latin America (LOC,
   Memoria Chilena), plus expanded Qatar Digital Library queries.
+
+Ancient-world sources cover:
+  Mesopotamia (CDLI, ORACC), Ancient Geography (Pleiades),
+  Archaeology (Open Context), Texts (Internet Archive Ancient),
+  Numismatics (Nomisma), Roman Studies (Project Mercury),
+  Ancient Egypt (TLA), Oriental Institute (ISAC Chicago).
 """
 
 import sys
@@ -21,8 +28,9 @@ import importlib
 import db
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
-reset_mode    = "--reset"    in sys.argv
-new_only_mode = "--new-only" in sys.argv
+reset_mode       = "--reset"        in sys.argv
+new_only_mode    = "--new-only"     in sys.argv
+ancient_only_mode = "--ancient-only" in sys.argv
 
 # ── Database initialisation ───────────────────────────────────────────────────
 if reset_mode:
@@ -82,11 +90,12 @@ def run_fetcher(module_path, conn):
 results        = {}
 total_inserted = 0
 
-for module_path in FETCHER_MODULES:
-    count      = run_fetcher(module_path, conn)
-    short_name = module_path.split(".")[-1]
-    results[short_name] = count
-    total_inserted += count
+if not ancient_only_mode:
+    for module_path in FETCHER_MODULES:
+        count      = run_fetcher(module_path, conn)
+        short_name = module_path.split(".")[-1]
+        results[short_name] = count
+        total_inserted += count
 
 
 # ── Final summary report ──────────────────────────────────────────────────────
@@ -111,8 +120,8 @@ print("=" * 62)
 db.save(conn)
 print(f"  Database saved → curious_history.json")
 
-# ── Also run the new global sources (unless --new-only already ran them) ──────
-if not new_only_mode:
+# ── Also run the new global sources (unless --new-only / --ancient-only) ──────
+if not new_only_mode and not ancient_only_mode:
     print("\n\n" + "=" * 62)
     print("RUNNING NEW GLOBAL SOURCES (Asia, Africa, Middle East, Latin America)")
     print("=" * 62)
@@ -130,5 +139,30 @@ if not new_only_mode:
         print("  Database saved with new global sources.")
     except Exception as e:
         print(f"[WARN] New sources pathway failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+# ── Run the 9 ancient-world sources (CDLI, ORACC, Pleiades, Open Context,
+#    Internet Archive Ancient, Nomisma, Mercury, TLA, ISAC) ───────────────────
+if not new_only_mode:
+    print("\n\n" + "=" * 62)
+    print("RUNNING ANCIENT-WORLD SOURCES (Mesopotamia, Egypt, Greece, Rome)")
+    print("Sources: CDLI, ORACC, Pleiades, Open Context, Internet Archive,")
+    print("         Nomisma, Project Mercury, TLA, ISAC Oriental Institute")
+    print("=" * 62)
+    try:
+        from fetchers.ancient_sources.ancient_sources_pathway import run_all as run_ancient
+        ancient_results = run_ancient(conn)
+        print("\n" + "─" * 62)
+        print("  ANCIENT SOURCES SUMMARY:")
+        for name, count in ancient_results.items():
+            status = "✓" if count > 0 else "✗"
+            print(f"  {status}  {name:<42} {count:>5} records")
+        print(f"  TOTAL RECORDS IN DATABASE: {db.get_total_count(conn)}")
+        print("─" * 62)
+        db.save(conn)
+        print("  Database saved with ancient-world sources.")
+    except Exception as e:
+        print(f"[WARN] Ancient sources pathway failed: {e}")
         import traceback
         traceback.print_exc()

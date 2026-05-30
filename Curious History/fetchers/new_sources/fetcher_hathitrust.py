@@ -14,6 +14,7 @@ Docs     : https://www.hathitrust.org/data
 import time
 import requests
 from db import insert_record
+from fetchers.new_sources.era_utils import infer_era as _infer_topic_era
 
 SOURCE_NAME = "HathiTrust Digital Library"
 BASE_URL    = "https://catalog.hathitrust.org/Search/Home"
@@ -119,6 +120,7 @@ def fetch(conn: dict, source_id: int) -> int:
                     "source_url":  url,
                     "external_id": f"ht-{rec_id}",
                     "record_type": "document",
+                    "era":         _infer_topic_era(query),
                     "tags":        [str(s)[:60] for s in subjects[:6]]
                                    + ["HathiTrust", query[:40]],
                 })

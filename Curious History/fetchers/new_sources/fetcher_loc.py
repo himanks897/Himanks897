@@ -15,6 +15,7 @@ Coverage : Americas (strong), World history, Asia, Africa
 import time
 import requests
 from db import insert_record
+from fetchers.new_sources.era_utils import infer_era as _infer_topic_era
 
 SOURCE_NAME = "Library of Congress"
 BASE_URL    = "https://www.loc.gov/search/"
@@ -143,6 +144,7 @@ def fetch(conn: dict, source_id: int) -> int:
                     "summary":     summary or None,
                     "date_text":   date_v,
                     "region":      region,
+                    "era":         _infer_topic_era(f"{query} {region}"),
                     "source_url":  src_url,
                     "external_id": f"loc-{str(item_id).replace('/', '-')[-60:]}",
                     "record_type": "document",
