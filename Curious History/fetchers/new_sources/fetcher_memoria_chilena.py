@@ -25,7 +25,13 @@ import requests
 from db import insert_record
 
 SOURCE_NAME  = "Memoria Chilena"
-OAI_ENDPOINT = "https://www.memoriachilena.gob.cl/oai/request"
+# Primary OAI-PMH endpoint; fallback list tried in order if 404/timeout
+_OAI_ENDPOINTS = [
+    "https://www.memoriachilena.gob.cl/oai/request",
+    "https://www.memoriachilena.gob.cl/602/w3-article-858.html",  # metadata page
+    "http://www.memoriachilena.gob.cl/oai/request",
+]
+OAI_ENDPOINT = _OAI_ENDPOINTS[0]
 HEADERS      = {"User-Agent": "CuriousHistory/1.0 (himanks897@gmail.com)"}
 
 OAI_NS    = "http://www.openarchives.org/OAI/2.0/"
@@ -57,9 +63,24 @@ def _has_non_latin_script(text: str) -> bool:
     return non_latin / max(len(text), 1) > 0.15
 
 
+def _resolve_endpoint() -> str:
+    """Try each OAI endpoint in order; return first that responds with 200."""
+    for ep in _OAI_ENDPOINTS:
+        try:
+            r = requests.head(ep, headers=HEADERS, timeout=10)
+            if r.status_code in (200, 400, 422):   # 400/422 = valid OAI error response
+                return ep
+        except Exception:
+            continue
+    return _OAI_ENDPOINTS[0]   # fall back to primary even if unreachable
+
+
 def fetch(conn: dict, source_id: int) -> int:
     inserted = 0
     token    = None
+
+    active_endpoint = _resolve_endpoint()
+    print(f"  [MC] Using endpoint: {active_endpoint}")
 
     while inserted < MAX_RECORDS:
         if token:
@@ -68,7 +89,7 @@ def fetch(conn: dict, source_id: int) -> int:
             params = {"verb": "ListRecords", "metadataPrefix": "oai_dc"}
 
         try:
-            resp = requests.get(OAI_ENDPOINT, params=params,
+            resp = requests.get(active_endpoint, params=params,
                                 headers=HEADERS, timeout=30)
 
             if resp.status_code != 200:

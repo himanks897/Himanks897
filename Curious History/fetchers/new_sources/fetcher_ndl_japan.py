@@ -86,9 +86,10 @@ def fetch(conn: dict, source_id: int) -> int:
                 params={
                     "q":         topic,
                     "cnt":       20,
-                    "type":      1,     # books
+                    "type":      1,      # books
                     "mediatype": 1,
-                    "lang":      "en",  # request English results where available
+                    # NDL language codes: "eng" for English. Using no lang filter
+                    # gets broader results; English readability guard below filters.
                 },
                 timeout=20,
             )

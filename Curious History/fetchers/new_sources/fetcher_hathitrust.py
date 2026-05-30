@@ -17,7 +17,10 @@ from db import insert_record
 from fetchers.new_sources.era_utils import infer_era as _infer_topic_era
 
 SOURCE_NAME = "HathiTrust Digital Library"
+# HathiTrust Catalog API — correct JSON endpoint
 BASE_URL    = "https://catalog.hathitrust.org/Search/Home"
+# Alternative: the Bibliographic API returns cleaner JSON
+_BIBLIO_API = "https://catalog.hathitrust.org/api/volumes/brief/json/"
 HEADERS     = {
     "User-Agent": "CuriousHistory/1.0 (himanks897@gmail.com)",
     "Accept":     "application/json, */*",
@@ -71,20 +74,20 @@ def fetch(conn: dict, source_id: int) -> int:
 
     for query in QUERIES:
         try:
+            # HathiTrust Catalog Search — correct parameter format
             params = {
-                "lookfor": query,
-                "type":    "AllFields",
-                "filter[]": ["format:Book", "language:English"],
-                "ft":      "ft",       # full-text search only
-                "limit":   20,
-                "format":  "json",
+                "lookfor":  query,
+                "type":     "AllFields",
+                "filter[]": "language:English",
+                "limit":    20,
+                "view":     "list",
+                "format":   "json",
             }
             resp = requests.get(
-                BASE_URL, headers=HEADERS, params=params, timeout=20
+                BASE_URL, headers=HEADERS, params=params, timeout=25
             )
 
             if resp.status_code != 200:
-                # HathiTrust catalog may not support JSON — skip silently
                 time.sleep(1)
                 continue
 
@@ -94,7 +97,13 @@ def fetch(conn: dict, source_id: int) -> int:
                 time.sleep(0.5)
                 continue
 
-            records_list = data.get("records", []) or data.get("results", []) or []
+            # HathiTrust returns {"resultCount": N, "records": {...}, "items": [...]}
+            # The "records" key is a dict keyed by record ID, not a list
+            records_dict = data.get("records") or {}
+            records_list = list(records_dict.values()) if isinstance(records_dict, dict) else []
+            # Also try list-form keys
+            if not records_list:
+                records_list = data.get("items") or data.get("results") or []
             if not isinstance(records_list, list):
                 records_list = []
 

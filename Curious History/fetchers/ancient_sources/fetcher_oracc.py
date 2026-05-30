@@ -47,7 +47,10 @@ PROJECTS = [
      "Ancient Mesopotamia", "Mesopotamia"),
 ]
 
-_BASE = "http://oracc.museum.upenn.edu"
+# ORACC redirects HTTP → HTTPS but has an SSL cert not trusted by macOS
+# Use verify=False for local pipeline runs; Vercel has correct certs so it works there
+_BASE    = "http://oracc.museum.upenn.edu"
+_VERIFY  = False  # suppress SSL cert errors on macOS local runs
 
 
 def _strip_html(text: str) -> str:
@@ -121,7 +124,7 @@ def _fetch_project_catalog(project_id: str) -> list:
     """Fetch the catalog.json for a project to get text IDs and titles."""
     url = f"{_BASE}/{project_id}/catalogue.json"
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=25)
+        resp = requests.get(url, headers=HEADERS, timeout=25, verify=_VERIFY)
         if resp.status_code != 200:
             return []
         data = resp.json()
@@ -141,7 +144,7 @@ def _fetch_text_translation(project_id: str, text_id: str) -> str:
     """Fetch the full text JSON and extract English translation."""
     url = f"{_BASE}/{project_id}/{text_id}.json"
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=20)
+        resp = requests.get(url, headers=HEADERS, timeout=20, verify=_VERIFY)
         if resp.status_code != 200:
             return ""
         return _extract_translation(resp.json())
