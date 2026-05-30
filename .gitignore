@@ -1,0 +1,5 @@
+# Claude Code internal directories — never commit
+.claude/
+
+# macOS
+.DS_Store
